@@ -140,7 +140,7 @@ export function AuthPage({ mode = 'login' }) {
                   type="button"
                   onClick={() => setShowPw((v) => !v)}
                   aria-label={showPw ? 'Hide password' : 'Show password'}
-                  className="focus-ring absolute right-2 top-1/2 grid h-7 w-7 -translate-y-1/2 place-items-center rounded-md text-muted hover:text-ink"
+                  className="focus-ring auth-eye-btn no-tilt absolute right-2 top-1/2 grid h-7 w-7 -translate-y-1/2 place-items-center rounded-md text-muted transition-colors hover:text-ink"
                 >
                   {showPw ? <EyeOff size={15} /> : <Eye size={15} />}
                 </button>

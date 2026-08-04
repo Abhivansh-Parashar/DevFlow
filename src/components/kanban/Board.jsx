@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { createPortal } from 'react-dom';
 import {
   DndContext, DragOverlay, PointerSensor, KeyboardSensor, useSensor, useSensors,
   useDroppable, closestCorners,
 } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy, useSortable, arrayMove, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { Plus, Search, MessageSquare, GitCommit, MoreHorizontal, Inbox, Clock } from 'lucide-react';
+import { Plus, Search, MessageSquare, GitCommit, MoreHorizontal, Inbox, Clock, Github, FolderCode } from 'lucide-react';
 import { useAppStore } from '../../store/useAppStore';
 import { Badge, PriorityBadge, Avatar, PipelineLine, EmptyState, Button } from '../ui';
 import { NewIssueSlideOver } from './NewIssueSlideOver';
@@ -142,29 +143,73 @@ function SortableCard({ issue, users, onStatusChange }) {
 
 function StatusMenu({ statusOptions, onSelect, issueKey }) {
   const [open, setOpen] = useState(false);
+  const anchorRef = useRef(null);
+  const [pos, setPos] = useState({ top: 0, left: 0 });
+
+  const placeMenu = useCallback(() => {
+    if (!anchorRef.current) return;
+    const rect = anchorRef.current.getBoundingClientRect();
+    const menuW = 176;
+    const margin = 8;
+    const left = Math.max(margin, Math.min(rect.right - menuW, window.innerWidth - menuW - margin));
+    const top = Math.min(rect.bottom + 8, window.innerHeight - 220);
+    setPos({ top, left });
+  }, []);
+
+  useEffect(() => {
+    if (!open) return;
+    placeMenu();
+    const onDown = (e) => {
+      if (anchorRef.current && anchorRef.current.contains(e.target)) return;
+      setOpen(false);
+    };
+    const onEsc = (e) => e.key === 'Escape' && setOpen(false);
+    const onRelayout = () => placeMenu();
+    document.addEventListener('mousedown', onDown);
+    document.addEventListener('keydown', onEsc);
+    window.addEventListener('resize', onRelayout);
+    window.addEventListener('scroll', onRelayout, true);
+    return () => {
+      document.removeEventListener('mousedown', onDown);
+      document.removeEventListener('keydown', onEsc);
+      window.removeEventListener('resize', onRelayout);
+      window.removeEventListener('scroll', onRelayout, true);
+    };
+  }, [open, placeMenu]);
+
   return (
-    <div className="relative" onMouseDown={(e) => e.stopPropagation()}>
+    <div ref={anchorRef} className={cx('relative', open && 'z-[80]')} onMouseDown={(e) => e.stopPropagation()}>
       <button
-        onClick={() => setOpen((o) => !o)}
+        onClick={() => {
+          setOpen((o) => !o);
+          requestAnimationFrame(placeMenu);
+        }}
         aria-label={`Move ${issueKey} to another column`}
         className="focus-ring grid h-6 w-6 place-items-center rounded-md text-muted opacity-0 transition-opacity hover:bg-raised hover:text-ink group-hover:opacity-100"
       >
         <MoreHorizontal size={14} />
       </button>
       {open && (
-        <div className="glass-popover absolute right-0 top-7 z-30 w-44 rounded-xl p-1.5">
-          <p className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-muted">Move to</p>
-          {statusOptions.map((s) => (
-            <button
-              key={s.id}
-              onClick={() => { onSelect(s.id); setOpen(false); }}
-              className="focus-ring flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-[13px] font-medium text-ink hover:bg-raised"
-            >
-              <span className="h-2 w-2 rounded-full" style={{ background: STATUS_COLORS[s.id] }} />
-              {s.label}
-            </button>
-          ))}
-        </div>
+        createPortal(
+          <div
+            className="glass-popover fixed z-[120] w-44 rounded-xl p-1.5 shadow-pop"
+            style={{ top: pos.top, left: pos.left }}
+            onMouseDown={(e) => e.stopPropagation()}
+          >
+            <p className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-muted">Move to</p>
+            {statusOptions.map((s) => (
+              <button
+                key={s.id}
+                onClick={() => { onSelect(s.id); setOpen(false); }}
+                className="focus-ring flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-[13px] font-medium text-ink hover:bg-raised"
+              >
+                <span className="h-2 w-2 rounded-full" style={{ background: STATUS_COLORS[s.id] }} />
+                {s.label}
+              </button>
+            ))}
+          </div>,
+          document.body
+        )
       )}
     </div>
   );
@@ -244,6 +289,34 @@ export function Board() {
   const [newIssueOpen, setNewIssueOpen] = useState(false);
   const [newIssueStatus, setNewIssueStatus] = useState('backlog');
   const [createProjectOpen, setCreateProjectOpen] = useState(false);
+
+  const getIdeTarget = (project) => {
+    if (!project) return '';
+    if (project.ideUrl?.trim()) return project.ideUrl.trim();
+    if (!project.localRepoPath?.trim()) return '';
+    const normalized = project.localRepoPath.trim().replace(/\\/g, '/');
+    return `vscode://file/${normalized}`;
+  };
+
+  const openTarget = (target, label) => {
+    const value = String(target ?? '').trim();
+    if (!value) {
+      toast('info', `Add ${label.toLowerCase()} in Settings → Active project integration`);
+      return;
+    }
+    if (value.startsWith('vscode://')) {
+      window.location.href = value;
+      toast('success', `${label} opened`);
+      return;
+    }
+    const normalized = /^https?:\/\//i.test(value) ? value : `https://${value}`;
+    const win = window.open(normalized, '_blank', 'noopener,noreferrer');
+    if (!win) {
+      toast('error', `${label} popup blocked — allow popups for this site`);
+      return;
+    }
+    toast('success', `${label} opened`);
+  };
 
   const projectIssues = useMemo(
     () => issues.filter((i) => i.projectId === activeProject?.id),
@@ -375,6 +448,22 @@ export function Board() {
           </div>
         </div>
         <div className="flex-1" />
+        <Button
+          variant="secondary"
+          icon={Github}
+          onClick={() => openTarget(activeProject.repoUrl, 'GitHub repository')}
+          title={activeProject.repoUrl ? 'Open linked GitHub repository' : 'Add a GitHub repo URL in project settings'}
+        >
+          Open Repo
+        </Button>
+        <Button
+          variant="secondary"
+          icon={FolderCode}
+          onClick={() => openTarget(getIdeTarget(activeProject), 'Project in IDE')}
+          title={getIdeTarget(activeProject) ? 'Open local clone in IDE' : 'Add a local path or IDE link in project settings'}
+        >
+          Open in IDE
+        </Button>
         <Button icon={Plus} onClick={() => { setNewIssueStatus('backlog'); setNewIssueOpen(true); }}>
           New Issue
         </Button>

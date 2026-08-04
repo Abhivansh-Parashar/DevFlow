@@ -94,7 +94,7 @@ export function BrutalHero({ className }) {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.65, delay: 0.55, ease: EASE }}
-            className="mt-5 max-w-md text-[17px] leading-relaxed text-muted"
+            className="mt-5 max-w-xl rounded-xl border border-line bg-card-60 px-4 py-3 text-[17px] leading-relaxed text-ink shadow-soft"
           >
             Workspaces keep companies apart, projects keep teams in sync. Every issue — from
             Backlog to Done — carries its commits, comments and context along a live pipeline.

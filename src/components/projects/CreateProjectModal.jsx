@@ -9,14 +9,20 @@ export function CreateProjectModal({ isOpen, onClose }) {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [color, setColor] = useState(PROJECT_ACCENTS[0]);
+  const [repoUrl, setRepoUrl] = useState('');
+  const [localRepoPath, setLocalRepoPath] = useState('');
+  const [ideUrl, setIdeUrl] = useState('');
 
   const submit = (e) => {
     e.preventDefault();
     if (!name.trim()) return;
-    createProject({ name, description, color });
+    createProject({ name, description, color, repoUrl, localRepoPath, ideUrl });
     onClose();
     setName('');
     setDescription('');
+    setRepoUrl('');
+    setLocalRepoPath('');
+    setIdeUrl('');
   };
 
   return (
@@ -38,6 +44,15 @@ export function CreateProjectModal({ isOpen, onClose }) {
         </Field>
         <Field label="Description">
           <Textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="What will this project track?" />
+        </Field>
+        <Field label="GitHub repo URL" hint="Optional — used for quick repo open from the board.">
+          <Input value={repoUrl} onChange={(e) => setRepoUrl(e.target.value)} placeholder="https://github.com/org/repo" />
+        </Field>
+        <Field label="Local clone path" hint="Optional — for opening the cloned project on this PC.">
+          <Input value={localRepoPath} onChange={(e) => setLocalRepoPath(e.target.value)} placeholder="C:/Users/you/dev/repo" />
+        </Field>
+        <Field label="IDE link" hint="Optional deep link, e.g. vscode://file/C:/Users/you/dev/repo">
+          <Input value={ideUrl} onChange={(e) => setIdeUrl(e.target.value)} placeholder="vscode://file/C:/Users/you/dev/repo" />
         </Field>
         <Field label="Accent color">
           <div className="flex flex-wrap gap-2">

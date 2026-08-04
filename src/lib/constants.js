@@ -50,5 +50,5 @@ export const navItems = [
   { id: 'chat', label: 'Chat', to: '/app/chat', icon: 'chat' },
   { id: 'members', label: 'Members', to: '/app/members', icon: 'members' },
   { id: 'analytics', label: 'Analytics', to: '/app/analytics', icon: 'analytics' },
-  { id: 'ai', label: 'AI Generator', to: '/app/ai', icon: 'ai' },
+  { id: 'ai', label: 'AI Assistant', to: '/app/ai', icon: 'ai' },
 ];

@@ -8,7 +8,9 @@ import { cx } from '../lib/utils';
 
 export function SettingsPage() {
   const activeWorkspace = useAppStore((s) => s.activeWorkspace());
+  const activeProject = useAppStore((s) => s.activeProject());
   const updateWorkspace = useAppStore((s) => s.updateWorkspace);
+  const updateProject = useAppStore((s) => s.updateProject);
   const deleteWorkspace = useAppStore((s) => s.deleteWorkspace);
   const toast = useAppStore((s) => s.toast);
   const role = useAppStore((s) => (s.activeWorkspace() ? s.workspaceRole(s.activeWorkspace().id) : ''));
@@ -18,6 +20,9 @@ export function SettingsPage() {
   const [description, setDescription] = useState('');
   const [icon, setIcon] = useState('◆');
   const [accent, setAccent] = useState(PROJECT_ACCENTS[0]);
+  const [repoUrl, setRepoUrl] = useState('');
+  const [localRepoPath, setLocalRepoPath] = useState('');
+  const [ideUrl, setIdeUrl] = useState('');
   const [confirmOpen, setConfirmOpen] = useState(false);
 
   useEffect(() => {
@@ -29,6 +34,12 @@ export function SettingsPage() {
     }
   }, [activeWorkspace?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  useEffect(() => {
+    setRepoUrl(activeProject?.repoUrl ?? '');
+    setLocalRepoPath(activeProject?.localRepoPath ?? '');
+    setIdeUrl(activeProject?.ideUrl ?? '');
+  }, [activeProject?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+
   if (!activeWorkspace) return null;
 
   const save = () => {
@@ -37,6 +48,16 @@ export function SettingsPage() {
   };
 
   const isOwner = role === 'Owner';
+
+  const saveProjectIntegration = () => {
+    if (!activeProject) return;
+    updateProject(activeProject.id, {
+      repoUrl: repoUrl.trim(),
+      localRepoPath: localRepoPath.trim(),
+      ideUrl: ideUrl.trim(),
+    });
+    toast('success', `Project integration saved for ${activeProject.name}`);
+  };
 
   return (
     <div className="mx-auto max-w-2xl px-5 py-6">
@@ -90,6 +111,27 @@ export function SettingsPage() {
           <Button icon={Save} onClick={save}>Save changes</Button>
         </div>
       </Card>
+
+      {activeProject && (
+        <Card className="mt-5 space-y-4 p-5">
+          <div>
+            <h2 className="font-display text-base font-semibold text-ink">Active project integration</h2>
+            <p className="text-xs text-muted">Connect repository links for quick open actions from the board.</p>
+          </div>
+          <Field label="GitHub repository URL">
+            <Input value={repoUrl} onChange={(e) => setRepoUrl(e.target.value)} placeholder="https://github.com/org/repo" />
+          </Field>
+          <Field label="Local clone path" hint="Used to open your project folder in the local IDE.">
+            <Input value={localRepoPath} onChange={(e) => setLocalRepoPath(e.target.value)} placeholder="C:/Users/you/dev/repo" />
+          </Field>
+          <Field label="IDE deep link" hint="Optional override, e.g. vscode://file/C:/Users/you/dev/repo">
+            <Input value={ideUrl} onChange={(e) => setIdeUrl(e.target.value)} placeholder="vscode://file/C:/Users/you/dev/repo" />
+          </Field>
+          <div className="flex justify-end border-t border-line pt-4">
+            <Button onClick={saveProjectIntegration}>Save project integration</Button>
+          </div>
+        </Card>
+      )}
 
       {isOwner && (
         <Card className="mt-5 p-5" style={{ borderColor: 'color-mix(in srgb, var(--signal-coral) 34%, transparent)' }}>

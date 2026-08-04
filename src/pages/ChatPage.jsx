@@ -372,11 +372,12 @@ export function ChatPage() {
               aria-label="Open stickers"
               title="Stickers"
               className={cx(
-                'focus-ring grid h-[42px] w-[42px] shrink-0 place-items-center rounded-xl border transition-colors',
-                stickerOpen ? 'border-teal-soft fill-teal-soft text-teal' : 'border-line bg-raised text-muted hover:border-teal-soft hover:text-teal'
+                'focus-ring relative grid h-[42px] w-[42px] shrink-0 place-items-center rounded-xl border bg-card transition-colors',
+                stickerOpen ? 'border-teal-soft fill-teal-soft text-teal' : 'border-line text-ink hover:border-teal-soft hover:text-teal'
               )}
             >
-              <Sticker size={17} />
+              <Sticker size={17} strokeWidth={2.3} />
+              <span className="pointer-events-none absolute -bottom-1.5 -right-1.5 rounded-full bg-card px-1 text-[10px] leading-none shadow-soft" aria-hidden="true">🎉</span>
             </button>
             <textarea
               ref={inputRef}
@@ -423,9 +424,6 @@ export function ChatPage() {
             </button>
           </div>
         </div>
-        <p className="mt-1.5 pl-1 font-mono text-[10px] text-muted">
-          wrap code in ``` fences · type <span className="text-teal">@</span> to mention · react on hover
-        </p>
       </div>
     </div>
   );

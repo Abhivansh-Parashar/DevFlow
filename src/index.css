@@ -878,6 +878,40 @@
   transform: translate(-2px, -2px) rotate(1deg);
 }
 
+.no-tilt,
+.no-tilt:hover,
+.no-tilt:active {
+  transform: none !important;
+}
+
+.brutal .no-tilt:hover,
+.brutal .no-tilt:active {
+  box-shadow: none !important;
+}
+
+.auth-eye-btn,
+.auth-eye-btn:hover,
+.auth-eye-btn:active {
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.brutal .auth-eye-btn,
+.brutal .auth-eye-btn:hover,
+.brutal .auth-eye-btn:active {
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  transform: translateY(-50%) !important;
+}
+
+.landing-page,
+.landing-page * {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
 /* ---- blueprint grid backdrop ---- */
 .sb-blueprint {
   position: relative;

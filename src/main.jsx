@@ -6,19 +6,19 @@ import './index.css';
 
 // Theme engine: sync <html> classes (dark / brutal) with the store.
 const applyTheme = (theme) => {
-  const resolved = theme === 'light' ? 'dark' : theme;
+  const resolved = theme === 'light' ? 'brutal' : theme;
   const el = document.documentElement;
   el.classList.toggle('dark', resolved === 'dark');
   el.classList.toggle('brutal', resolved === 'brutal');
 };
 
-// Default to dark; migrate legacy light preference.
+// Default to brutal (white); migrate legacy light/dark preference.
 try {
   const raw = localStorage.getItem('devflow-store');
   const parsed = raw ? JSON.parse(raw) : null;
   const stored = parsed?.state?.theme;
-  if (!parsed || !parsed.state || stored === 'light') {
-    useAppStore.setState({ theme: 'dark' });
+  if (!parsed || !parsed.state || stored === 'light' || stored === 'dark') {
+    useAppStore.setState({ theme: 'brutal' });
   }
 } catch (e) {
   /* noop */

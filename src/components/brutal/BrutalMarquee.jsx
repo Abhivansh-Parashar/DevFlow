@@ -10,7 +10,7 @@ const DEFAULT_ITEMS = [
  * Continuous-scroll marquee ticker with hard 2px borders.
  * Soft Brutalist kinetic element for secondary text / feature lists.
  */
-export function BrutalMarquee({ items = DEFAULT_ITEMS, className, speed = 32 }) {
+export function BrutalMarquee({ items = DEFAULT_ITEMS, className, speed = 52 }) {
   return (
     <div
       className={cx('sb-marquee brutal-ticker py-3.5', className)}

@@ -20,7 +20,7 @@ export const useAppStore = create(
   persist(
     (set, get) => ({
       // ---- persisted preferences ----
-      theme: 'dark',
+      theme: 'brutal',
       signedIn: false,
       currentUserId: null,
       activeWorkspaceId: null,
@@ -110,7 +110,7 @@ export const useAppStore = create(
         get().toast('success', `Workspace "${name.trim()}" created`);
       },
 
-      createProject: ({ name, description = '', color, icon = '#' }) => {
+      createProject: ({ name, description = '', color, icon = '#', repoUrl = '', localRepoPath = '', ideUrl = '' }) => {
         if (!name.trim()) {
           get().toast('error', 'Project needs a name');
           return;
@@ -123,6 +123,9 @@ export const useAppStore = create(
           workspaceId: wsId,
           name: name.trim(),
           description: description.trim(),
+          repoUrl: repoUrl.trim(),
+          localRepoPath: localRepoPath.trim(),
+          ideUrl: ideUrl.trim(),
           color: color ?? pickAccent(),
           icon,
           keyPrefix: (name.replace(/[^a-zA-Z]/g, '').slice(0, 3).toUpperCase() || 'PRJ'),

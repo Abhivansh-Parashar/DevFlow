@@ -20,15 +20,8 @@ const EASE = [0.16, 1, 0.3, 1];
 
 /* ---------------------------------- Nav ---------------------------------- */
 function LandingNav() {
-  const [scrolled, setScrolled] = useState(false);
   const theme = useAppStore((s) => s.theme);
   const toggleTheme = useAppStore((s) => s.toggleTheme);
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 24);
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
 
   const go = (e, href) => {
     e.preventDefault();
@@ -36,8 +29,8 @@ function LandingNav() {
   };
 
   return (
-    <header className={cx('fixed inset-x-0 top-0 z-40 transition-all duration-300', scrolled ? 'glass-nav' : 'bg-transparent')}>
-      <div className="mx-auto flex h-16 max-w-6xl items-center gap-6 px-5">
+    <header className="relative z-40 bg-transparent py-2">
+      <div className="mx-auto flex h-16 max-w-[90rem] items-center gap-6 rounded-xl border-2 border-ink bg-card px-5 shadow-pop">
         <a href="#top" onClick={(e) => go(e, '#top')} className="focus-ring flex items-center gap-2 rounded-lg">
           <span className="grid h-8 w-8 place-items-center rounded-lg bg-ink text-card">
             <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
@@ -56,7 +49,7 @@ function LandingNav() {
               key={href}
               href={href}
               onClick={(e) => go(e, href)}
-              className="focus-ring rounded-lg px-3 py-1.5 text-sm font-medium text-muted transition-colors hover:text-ink"
+              className="focus-ring sb-tilt rounded-lg border border-line bg-card-60 px-3 py-1.5 text-sm font-semibold text-ink shadow-soft transition-all hover:-translate-y-px hover:shadow-pop"
             >
               {label}
             </a>
@@ -67,11 +60,11 @@ function LandingNav() {
           onClick={toggleTheme}
           aria-label="Toggle theme"
           title={`Theme: ${theme} — click for ${theme === 'dark' ? 'brutal' : 'dark'}`}
-          className="focus-ring grid h-9 w-9 place-items-center rounded-lg text-muted transition-colors hover:bg-raised hover:text-ink"
+          className="focus-ring sb-tilt grid h-9 w-9 place-items-center rounded-lg border border-line bg-card-60 text-ink shadow-soft transition-all hover:-translate-y-px hover:shadow-pop"
         >
           {theme === 'dark' ? <Moon size={17} /> : <BrickWall size={17} />}
         </button>
-        <Link to="/login"><Button variant="ghost" size="sm" className="brutal:rounded-none">Sign in</Button></Link>
+        <Link to="/login"><Button variant="secondary" size="sm" className="sb-tilt brutal:rounded-none">Sign in</Button></Link>
         <Link to="/register"><Button size="sm" className="sb-tilt brutal:rounded-none">Start Free</Button></Link>
       </div>
     </header>
@@ -109,7 +102,7 @@ const STAGES = [
   {
     id: 'backlog', label: 'Backlog', color: 'var(--text-muted)',
     title: 'Issues land in the backlog',
-    body: 'Every feature, bug and idea enters with a ticket ID, a priority and an owner. AI-generated drafts drop in alongside the rest.',
+    body: 'Every feature, bug and idea enters with a ticket ID, a priority and an owner. The AI assistant helps teams add context before shipping work.',
     snippet: (
       <div className="space-y-2.5">
         {[
@@ -131,8 +124,8 @@ const STAGES = [
         <div className="flex items-center gap-2.5 rounded-xl border border-violet-soft fill-violet-soft p-3">
           <Sparkles size={14} className="text-violet" />
           <div>
-            <p className="text-[12px] font-semibold text-violet">“Add retry logic to webhook deliveries…”</p>
-            <p className="text-[11px] text-muted">AI draft · waiting for your confirm</p>
+            <p className="text-[12px] font-semibold text-violet">“Summarize blockers for DEV-105 and suggest next steps.”</p>
+            <p className="text-[11px] text-muted">AI assistant · project-aware context</p>
           </div>
         </div>
       </div>
@@ -299,6 +292,7 @@ function Walkthrough() {
     const ctx = gsap.context(() => {
       const panels = gsap.utils.toArray('[data-stage-panel]');
       const distance = () => Math.max(0, track.scrollWidth - window.innerWidth);
+      const scrollDistance = () => Math.max(1, distance() * 1.45);
 
       const tween = gsap.to(track, {
         x: () => -distance(),
@@ -306,7 +300,7 @@ function Walkthrough() {
         scrollTrigger: {
           trigger: section,
           start: 'top top',
-          end: () => `+=${distance()}`,
+          end: () => `+=${scrollDistance()}`,
           scrub: 1,
           pin: true,
           anticipatePin: 1,
@@ -439,7 +433,7 @@ const FEATURES = [
   { icon: Building2, title: 'Workspace scoping', body: 'Nothing is global except the switcher. Projects, members, chat and analytics all re-scope the instant you switch.', accent: 'teal' },
   { icon: GitCommit, title: 'GitHub auto-linking', body: 'Commits and PRs attach themselves to issues with hash chips and branch context — the trace stays honest.', accent: 'amber' },
   { icon: MessageSquare, title: 'Chat with mentions & stickers', body: 'Realtime group chat with @mentions that ping the right person, sticker reactions for the wins, and code blocks that format themselves.', accent: 'violet' },
-  { icon: Sparkles, title: 'AI issue generation', body: 'Describe the work in plain language. Review a structured draft — labels, priority, acceptance criteria — then confirm.', accent: 'violet' },
+  { icon: Sparkles, title: 'AI project assistant', body: 'Ask for project status, team load, blockers, and suggested next steps from live board context.', accent: 'violet' },
   { icon: BarChart3, title: 'Project health analytics', body: 'Velocity, distribution and cycle time, styled to the theme and scoped to the project.', accent: 'teal' },
   { icon: Mail, title: 'Project invites', body: 'Invite teammates with a card — accept with a swipe and land straight inside the project. Declines swoop away, no hard feelings.', accent: 'azure' },
 ];
@@ -742,7 +736,7 @@ function Footer() {
   const cols = [
     { h: 'Product', links: ['Pipeline', 'Board', 'Chat', 'Analytics'] },
     { h: 'Workspaces', links: ['Switch', 'Roles', 'Members', 'Create'] },
-    { h: 'Projects', links: ['Scoping', 'Keys', 'Health', 'AI drafts'] },
+    { h: 'Projects', links: ['Scoping', 'Keys', 'Health', 'AI assistant'] },
     { h: 'Resources', links: ['Docs', 'Changelog', 'Status', 'Contact'] },
   ];
   return (
@@ -790,13 +784,13 @@ function SectionHeading({ eyebrow, title, sub }) {
 /* ---------------------------------- Page ---------------------------------- */
 export function Landing() {
   return (
-    <div className="relative">
+    <div className="landing-page relative">
       <ScrollProgress />
       <LandingNav />
       <PipelineRail />
       <div className="relative">
         <BrutalHero />
-        <BrutalMarquee />
+        <BrutalMarquee speed={52} />
         <Walkthrough />
         <Features />
         <ChatShowcase />
