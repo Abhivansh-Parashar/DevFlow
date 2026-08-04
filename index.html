@@ -12,22 +12,23 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800;900&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
     <script>
-      // Apply theme before first paint to avoid flash. Light is the default;
-      // only an explicitly persisted choice (the toggle) overrides it.
+      // Apply theme before first paint. Default is dark; legacy light → dark.
       (function () {
         try {
           var raw = localStorage.getItem('devflow-store');
-          var theme = null;
+          var theme = 'dark';
           if (raw) {
             try {
-              theme = JSON.parse(raw).state && JSON.parse(raw).state.theme;
+              theme = (JSON.parse(raw).state && JSON.parse(raw).state.theme) || 'dark';
             } catch (e) {}
           }
+          if (theme === 'light') theme = 'dark';
           if (theme === 'dark') document.documentElement.classList.add('dark');
+          else if (theme === 'brutal') document.documentElement.classList.add('brutal');
         } catch (e) {}
       })();
     </script>

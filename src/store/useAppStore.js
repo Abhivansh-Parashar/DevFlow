@@ -20,7 +20,7 @@ export const useAppStore = create(
   persist(
     (set, get) => ({
       // ---- persisted preferences ----
-      theme: 'light',
+      theme: 'dark',
       signedIn: false,
       currentUserId: null,
       activeWorkspaceId: null,
@@ -54,7 +54,12 @@ export const useAppStore = create(
 
       // ---- theme & session ----
       setTheme: (theme) => set({ theme }),
-      toggleTheme: () => set((s) => ({ theme: s.theme === 'light' ? 'dark' : 'light' })),
+      // Two themes: dark ↔ brutal (soft-brutalist).
+      toggleTheme: () =>
+        set((s) => {
+          const current = s.theme === 'light' ? 'dark' : s.theme;
+          return { theme: current === 'dark' ? 'brutal' : 'dark' };
+        }),
       signIn: (email) =>
         set((s) => {
           const match = s.users.find(

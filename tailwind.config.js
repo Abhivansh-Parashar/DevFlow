@@ -26,6 +26,11 @@ export default {
         soft: 'var(--shadow-soft)',
         pop: 'var(--shadow-pop)',
         glow: '0 0 0 1px color-mix(in srgb, var(--signal-teal) 35%, transparent), 0 8px 40px color-mix(in srgb, var(--signal-teal) 25%, transparent)',
+        'sb-hard': 'var(--sb-shadow)',
+        'sb-hard-hover': 'var(--sb-shadow-hover)',
+      },
+      transitionTimingFunction: {
+        'sb-spring': 'cubic-bezier(0.2, 0, 0, 1)',
       },
       maxWidth: {
         prose: '68ch',
@@ -47,5 +52,9 @@ export default {
       },
     },
   },
-  plugins: [],
+  plugins: [
+    function ({ addVariant }) {
+      addVariant('brutal', '.brutal &');
+    },
+  ],
 };

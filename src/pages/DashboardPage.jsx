@@ -239,7 +239,7 @@ export function DashboardPage() {
           />
 
           <div className="relative">
-            <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-teal">
+            <p className="brutal-stamp font-mono text-[11px] uppercase tracking-[0.2em] text-teal">
               <span className="mr-2 inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-teal align-middle" />
               {activeProject.keyPrefix} · pipeline live
             </p>

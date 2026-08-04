@@ -1,17 +1,22 @@
 import { useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ChevronDown, Menu, Search, Sun, Moon, Settings, LogOut, Building2, FolderKanban } from 'lucide-react';
+import { ChevronDown, Menu, Search, Moon, Settings, LogOut, Building2, FolderKanban, BrickWall } from 'lucide-react';
 import { useAppStore } from '../../store/useAppStore';
 import { Dropdown, Avatar } from '../ui';
 import { NotificationsPanel } from '../notifications/NotificationsPanel';
 
+const THEME_ICONS = { dark: Moon, brutal: BrickWall };
+const THEME_LABELS = { dark: 'brutal', brutal: 'dark' };
+
 function ThemeToggle() {
   const theme = useAppStore((s) => s.theme);
   const toggle = useAppStore((s) => s.toggleTheme);
+  const Icon = THEME_ICONS[theme] ?? Moon;
   return (
     <motion.button
       onClick={toggle}
-      aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+      aria-label={`Switch to ${THEME_LABELS[theme] ?? 'brutal'} mode`}
+      title={`Theme: ${theme} — click for ${THEME_LABELS[theme] ?? 'brutal'}`}
       className="focus-ring relative grid h-9 w-9 place-items-center rounded-lg text-muted transition-colors hover:bg-raised hover:text-ink"
       whileTap={{ scale: 0.9 }}
     >
@@ -24,7 +29,7 @@ function ThemeToggle() {
           transition={{ duration: 0.2, ease: 'easeOut' }}
           className="grid place-items-center"
         >
-          {theme === 'light' ? <Sun size={17} /> : <Moon size={17} />}
+          <Icon size={17} />
         </motion.span>
       </AnimatePresence>
     </motion.button>

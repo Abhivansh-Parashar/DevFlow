@@ -4,18 +4,21 @@ import App from './App';
 import { useAppStore } from './store/useAppStore';
 import './index.css';
 
-// Theme engine: sync <html class="dark"> with the store. Light is the default;
-// the pre-paint script in index.html applies the persisted choice before paint.
+// Theme engine: sync <html> classes (dark / brutal) with the store.
 const applyTheme = (theme) => {
-  document.documentElement.classList.toggle('dark', theme === 'dark');
+  const resolved = theme === 'light' ? 'dark' : theme;
+  const el = document.documentElement;
+  el.classList.toggle('dark', resolved === 'dark');
+  el.classList.toggle('brutal', resolved === 'brutal');
 };
 
-// If nothing was persisted yet, default to light.
+// Default to dark; migrate legacy light preference.
 try {
   const raw = localStorage.getItem('devflow-store');
   const parsed = raw ? JSON.parse(raw) : null;
-  if (!parsed || !parsed.state) {
-    useAppStore.setState({ theme: 'light' });
+  const stored = parsed?.state?.theme;
+  if (!parsed || !parsed.state || stored === 'light') {
+    useAppStore.setState({ theme: 'dark' });
   }
 } catch (e) {
   /* noop */

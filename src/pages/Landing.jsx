@@ -6,12 +6,12 @@ import { ScrollToPlugin } from 'gsap/ScrollToPlugin';
 import { motion, useReducedMotion, useInView } from 'framer-motion';
 import {
   ArrowRight, GitCommit, MessageSquare, Sparkles, BarChart3,
-  Building2, Sun, Moon, Check, ChevronDown, Mail,
+  Building2, Moon, Check, Mail, BrickWall,
 } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
 import { Button } from '../components/ui';
+import { BrutalHero, BrutalMarquee, BrutalFeatureCard } from '../components/brutal';
 import { PipelineRail } from '../components/landing/PipelineRail';
-import { MiniKanban } from '../components/landing/MiniKanban';
 import { cx } from '../lib/utils';
 
 gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
@@ -66,12 +66,13 @@ function LandingNav() {
         <button
           onClick={toggleTheme}
           aria-label="Toggle theme"
+          title={`Theme: ${theme} — click for ${theme === 'dark' ? 'brutal' : 'dark'}`}
           className="focus-ring grid h-9 w-9 place-items-center rounded-lg text-muted transition-colors hover:bg-raised hover:text-ink"
         >
-          {theme === 'light' ? <Sun size={17} /> : <Moon size={17} />}
+          {theme === 'dark' ? <Moon size={17} /> : <BrickWall size={17} />}
         </button>
-        <Link to="/login"><Button variant="ghost" size="sm">Sign in</Button></Link>
-        <Link to="/register"><Button size="sm">Start Free</Button></Link>
+        <Link to="/login"><Button variant="ghost" size="sm" className="brutal:rounded-none">Sign in</Button></Link>
+        <Link to="/register"><Button size="sm" className="sb-tilt brutal:rounded-none">Start Free</Button></Link>
       </div>
     </header>
   );
@@ -100,158 +101,8 @@ function ScrollProgress() {
   );
 }
 
-/* ---------------------------------- Hero ---------------------------------- */
-function RevealLine({ text, className = '', delay = 0 }) {
-  const words = text.split(' ');
-  return (
-    <span className={cx('block', className)}>
-      {words.map((w, i) => (
-        <span key={i} className="inline-block overflow-hidden align-bottom" style={{ paddingBottom: '0.14em', marginBottom: '-0.14em' }}>
-          <motion.span
-            className="inline-block"
-            initial={{ y: '115%' }}
-            animate={{ y: 0 }}
-            transition={{ duration: 0.85, delay: delay + i * 0.06, ease: EASE }}
-          >
-            {w}
-            {i < words.length - 1 ? '\u00A0' : ''}
-          </motion.span>
-        </span>
-      ))}
-    </span>
-  );
-}
-
-function Hero() {
-  return (
-    <section id="top" className="relative flex min-h-screen items-center overflow-hidden px-5 pt-16">
-      {/* Backdrop: grid + floating orbs */}
-      <div className="absolute inset-0" aria-hidden="true">
-        <div className="bg-grid absolute inset-0" />
-        <div
-          className="orb orb-a absolute -left-24 -top-24 h-[26rem] w-[26rem] rounded-full"
-          style={{ background: 'radial-gradient(circle, color-mix(in srgb, var(--signal-teal) 13%, transparent), transparent 70%)' }}
-        />
-        <div
-          className="orb orb-b absolute -right-24 top-1/3 h-[24rem] w-[24rem] rounded-full"
-          style={{ background: 'radial-gradient(circle, color-mix(in srgb, var(--signal-violet) 11%, transparent), transparent 70%)' }}
-        />
-        <div
-          className="orb orb-c absolute -bottom-28 left-1/3 h-[22rem] w-[22rem] rounded-full"
-          style={{ background: 'radial-gradient(circle, color-mix(in srgb, var(--signal-azure) 9%, transparent), transparent 70%)' }}
-        />
-      </div>
-
-      <div className="relative z-10 mx-auto grid w-full max-w-6xl items-center gap-14 lg:grid-cols-2">
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}>
-          <motion.p
-            initial={{ opacity: 0, y: 14 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, ease: EASE }}
-            className="font-mono text-xs uppercase tracking-[0.22em] text-teal"
-          >
-            <span className="mr-2 inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-teal align-middle" />
-            DEV-001 · pipeline active
-          </motion.p>
-          <h1 className="mt-5 font-display text-[44px] font-bold leading-[1.05] tracking-tight text-ink sm:text-6xl">
-            <RevealLine text="Every issue has a path." />
-            <RevealLine text="Watch yours move." className="text-teal" delay={0.32} />
-          </h1>
-          <motion.p
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.65, delay: 0.55, ease: EASE }}
-            className="mt-5 max-w-md text-[17px] leading-relaxed text-muted"
-          >
-            Workspaces keep companies apart, projects keep teams in sync. Every issue — from
-            Backlog to Done — carries its commits, comments and context along a live pipeline,
-            while your team ships faster with mentions, stickers and one-tap invites.
-          </motion.p>
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.65, delay: 0.7, ease: EASE }}
-            className="mt-8 flex flex-wrap items-center gap-3"
-          >
-            <Link to="/register"><Button size="lg" iconRight={ArrowRight}>Start Free</Button></Link>
-            <a href="#pipeline" className="focus-ring rounded-lg" onClick={(e) => { e.preventDefault(); gsap.to(window, { scrollTo: { y: '#pipeline', offsetY: 80 }, duration: 0.9, ease: 'power3.inOut' }); }}>
-              <Button size="lg" variant="secondary">Explore Pipeline</Button>
-            </a>
-          </motion.div>
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.7, delay: 0.9 }}
-            className="mt-8 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-muted"
-          >
-            {['Workspace isolation', 'GitHub auto-linking', 'Mentions & stickers'].map((f) => (
-              <span key={f} className="flex items-center gap-1.5">
-                <Check size={13} className="text-teal" /> {f}
-              </span>
-            ))}
-          </motion.div>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 28, scale: 0.97 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          transition={{ duration: 0.7, delay: 0.25, ease: EASE }}
-          className="relative"
-        >
-          <div
-            className="absolute -inset-10 rounded-[2.5rem]"
-            aria-hidden="true"
-            style={{
-              background:
-                'radial-gradient(58% 55% at 50% 42%, color-mix(in srgb, var(--signal-teal) 11%, transparent), transparent 72%), radial-gradient(40% 40% at 82% 16%, color-mix(in srgb, var(--signal-violet) 9%, transparent), transparent 70%)',
-            }}
-          />
-          <div className="relative">
-            <motion.div
-              animate={{ y: [0, -9, 0] }}
-              transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut' }}
-            >
-              <MiniKanban />
-            </motion.div>
-            <p className="mt-3 text-center font-mono text-[10px] uppercase tracking-[0.18em] text-muted">
-              DEV-102 is moving · drag it anywhere
-            </p>
-          </div>
-        </motion.div>
-      </div>
-
-      {/* Scroll hint */}
-      <div className="absolute bottom-5 left-1/2 z-10 flex -translate-x-1/2 flex-col items-center gap-1.5 text-muted">
-        <span className="font-mono text-[10px] uppercase tracking-[0.22em]">scroll</span>
-        <ChevronDown size={16} className="animate-[scroll-hint_1.6s_ease-in-out_infinite] text-teal" />
-      </div>
-    </section>
-  );
-}
-
-/* ---------------------------------- Ticker ---------------------------------- */
-const TICKER = ['Backlog', 'Todo', 'In Progress', 'Review', 'Done'];
-
-function Ticker() {
-  return (
-    <div className="relative border-y border-line bg-card-60 py-3.5 backdrop-blur-sm">
-      <div className="overflow-hidden">
-        <div className="marquee-track flex w-max items-center gap-8 whitespace-nowrap">
-          {[0, 1].map((k) => (
-            <div key={k} className="flex items-center gap-8" aria-hidden={k === 1}>
-              {TICKER.map((s, i) => (
-                <span key={i} className="flex items-center gap-8">
-                  <span className="font-mono text-xs font-semibold uppercase tracking-[0.22em] text-muted">{s}</span>
-                  <ArrowRight size={13} className="text-teal opacity-50" />
-                </span>
-              ))}
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
+/* ---------------------------------- Hero & Ticker (Soft Brutalist modules) ---------------------------------- */
+/* BrutalHero and BrutalMarquee live in src/components/brutal/ */
 
 /* ---------------------------------- Walkthrough ---------------------------------- */
 const STAGES = [
@@ -593,26 +444,6 @@ const FEATURES = [
   { icon: Mail, title: 'Project invites', body: 'Invite teammates with a card — accept with a swipe and land straight inside the project. Declines swoop away, no hard feelings.', accent: 'azure' },
 ];
 
-function SpotlightCard({ children }) {
-  const ref = useRef(null);
-  const onMove = (e) => {
-    const el = ref.current;
-    if (!el) return;
-    const r = el.getBoundingClientRect();
-    el.style.setProperty('--mx', `${e.clientX - r.left}px`);
-    el.style.setProperty('--my', `${e.clientY - r.top}px`);
-  };
-  return (
-    <div
-      ref={ref}
-      onMouseMove={onMove}
-      className="spotlight-card glass-popover group h-full rounded-2xl p-6 transition-transform duration-300 ease-out hover:-translate-y-1.5"
-    >
-      {children}
-    </div>
-  );
-}
-
 function Features() {
   return (
     <section id="features" className="relative px-5 py-24">
@@ -629,13 +460,13 @@ function Features() {
               viewport={{ once: true, margin: '-40px' }}
               transition={{ duration: 0.5, delay: (i % 3) * 0.08, ease: EASE }}
             >
-              <SpotlightCard>
-                <span className={cx('grid h-11 w-11 place-items-center rounded-xl', f.accent === 'violet' ? 'fill-violet-soft text-violet' : f.accent === 'amber' ? 'fill-amber-soft text-amber' : f.accent === 'azure' ? 'fill-azure-soft text-azure' : 'fill-teal-soft text-teal')}>
-                  <f.icon size={19} strokeWidth={2} />
-                </span>
-                <h3 className="mt-4 font-display text-lg font-semibold text-ink">{f.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-muted">{f.body}</p>
-              </SpotlightCard>
+              <BrutalFeatureCard
+                icon={f.icon}
+                title={f.title}
+                body={f.body}
+                accent={f.accent}
+                index={i}
+              />
             </motion.div>
           ))}
         </div>
@@ -692,7 +523,7 @@ function ChatShowcase() {
               aria-hidden="true"
               style={{ background: 'radial-gradient(50% 55% at 30% 30%, color-mix(in srgb, var(--signal-violet) 12%, transparent), transparent 70%)' }}
             />
-            <div className="relative overflow-hidden rounded-2xl border border-line bg-card-60 shadow-pop backdrop-blur-xl">
+            <div className="brutal-window relative overflow-hidden rounded-2xl border border-line bg-card-60 shadow-pop backdrop-blur-xl">
               {/* window header */}
               <div className="flex items-center gap-2.5 border-b border-line bg-card-60 px-4 py-3">
                 <span className="grid h-7 w-7 place-items-center rounded-lg fill-violet-soft text-violet">
@@ -818,7 +649,7 @@ function MetricsBand() {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: '-60px' }}
         transition={{ duration: 0.6, ease: EASE }}
-        className="mx-auto max-w-5xl rounded-2xl border border-line bg-card-60 p-8 shadow-soft backdrop-blur-xl sm:p-10"
+        className="brutal-metrics mx-auto max-w-5xl rounded-2xl border border-line bg-card-60 p-8 shadow-soft backdrop-blur-xl sm:p-10"
       >
         <div className="grid grid-cols-1 gap-8 text-center sm:grid-cols-3">
           <div ref={ref1}>
@@ -948,9 +779,9 @@ function Footer() {
 
 function SectionHeading({ eyebrow, title, sub }) {
   return (
-    <div>
-      <p className="font-mono text-xs uppercase tracking-[0.22em] text-teal">{eyebrow}</p>
-      <h2 className="mt-3 font-display text-3xl font-bold tracking-tight text-ink sm:text-[36px]">{title}</h2>
+    <div className="sb-section-header">
+      <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.24em] text-teal">{eyebrow}</p>
+      <h2 className="mt-3 font-display text-3xl font-black tracking-[-0.03em] text-ink sm:text-[36px]">{title}</h2>
       {sub && <p className="mx-auto mt-3 max-w-lg text-muted">{sub}</p>}
     </div>
   );
@@ -964,8 +795,8 @@ export function Landing() {
       <LandingNav />
       <PipelineRail />
       <div className="relative">
-        <Hero />
-        <Ticker />
+        <BrutalHero />
+        <BrutalMarquee />
         <Walkthrough />
         <Features />
         <ChatShowcase />

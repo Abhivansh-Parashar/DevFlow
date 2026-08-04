@@ -439,3 +439,778 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ============================================================
+   SOFT BRUTALIST THEME — <html class="brutal">
+   Light, airy, hard-edged. Bone-white canvas, crisp black borders,
+   no blur, no glow. Inter for UI/body, Archivo for display only.
+   (Toggled via the theme button: dark ↔ brutal.)
+   ============================================================ */
+
+/* ---- tokens: sit after :root/.dark so equal-specificity wins ---- */
+.brutal {
+  --surface-canvas: #FAFAFA;
+  --surface-card: #FFFFFF;
+  --surface-raised: #F4F4F4;
+  --text-primary: #0A0A0A;
+  --text-muted: #454545;
+  --border-subtle: #0A0A0A;
+  --line-hard: #000000;
+  --signal-accent: #FEF08A;
+  --signal-teal: #0D6B63;
+  --signal-amber: #92400E;
+  --signal-coral: #9A3412;
+  --signal-violet: #5B21B6;
+  --signal-azure: #1E40AF;
+  --glass-highlight: rgba(255, 255, 255, 0.6);
+  --shadow-soft: 3px 3px 0 0 #000000;
+  --shadow-pop: 5px 5px 0 0 #000000;
+  --sb-border: #000000;
+  --sb-border-soft: #000000;
+  --sb-shadow: 4px 4px 0 0 #000000;
+  --sb-shadow-hover: 6px 6px 0 0 #000000;
+}
+
+/* ---- flat canvas + readable body typography ---- */
+.brutal body {
+  background-image: none;
+  font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  font-weight: 450;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---- display headings only — Archivo, not body ---- */
+.brutal h1,
+.brutal h2,
+.brutal h3,
+.brutal h4,
+.brutal h5 {
+  font-family: 'Archivo', 'Inter', ui-sans-serif, system-ui, sans-serif;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.08;
+  color: var(--text-primary);
+}
+.brutal .font-display {
+  font-family: 'Archivo', 'Inter', ui-sans-serif, system-ui, sans-serif;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+}
+.brutal .text-muted { color: var(--text-muted); }
+.brutal .text-ink { color: var(--text-primary); }
+.brutal .mono-label {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  letter-spacing: 0.14em;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+/* ---- hard 90° corners (keep avatars as circles) ---- */
+.brutal .rounded-2xl,
+.brutal .rounded-3xl,
+.brutal .rounded-xl,
+.brutal .rounded-lg,
+.brutal .rounded-md,
+.brutal .rounded-sm,
+.brutal .rounded,
+.brutal .rounded-\[2\.5rem\],
+.brutal .rounded-\[1\.75rem\],
+.brutal .rounded-\[2rem\] {
+  border-radius: 0 !important;
+}
+
+/* ---- kill glass everywhere ---- */
+.brutal .glass-topbar,
+.brutal .glass-sidebar,
+.brutal .glass-popover,
+.brutal .glass-nav {
+  background: var(--surface-card);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  box-shadow: none;
+}
+.brutal .glass-topbar { border-bottom: 2px solid var(--line-hard); }
+.brutal .glass-sidebar { border-right: 2px solid var(--line-hard); }
+.brutal .backdrop-blur-xl,
+.brutal .backdrop-blur-sm,
+.brutal .backdrop-blur,
+.brutal [class*="backdrop-blur"] {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+.brutal .bg-card-60 { background: var(--surface-card); }
+
+/* ---- global hard shadows ---- */
+.brutal .shadow-soft { box-shadow: var(--shadow-soft); }
+.brutal .shadow-pop  { box-shadow: var(--shadow-pop); }
+.brutal .shadow-glow { box-shadow: var(--shadow-soft); }
+
+/* ---- global borders ---- */
+.brutal .border-line,
+.brutal .border.border-line,
+.brutal [class*="border-line"] {
+  border-color: var(--line-hard) !important;
+}
+.brutal .border:not(.border-0) {
+  border-width: 2px;
+}
+
+/* ---- all cards & elevated surfaces ---- */
+.brutal .card-surface,
+.brutal .bento-tile,
+.brutal .sb-card,
+.brutal .brutal-window,
+.brutal .brutal-metrics,
+.brutal .brutal-kanban,
+.brutal .glass-popover,
+.brutal .bg-card-60.border,
+.brutal .border.border-line.bg-card,
+.brutal .border.border-line.bg-card-60 {
+  border-radius: 0;
+  background: var(--surface-card);
+  border: 2px solid var(--line-hard);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  box-shadow: var(--shadow-soft);
+}
+.brutal .card-surface:hover,
+.brutal .bento-tile:hover,
+.brutal .sb-card:hover {
+  box-shadow: var(--shadow-pop);
+}
+.brutal .card-surface::before,
+.brutal .bento-sheen::after,
+.brutal .bento-spotlight::before,
+.brutal .spotlight-card::before {
+  display: none;
+}
+
+/* ---- form fields ---- */
+.brutal .glass-input,
+.brutal input:not([type="checkbox"]):not([type="radio"]),
+.brutal textarea,
+.brutal select {
+  background: var(--surface-card);
+  border: 2px solid var(--line-hard);
+  border-radius: 0;
+  box-shadow: none;
+  color: var(--text-primary);
+  font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  font-weight: 500;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+.brutal .glass-input:focus,
+.brutal input:focus,
+.brutal textarea:focus,
+.brutal select:focus {
+  border-color: var(--text-primary);
+  box-shadow: none;
+  outline: none;
+}
+.brutal .ph-muted::placeholder {
+  color: var(--text-muted);
+}
+
+/* ============================================================
+   GLOBAL BRUTAL BUTTONS — every variant, clear readable text
+   ============================================================ */
+.brutal button {
+  border-radius: 0 !important;
+  font-family: 'Inter', ui-sans-serif, system-ui, sans-serif !important;
+  font-weight: 600 !important;
+  letter-spacing: 0 !important;
+  -webkit-font-smoothing: antialiased;
+  transition: transform 0.25s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.25s cubic-bezier(0.2, 0, 0, 1), background 0.2s ease, color 0.2s ease;
+}
+
+/* Primary CTA — white on black */
+.brutal .btn-primary {
+  background: #0A0A0A !important;
+  color: #FFFFFF !important;
+  border: 2px solid #000000 !important;
+  box-shadow: 3px 3px 0 0 #000000;
+  filter: none;
+}
+.brutal .btn-primary:hover {
+  filter: none;
+  box-shadow: 5px 5px 0 0 #000000;
+  transform: translate(-2px, -2px);
+  color: #FFFFFF !important;
+}
+.brutal .btn-primary:active {
+  transform: translate(0, 0) scale(0.97);
+  box-shadow: 1px 1px 0 0 #000000;
+}
+
+/* Secondary / outline — black text on white */
+.brutal .bg-raised.text-ink,
+.brutal button.bg-raised,
+.brutal .bg-card.text-ink.border {
+  background: var(--surface-card) !important;
+  color: var(--text-primary) !important;
+  border: 2px solid #000000 !important;
+  box-shadow: 3px 3px 0 0 #000000;
+}
+.brutal .bg-raised.text-ink:hover,
+.brutal button.bg-raised:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 5px 5px 0 0 #000000;
+  color: var(--text-primary) !important;
+}
+
+/* Ghost — readable ink, bordered on hover */
+.brutal button.text-ink.hover\:bg-raised,
+.brutal button.hover\:bg-raised:not(.btn-primary):not(.bg-raised):not(.fill-coral-soft):not(.fill-violet-soft) {
+  color: var(--text-primary) !important;
+  border: 2px solid transparent;
+  background: transparent;
+}
+.brutal button.text-ink.hover\:bg-raised:hover,
+.brutal button.hover\:bg-raised:not(.btn-primary):not(.bg-raised):hover {
+  background: var(--surface-card) !important;
+  border-color: #000000;
+  box-shadow: 2px 2px 0 0 #000000;
+  color: var(--text-primary) !important;
+}
+
+/* Destructive */
+.brutal .fill-coral-soft.text-coral {
+  background: var(--surface-card) !important;
+  color: var(--signal-coral) !important;
+  border: 2px solid var(--signal-coral) !important;
+  box-shadow: 3px 3px 0 0 var(--signal-coral);
+}
+
+/* Violet */
+.brutal .fill-violet-soft.text-violet {
+  background: var(--surface-card) !important;
+  color: var(--signal-violet) !important;
+  border: 2px solid var(--signal-violet) !important;
+  box-shadow: 3px 3px 0 0 var(--signal-violet);
+}
+
+/* Icon / nav buttons */
+.brutal button.grid.place-items-center,
+.brutal button[class*="grid"][class*="place-items-center"]:not(.btn-primary) {
+  color: var(--text-primary) !important;
+  border: 2px solid var(--line-hard);
+  background: var(--surface-card);
+}
+.brutal button.grid.place-items-center:hover,
+.brutal button[class*="grid"][class*="place-items-center"]:hover {
+  box-shadow: 2px 2px 0 0 #000000;
+  transform: translate(-1px, -1px);
+}
+
+/* Search bar button in topbar */
+.brutal button.border.border-line.bg-raised {
+  color: var(--text-muted) !important;
+  border: 2px solid #000000 !important;
+  box-shadow: 2px 2px 0 0 #000000;
+}
+.brutal button.border.border-line.bg-raised:hover {
+  color: var(--text-primary) !important;
+}
+
+/* Badges — sharp, readable */
+.brutal .badge {
+  border-radius: 0;
+  border-width: 2px;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  box-shadow: 2px 2px 0 0 rgba(0, 0, 0, 0.12);
+}
+
+/* ---- selection + focus ---- */
+.brutal ::selection {
+  background: var(--signal-accent);
+  color: var(--text-primary);
+}
+.brutal .focus-ring:focus-visible {
+  outline: 2px solid var(--text-primary);
+  outline-offset: 2px;
+}
+
+/* ---- exposed structure: grid lines ---- */
+.brutal .bg-grid,
+.brutal .bento-grid-bg {
+  background-image:
+    linear-gradient(to right, var(--line-hard) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--line-hard) 1px, transparent 1px);
+  -webkit-mask-image: none;
+  mask-image: none;
+  opacity: 0.25;
+}
+.brutal .bg-grid { background-size: 48px 48px; }
+.brutal .bento-grid-bg { background-size: 42px 42px; }
+
+/* ---- landing hooks ---- */
+.brutal .brutal-stamp,
+.brutal .sb-stamp,
+.brutal-stamp {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 2px solid var(--text-primary);
+  background: var(--surface-card);
+  color: var(--text-primary);
+  padding: 4px 12px;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  box-shadow: 2px 2px 0 0 #000000;
+}
+.brutal .brutal-block,
+.brutal-block {
+  border-radius: 0;
+  border: 2px solid var(--line-hard);
+  background: var(--signal-accent);
+  box-shadow: 6px 6px 0 0 #000000;
+  transform: rotate(-1.5deg);
+}
+.brutal .brutal-ticker,
+.brutal-ticker,
+.brutal .sb-marquee {
+  background: var(--surface-card);
+  border-top: 2px solid var(--line-hard);
+  border-bottom: 2px solid var(--line-hard);
+}
+.brutal .brutal-metrics,
+.brutal-metrics {
+  border-radius: 0;
+  border: 2px solid var(--line-hard);
+  background: var(--surface-card);
+  box-shadow: 5px 5px 0 0 #000000;
+  transform: translateY(-2px);
+}
+.brutal .brutal-window,
+.brutal-window {
+  border-radius: 0;
+  border: 2px solid var(--line-hard);
+  background: var(--surface-card);
+  box-shadow: 5px 5px 0 0 #000000;
+}
+.brutal .brutal-kanban,
+.brutal-kanban {
+  border-radius: 0;
+  border: 2px solid var(--line-hard);
+  background: var(--surface-card);
+  box-shadow: 5px 5px 0 0 #000000;
+  transform: rotate(1deg);
+}
+
+/* ---- kbd chips ---- */
+.brutal kbd {
+  border-radius: 0;
+  border: 2px solid var(--line-hard);
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* ---- links in nav ---- */
+.brutal a.text-muted:hover,
+.brutal nav a {
+  color: var(--text-muted);
+  font-weight: 500;
+}
+.brutal nav a:hover {
+  color: var(--text-primary);
+}
+
+/* ============================================================
+   SOFT BRUTALIST DESIGN SYSTEM — sb-* utilities
+   Editorial, crisp, hard-edged. Works in all themes;
+   .brutal class amplifies to full neo-brutalist starkness.
+   ============================================================ */
+
+:root {
+  --sb-ease-spring: cubic-bezier(0.2, 0, 0, 1);
+  --sb-border: #141414;
+  --sb-border-soft: var(--border-subtle);
+  --sb-shadow: 4px 4px 0 0 rgba(20, 20, 20, 0.12);
+  --sb-shadow-hover: 6px 6px 0 0 rgba(20, 20, 20, 0.16);
+  --sb-pastel-lemon: #FEF08A;
+  --sb-pastel-mint: #A7F3D0;
+  --sb-pastel-sky: #AFC8F0;
+}
+
+.brutal {
+  --sb-border: #000000;
+  --sb-border-soft: #141414;
+  --sb-shadow: 4px 4px 0 0 #000000;
+  --sb-shadow-hover: 6px 6px 0 0 #000000;
+}
+
+/* ---- spring transition utility ---- */
+.sb-spring {
+  transition-timing-function: var(--sb-ease-spring);
+}
+
+/* ---- hard offset shadow surfaces ---- */
+.sb-shadow-hard {
+  box-shadow: var(--sb-shadow);
+}
+.sb-shadow-hard:hover {
+  box-shadow: var(--sb-shadow-hover);
+}
+
+/* ---- tactical tilt on hover ---- */
+.sb-tilt {
+  transition: transform 0.28s var(--sb-ease-spring), box-shadow 0.28s var(--sb-ease-spring);
+  will-change: transform;
+}
+.sb-tilt:hover {
+  transform: translate(-2px, -2px) rotate(-0.8deg);
+}
+.sb-tilt:active {
+  transform: translate(1px, 1px) rotate(0deg);
+}
+.sb-tilt-right:hover {
+  transform: translate(-2px, -2px) rotate(1deg);
+}
+
+/* ---- blueprint grid backdrop ---- */
+.sb-blueprint {
+  position: relative;
+  background-color: var(--surface-card);
+}
+.sb-blueprint::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(to right, var(--sb-border-soft) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--sb-border-soft) 1px, transparent 1px);
+  background-size: 48px 48px;
+  opacity: 0.45;
+}
+.brutal .sb-blueprint::before {
+  opacity: 0.7;
+  background-image:
+    linear-gradient(to right, var(--sb-border) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--sb-border) 1px, transparent 1px);
+}
+
+/* ---- dot-matrix texture ---- */
+.sb-dot-matrix {
+  background-image: radial-gradient(circle, var(--sb-border-soft) 0.6px, transparent 0.6px);
+  background-size: 12px 12px;
+}
+.brutal .sb-dot-matrix {
+  background-image: radial-gradient(circle, rgba(0, 0, 0, 0.18) 0.7px, transparent 0.7px);
+}
+
+/* ---- crosshair corner markers ---- */
+.sb-crosshair {
+  position: relative;
+}
+.sb-crosshair::before,
+.sb-crosshair::after {
+  content: '';
+  position: absolute;
+  pointer-events: none;
+  z-index: 2;
+}
+/* top-left + */
+.sb-crosshair::before {
+  top: -1px;
+  left: -1px;
+  width: 12px;
+  height: 12px;
+  background:
+    linear-gradient(var(--sb-border) 0 0) 50% 0 / 1px 100% no-repeat,
+    linear-gradient(var(--sb-border) 0 0) 0 50% / 100% 1px no-repeat;
+  opacity: 0.55;
+}
+/* bottom-right coordinate */
+.sb-crosshair::after {
+  bottom: 6px;
+  right: 8px;
+  font-family: theme('fontFamily.mono');
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  color: var(--text-muted);
+  content: attr(data-coord);
+  opacity: 0.7;
+}
+.brutal .sb-crosshair::before { opacity: 1; }
+
+/* ---- stamp badge (asymmetrical label accent) ---- */
+.sb-stamp {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 2px solid var(--sb-border);
+  background: var(--surface-card);
+  padding: 4px 12px;
+  font-family: theme('fontFamily.mono');
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--text-primary);
+  box-shadow: 2px 2px 0 0 var(--sb-border-soft);
+  transition: transform 0.25s var(--sb-ease-spring), box-shadow 0.25s var(--sb-ease-spring);
+}
+.sb-stamp:hover {
+  transform: translate(-1px, -1px) rotate(-1deg);
+  box-shadow: 3px 3px 0 0 var(--sb-border-soft);
+}
+.sb-stamp-accent {
+  background: var(--sb-pastel-lemon);
+}
+.brutal .sb-stamp-accent {
+  background: var(--sb-pastel-lemon);
+}
+
+/* ---- sharp geometric status dot ---- */
+.sb-status-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  background: currentColor;
+  flex-shrink: 0;
+}
+.sb-status-dot.square { border-radius: 0; }
+.sb-status-dot.pulse {
+  animation: sb-pulse 2s var(--sb-ease-spring) infinite;
+}
+@keyframes sb-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.85); }
+}
+
+/* ---- sharp bordered badge (replaces pills in brutal context) ---- */
+.sb-badge-sharp {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: 2px solid var(--sb-border);
+  background: var(--surface-card);
+  padding: 2px 8px;
+  font-family: theme('fontFamily.mono');
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  border-radius: 0;
+  box-shadow: 2px 2px 0 0 var(--sb-border-soft);
+}
+.sb-badge-sharp.mint { background: var(--sb-pastel-mint); }
+.sb-badge-sharp.lemon { background: var(--sb-pastel-lemon); }
+
+/* ---- section hairline dividers ---- */
+.sb-divider-h {
+  height: 2px;
+  background: var(--sb-border);
+  opacity: 0.15;
+}
+.brutal .sb-divider-h { opacity: 1; }
+.sb-divider-v {
+  width: 2px;
+  background: var(--sb-border);
+  opacity: 0.15;
+}
+.brutal .sb-divider-v { opacity: 1; }
+
+/* ---- hero section shell ---- */
+.sb-hero {
+  position: relative;
+  border-bottom: 2px solid transparent;
+}
+.brutal .sb-hero {
+  border-bottom-color: var(--sb-border);
+}
+
+/* ---- interactive feature card ---- */
+.sb-card {
+  position: relative;
+  background: var(--surface-card);
+  border: 2px solid var(--sb-border-soft);
+  box-shadow: var(--sb-shadow);
+  transition: transform 0.3s var(--sb-ease-spring), box-shadow 0.3s var(--sb-ease-spring), border-color 0.3s var(--sb-ease-spring);
+}
+.sb-card:hover {
+  transform: translate(-2px, -2px) rotate(-0.6deg);
+  box-shadow: var(--sb-shadow-hover);
+  border-color: var(--sb-border);
+}
+.brutal .sb-card {
+  border-color: var(--sb-border);
+  border-radius: 0;
+}
+.brutal .sb-card:hover {
+  transform: translate(-2px, -2px) rotate(-1.2deg);
+}
+
+/* ---- floating feedback badge ---- */
+.sb-feedback-badge {
+  position: absolute;
+  z-index: 20;
+  border: 2px solid var(--sb-border);
+  background: var(--sb-pastel-mint);
+  padding: 6px 14px;
+  font-family: theme('fontFamily.mono');
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  box-shadow: 3px 3px 0 0 var(--sb-border);
+  transform: rotate(2deg);
+  transition: transform 0.3s var(--sb-ease-spring);
+}
+.sb-feedback-badge:hover {
+  transform: rotate(0deg) translate(-2px, -2px);
+}
+
+/* ---- marquee ticker bar ---- */
+.sb-marquee {
+  position: relative;
+  overflow: hidden;
+  border-top: 2px solid var(--sb-border-soft);
+  border-bottom: 2px solid var(--sb-border-soft);
+  background: var(--surface-card);
+}
+.brutal .sb-marquee {
+  border-color: var(--sb-border);
+}
+.sb-marquee-track {
+  animation: marquee 32s linear infinite;
+}
+.sb-marquee:hover .sb-marquee-track {
+  animation-play-state: paused;
+}
+
+/* ---- index marker (// 01.) ---- */
+.sb-index {
+  font-family: theme('fontFamily.mono');
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  color: var(--text-muted);
+}
+.sb-index::before {
+  content: '// ';
+  opacity: 0.5;
+}
+
+/* ---- section header with grid intersection ---- */
+.sb-section-header {
+  position: relative;
+  padding-left: 20px;
+}
+.sb-section-header::before {
+  content: '+';
+  position: absolute;
+  left: 0;
+  top: 0;
+  font-family: theme('fontFamily.mono');
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-muted);
+  line-height: 1;
+}
+.brutal .sb-section-header::before {
+  color: var(--sb-border);
+}
+
+/* ---- brutal theme: extend tilt to spotlight cards ---- */
+.brutal .spotlight-card {
+  border: 2px solid var(--sb-border);
+  border-radius: 0;
+  background: var(--surface-card);
+  box-shadow: var(--sb-shadow);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  transition: transform 0.3s var(--sb-ease-spring), box-shadow 0.3s var(--sb-ease-spring);
+}
+.brutal .spotlight-card:hover {
+  transform: translate(-2px, -2px) rotate(-1deg);
+  box-shadow: var(--sb-shadow-hover);
+}
+
+/* ---- brutal theme: secondary buttons ---- */
+.brutal .btn-secondary-brutal,
+.brutal button.bg-raised {
+  border-radius: 0;
+  border: 2px solid var(--sb-border);
+  box-shadow: 3px 3px 0 0 var(--sb-border);
+  transition: transform 0.25s var(--sb-ease-spring), box-shadow 0.25s var(--sb-ease-spring);
+}
+.brutal .btn-secondary-brutal:hover,
+.brutal button.bg-raised:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 5px 5px 0 0 var(--sb-border);
+}
+
+/* ---- brutal: unscoped landing hooks (also work outside .brutal for editorial light) ---- */
+.brutal-stamp {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 2px solid var(--sb-border-soft);
+  background: var(--surface-card);
+  padding: 4px 12px;
+  font-family: theme('fontFamily.mono');
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  box-shadow: 2px 2px 0 0 rgba(20, 20, 20, 0.08);
+}
+.brutal .brutal-stamp {
+  border-color: var(--sb-border);
+  box-shadow: 2px 2px 0 0 var(--sb-border);
+}
+
+.brutal-block {
+  border: 2px solid var(--sb-border-soft);
+  background: var(--sb-pastel-sky);
+  box-shadow: 6px 6px 0 0 rgba(20, 20, 20, 0.06);
+  transform: rotate(-1.5deg);
+}
+.brutal .brutal-block {
+  border-color: var(--sb-border);
+  box-shadow: 8px 8px 0 0 var(--sb-border);
+}
+
+.brutal-ticker {
+  border-top: 2px solid var(--sb-border-soft);
+  border-bottom: 2px solid var(--sb-border-soft);
+  background: var(--surface-card);
+}
+.brutal .brutal-ticker {
+  border-color: var(--sb-border);
+}
+
+.brutal-metrics,
+.brutal-window,
+.brutal-kanban {
+  border: 2px solid var(--sb-border-soft);
+  background: var(--surface-card);
+  box-shadow: var(--sb-shadow);
+}
+.brutal .brutal-metrics,
+.brutal .brutal-window,
+.brutal .brutal-kanban {
+  border-color: var(--sb-border);
+  box-shadow: var(--sb-shadow);
+  border-radius: 0;
+}
+.brutal-kanban {
+  transform: rotate(1deg);
+}
+.brutal-metrics {
+  transform: translateY(-2px);
+}
