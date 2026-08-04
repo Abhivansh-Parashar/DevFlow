@@ -1,0 +1,359 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================================
+   DevFlow Design Tokens — Dual-Theme Architecture
+   Light Mode (default) + Dark Mode via <html class="dark">
+   ============================================================ */
+:root {
+  /* Light (default) — professional slate-tinted neutrals, AA calibrated */
+  --surface-canvas: #f4f6f9;
+  --surface-card: #ffffff;
+  --surface-raised: #eef1f5;
+  --text-primary: #101828;
+  --text-muted: #5d6b80;
+  --border-subtle: #e3e7ed;
+
+  --signal-teal: #0d9488;
+  --signal-amber: #d97706;
+  --signal-coral: #dc2626;
+  --signal-violet: #7c3aed;
+  --signal-azure: #2563eb;
+
+  --glass-highlight: rgba(255, 255, 255, 0.65);
+  --shadow-soft: 0 1px 2px rgba(16, 24, 40, 0.04), 0 1px 3px rgba(16, 24, 40, 0.06), 0 8px 24px -6px rgba(16, 24, 40, 0.08);
+  --shadow-pop: 0 12px 24px -6px rgba(16, 24, 40, 0.14), 0 24px 64px -12px rgba(16, 24, 40, 0.2);
+}
+
+.dark {
+  /* Dark — graphite surfaces, high-luminance accents */
+  --surface-canvas: #121417;
+  --surface-card: #1a1d23;
+  --surface-raised: #242832;
+  --text-primary: #edeef0;
+  --text-muted: #8b94a6;
+  --border-subtle: #2c313b;
+
+  --signal-teal: #00c2a8;
+  --signal-amber: #ffb454;
+  --signal-coral: #ff6b6b;
+  --signal-violet: #9b8cff;
+  --signal-azure: #6ea1ff;
+
+  --glass-highlight: rgba(255, 255, 255, 0.08);
+  --shadow-soft: 0 1px 2px rgba(0, 0, 0, 0.25), 0 4px 16px rgba(0, 0, 0, 0.35);
+  --shadow-pop: 0 6px 16px rgba(0, 0, 0, 0.4), 0 20px 56px rgba(0, 0, 0, 0.55);
+}
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply font-sans text-ink;
+    font-size: 15px;
+    line-height: 1.6;
+    background-color: var(--surface-canvas);
+    /* Ambient brand glow — a subtle, professional depth cue */
+    background-image:
+      radial-gradient(52rem 30rem at 8% -8%, color-mix(in srgb, var(--signal-teal) 6%, transparent), transparent 62%),
+      radial-gradient(46rem 28rem at 94% -6%, color-mix(in srgb, var(--signal-violet) 5.5%, transparent), transparent 60%),
+      radial-gradient(40rem 26rem at 50% 112%, color-mix(in srgb, var(--signal-azure) 4.5%, transparent), transparent 62%);
+    background-attachment: fixed;
+  }
+  h1, h2, h3, h4, h5 {
+    @apply font-display;
+    line-height: 1.15;
+  }
+  ::selection {
+    background: color-mix(in srgb, var(--signal-teal) 28%, transparent);
+  }
+  /* Hide scrollbars entirely while keeping scrollability */
+  * {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* legacy Edge / IE */
+  }
+  *::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Edge */
+  }
+}
+
+@layer components {
+  /* ---------- Glassmorphism (floating surfaces only) ---------- */
+  .glass-topbar {
+    background: color-mix(in srgb, var(--surface-card) 74%, transparent);
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid color-mix(in srgb, var(--border-subtle) 70%, transparent);
+    box-shadow: inset 0 1px 0 var(--glass-highlight), var(--shadow-soft);
+  }
+  .glass-sidebar {
+    background: color-mix(in srgb, var(--surface-card) 80%, transparent);
+    -webkit-backdrop-filter: blur(18px);
+    backdrop-filter: blur(18px);
+    border-right: 1px solid color-mix(in srgb, var(--border-subtle) 70%, transparent);
+    box-shadow: inset 1px 0 0 var(--glass-highlight);
+  }
+  .glass-popover {
+    background: color-mix(in srgb, var(--surface-card) 88%, transparent);
+    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(16px);
+    border: 1px solid color-mix(in srgb, var(--border-subtle) 72%, transparent);
+    box-shadow: var(--shadow-pop), inset 0 1px 0 var(--glass-highlight);
+  }
+  .glass-nav {
+    background: color-mix(in srgb, var(--surface-card) 70%, transparent);
+    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid color-mix(in srgb, var(--border-subtle) 70%, transparent);
+    box-shadow: inset 0 1px 0 var(--glass-highlight), var(--shadow-soft);
+  }
+
+  /* ---------- Focus rings (WCAG keyboard navigation) ---------- */
+  .focus-ring {
+    outline: none;
+  }
+  .focus-ring:focus-visible {
+    outline: 2px solid var(--signal-teal);
+    outline-offset: 2px;
+  }
+
+  /* ---------- Soft accent fills (avoid Tailwind alpha modifiers on CSS vars) ---------- */
+  .fill-teal-soft  { background: color-mix(in srgb, var(--signal-teal) 11%, transparent); }
+  .fill-amber-soft { background: color-mix(in srgb, var(--signal-amber) 13%, transparent); }
+  .fill-coral-soft { background: color-mix(in srgb, var(--signal-coral) 11%, transparent); }
+  .fill-violet-soft{ background: color-mix(in srgb, var(--signal-violet) 12%, transparent); }
+  .fill-azure-soft { background: color-mix(in srgb, var(--signal-azure) 12%, transparent); }
+  .fill-raised     { background: var(--surface-raised); }
+  .bg-raised-60    { background: color-mix(in srgb, var(--surface-raised) 60%, transparent); }
+
+  .border-teal-soft   { border-color: color-mix(in srgb, var(--signal-teal) 32%, transparent); }
+  .border-amber-soft  { border-color: color-mix(in srgb, var(--signal-amber) 38%, transparent); }
+  .border-coral-soft  { border-color: color-mix(in srgb, var(--signal-coral) 34%, transparent); }
+  .border-violet-soft { border-color: color-mix(in srgb, var(--signal-violet) 38%, transparent); }
+  .border-azure-soft  { border-color: color-mix(in srgb, var(--signal-azure) 36%, transparent); }
+
+  /* ---------- Badges ---------- */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    border-radius: 9999px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .badge-teal    { color: var(--signal-teal);    background: color-mix(in srgb, var(--signal-teal) 11%, transparent);    border: 1px solid color-mix(in srgb, var(--signal-teal) 30%, transparent); }
+  .badge-amber   { color: var(--signal-amber);   background: color-mix(in srgb, var(--signal-amber) 13%, transparent);   border: 1px solid color-mix(in srgb, var(--signal-amber) 36%, transparent); }
+  .badge-coral   { color: var(--signal-coral);   background: color-mix(in srgb, var(--signal-coral) 11%, transparent);   border: 1px solid color-mix(in srgb, var(--signal-coral) 32%, transparent); }
+  .badge-violet  { color: var(--signal-violet);  background: color-mix(in srgb, var(--signal-violet) 12%, transparent);  border: 1px solid color-mix(in srgb, var(--signal-violet) 36%, transparent); }
+  .badge-azure   { color: var(--signal-azure);   background: color-mix(in srgb, var(--signal-azure) 12%, transparent);   border: 1px solid color-mix(in srgb, var(--signal-azure) 34%, transparent); }
+  .badge-neutral { color: var(--text-muted);     background: color-mix(in srgb, var(--text-muted) 10%, transparent);     border: 1px solid color-mix(in srgb, var(--text-muted) 22%, transparent); }
+
+  /* ---------- Mono metadata labels ---------- */
+  .mono-label {
+    font-family: theme('fontFamily.mono');
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  /* ---------- Pipeline node states ---------- */
+  .node-base {
+    border: 2px solid var(--border-subtle);
+    background: var(--surface-raised);
+    transition: background 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease, transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .node-lit {
+    background: var(--signal-teal) !important;
+    border-color: var(--signal-teal) !important;
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--signal-teal) 18%, transparent), 0 0 18px color-mix(in srgb, var(--signal-teal) 65%, transparent);
+  }
+
+  /* ---------- Card surface ---------- */
+  .card-surface {
+    background: var(--surface-card);
+    border: 1px solid var(--border-subtle);
+  }
+
+  /* ---------- Primary CTA ---------- */
+  .btn-primary {
+    background: linear-gradient(180deg, color-mix(in srgb, var(--signal-teal) 88%, #ffffff), var(--signal-teal));
+    box-shadow: 0 1px 2px color-mix(in srgb, var(--signal-teal) 24%, transparent), inset 0 1px 0 rgba(255, 255, 255, 0.22);
+  }
+  .btn-primary:hover {
+    filter: brightness(1.06);
+  }
+  .btn-primary:active {
+    filter: brightness(0.96);
+  }
+
+  /* Muted placeholders (alpha of a CSS-var color, so no Tailwind modifier) */
+  .ph-muted::placeholder {
+    color: color-mix(in srgb, var(--text-muted) 72%, transparent);
+  }
+}
+
+/* ============================================================
+   Landing page motion utilities
+   ============================================================ */
+@keyframes marquee {
+  to { transform: translateX(-50%); }
+}
+@keyframes scroll-hint {
+  0%, 100% { transform: translateY(0); opacity: 0.9; }
+  50% { transform: translateY(6px); opacity: 0.4; }
+}
+.marquee-track {
+  animation: marquee 34s linear infinite;
+}
+.marquee-track:hover {
+  animation-play-state: paused;
+}
+
+/* Floating ambient orbs */
+@keyframes orb-a {
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  to   { transform: translate3d(46px, 30px, 0) scale(1.12); }
+}
+@keyframes orb-b {
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  to   { transform: translate3d(-38px, 42px, 0) scale(1.08); }
+}
+@keyframes orb-c {
+  from { transform: translate3d(26px, -38px, 0) scale(1.1); }
+  to   { transform: translate3d(-18px, 22px, 0) scale(1); }
+}
+.orb-a { animation: orb-a 16s ease-in-out infinite alternate; }
+.orb-b { animation: orb-b 19s ease-in-out infinite alternate; }
+.orb-c { animation: orb-c 22s ease-in-out infinite alternate; }
+
+/* Faint developer-tool grid for the hero */
+.bg-grid {
+  background-image:
+    linear-gradient(to right, color-mix(in srgb, var(--border-subtle) 55%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in srgb, var(--border-subtle) 55%, transparent) 1px, transparent 1px);
+  background-size: 54px 54px;
+  -webkit-mask-image: radial-gradient(ellipse 80% 65% at 50% 32%, #000 30%, transparent 78%);
+  mask-image: radial-gradient(ellipse 80% 65% at 50% 32%, #000 30%, transparent 78%);
+}
+
+/* WhatsApp-style @mention chips (used in RichText + chat) */
+.mention-chip {
+  display: inline-block;
+  padding: 0 6px;
+  margin: 0 1px;
+  border-radius: 6px;
+  font-weight: 600;
+  color: var(--signal-teal);
+  background: color-mix(in srgb, var(--signal-teal) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--signal-teal) 26%, transparent);
+}
+
+/* In your own (teal) chat bubble the chip needs inverted contrast */
+.bubble-mine .mention-chip {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+/* Chat sticker tiles */
+.sticker-tile {
+  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+}
+.sticker-tile:hover {
+  transform: translateY(-2px) scale(1.07);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.22);
+  filter: brightness(1.08);
+}
+.sticker-tile:active {
+  transform: scale(0.94);
+}
+
+/* Left pipeline progress rail */
+.rail-dot {
+  background: var(--surface-raised);
+  border: 1.5px solid var(--border-subtle);
+  transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+.rail-dot.rail-lit {
+  background: var(--signal-teal);
+  border-color: var(--signal-teal);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--signal-teal) 65%, transparent);
+}
+
+/* Cursor spotlight for feature cards */
+.spotlight-card {
+  position: relative;
+  overflow: hidden;
+}
+.spotlight-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  background: radial-gradient(280px circle at var(--mx, 50%) var(--my, 50%),
+    color-mix(in srgb, var(--signal-teal) 9%, transparent), transparent 65%);
+}
+.spotlight-card:hover::before {
+  opacity: 1;
+}
+
+/* Semi-transparent card surface (Tailwind can't alpha a CSS-var color) */
+.bg-card-60 {
+  background: color-mix(in srgb, var(--surface-card) 60%, transparent);
+}
+
+/* Route-transition skeletons with a soft shimmer sweep */
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: var(--surface-raised);
+  border-radius: 10px;
+}
+.skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--surface-card) 55%, transparent),
+    transparent
+  );
+  animation: skeleton-shimmer 1.5s ease-in-out infinite;
+}
+@keyframes skeleton-shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* The ambient canvas glow is anchored to the viewport on desktop; on small
+   screens a fixed attachment repaints on every scroll, so let it scroll with
+   the content instead. */
+@media (max-width: 767px) {
+  body {
+    background-attachment: scroll;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
