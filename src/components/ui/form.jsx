@@ -20,7 +20,7 @@ export function Field({ label, hint, error, children, className }) {
 }
 
 const fieldBase =
-  'focus-ring ph-muted w-full rounded-lg border border-line bg-raised px-3 text-sm text-ink transition-colors focus:border-teal disabled:opacity-50';
+  'focus-ring ph-muted glass-input w-full rounded-lg px-3 text-sm text-ink focus:border-teal disabled:opacity-50';
 
 export function Input({ className, ...rest }) {
   return <input className={cx(fieldBase, 'h-9', className)} {...rest} />;

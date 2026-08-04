@@ -107,7 +107,7 @@ export function SearchModal() {
           onChange={(e) => { setQ(e.target.value); setIndex(0); }}
           onKeyDown={onKey}
           placeholder="Search issues, projects, people…"
-          className="focus-ring ph-muted h-11 w-full rounded-xl border border-line bg-raised pl-10 pr-4 text-sm text-ink"
+          className="focus-ring ph-muted glass-input h-11 w-full rounded-xl pl-10 pr-4 text-sm text-ink"
         />
       </div>
 

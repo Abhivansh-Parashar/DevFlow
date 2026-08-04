@@ -8,6 +8,7 @@ import { IssueDetailPage } from './components/issue/IssueDetailPage';
 import { ChatPage } from './pages/ChatPage';
 import { MembersPage } from './pages/MembersPage';
 import { AnalyticsPage } from './pages/AnalyticsPage';
+import { DashboardPage } from './pages/DashboardPage';
 import { AIPage } from './pages/AIPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { AuthPage } from './pages/AuthPage';
@@ -46,6 +47,7 @@ export default function App() {
           }
         >
           <Route index element={<Navigate to="board" replace />} />
+          <Route path="dashboard" element={<DashboardPage />} />
           <Route path="board" element={<Board />} />
           <Route path="issue/:issueId" element={<IssueDetailPage />} />
           <Route path="chat" element={<ChatPage />} />

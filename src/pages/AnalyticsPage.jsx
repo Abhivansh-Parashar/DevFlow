@@ -82,7 +82,7 @@ export function AnalyticsPage() {
   }, [activeProject, issues]);
 
   if (!activeProject || !stats) {
-    return <div className="mx-auto max-w-xl px-4 py-20"><EmptyState icon={BarChart3} title="Select a project" description="Analytics are scoped to the active project." /></div>;
+    return <div className="mx-auto max-w-xl px-4 py-20"><EmptyState tile icon={BarChart3} title="Select a project" description="Analytics are scoped to the active project." /></div>;
   }
 
   const gridStroke = 'var(--border-subtle)';

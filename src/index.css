@@ -174,10 +174,22 @@
     box-shadow: 0 0 0 4px color-mix(in srgb, var(--signal-teal) 18%, transparent), 0 0 18px color-mix(in srgb, var(--signal-teal) 65%, transparent);
   }
 
-  /* ---------- Card surface ---------- */
+  /* ---------- Card surface (glass) ---------- */
   .card-surface {
-    background: var(--surface-card);
-    border: 1px solid var(--border-subtle);
+    position: relative;
+    background: color-mix(in srgb, var(--surface-card) 82%, transparent);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    border: 1px solid color-mix(in srgb, var(--border-subtle) 70%, transparent);
+    box-shadow: var(--shadow-soft);
+  }
+  .card-surface::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    border-radius: inherit;
+    box-shadow: inset 0 1px 0 var(--glass-highlight);
   }
 
   /* ---------- Primary CTA ---------- */
@@ -308,6 +320,76 @@
 /* Semi-transparent card surface (Tailwind can't alpha a CSS-var color) */
 .bg-card-60 {
   background: color-mix(in srgb, var(--surface-card) 60%, transparent);
+}
+
+/* ============================================================
+   Bento dashboard — glassmorphic tiles (theme-aware)
+   ============================================================ */
+.bento-tile {
+  position: relative;
+  overflow: hidden;
+  border-radius: 1.25rem;
+  background: color-mix(in srgb, var(--surface-card) 74%, transparent);
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  border: 1px solid color-mix(in srgb, var(--border-subtle) 68%, transparent);
+  box-shadow: inset 0 1px 0 var(--glass-highlight), var(--shadow-soft);
+  transition: box-shadow 0.35s ease, border-color 0.35s ease;
+}
+.bento-tile:hover {
+  border-color: color-mix(in srgb, var(--border-subtle) 94%, transparent);
+  box-shadow: inset 0 1px 0 var(--glass-highlight), var(--shadow-pop);
+}
+
+/* Soft diagonal sheen across the tile */
+.bento-sheen::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background: linear-gradient(165deg, color-mix(in srgb, #ffffff 6%, transparent) 0%, transparent 42%);
+}
+
+/* Glass form fields — translucent, blur-edged, inset highlight */
+.glass-input {
+  background: color-mix(in srgb, var(--surface-raised) 55%, transparent);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  border: 1px solid color-mix(in srgb, var(--border-subtle) 78%, transparent);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--glass-highlight) 55%, transparent);
+  transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.glass-input:focus {
+  background: color-mix(in srgb, var(--surface-card) 84%, transparent);
+  border-color: var(--signal-teal);
+  box-shadow: inset 0 1px 0 var(--glass-highlight), 0 0 0 3px color-mix(in srgb, var(--signal-teal) 16%, transparent);
+}
+
+/* Cursor-following spotlight (set --mx / --my on mousemove) */
+.bento-spotlight::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  border-radius: inherit;
+  background: radial-gradient(340px circle at var(--mx, 50%) var(--my, 50%),
+    color-mix(in srgb, var(--signal-teal) 8%, transparent), transparent 65%);
+}
+.bento-spotlight:hover::before {
+  opacity: 1;
+}
+
+/* Faint developer-grid backdrop for the hero tile */
+.bento-grid-bg {
+  background-image:
+    linear-gradient(to right, color-mix(in srgb, var(--border-subtle) 45%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in srgb, var(--border-subtle) 45%, transparent) 1px, transparent 1px);
+  background-size: 42px 42px;
+  -webkit-mask-image: radial-gradient(ellipse 85% 75% at 70% 10%, #000 25%, transparent 78%);
+  mask-image: radial-gradient(ellipse 85% 75% at 70% 10%, #000 25%, transparent 78%);
 }
 
 /* Route-transition skeletons with a soft shimmer sweep */

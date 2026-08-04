@@ -274,7 +274,7 @@ export function IssueDetailPage() {
   if (!issue) {
     return (
       <div className="mx-auto max-w-xl px-4 py-20">
-        <EmptyState icon={X} title="Issue not found" description="It may have been deleted." actionLabel="Back to board" onAction={() => navigate('/app/board')} />
+        <EmptyState tile icon={X} title="Issue not found" description="It may have been deleted." actionLabel="Back to board" onAction={() => navigate('/app/board')} />
       </div>
     );
   }
@@ -297,7 +297,7 @@ export function IssueDetailPage() {
       >
         <div className="absolute inset-0 bg-black/45 backdrop-blur-[4px]" onClick={() => navigate(-1)} />
         <motion.div
-          className="absolute inset-y-0 right-0 flex w-full max-w-[680px] flex-col border-l border-line bg-card shadow-pop"
+          className="absolute inset-y-0 right-0 flex w-full max-w-[680px] flex-col border-l border-line bg-card-60 backdrop-blur-xl shadow-pop"
           initial={{ x: '100%' }}
           animate={{ x: 0 }}
           exit={{ x: '100%' }}

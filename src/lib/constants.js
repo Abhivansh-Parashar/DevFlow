@@ -45,6 +45,7 @@ export const WORKSPACE_ROLES = ['Owner', 'Admin', 'Member'];
 export const PROJECT_ROLES = ['Owner', 'Member'];
 
 export const navItems = [
+  { id: 'dashboard', label: 'Dashboard', to: '/app/dashboard', icon: 'dashboard' },
   { id: 'board', label: 'Board', to: '/app/board', icon: 'board' },
   { id: 'chat', label: 'Chat', to: '/app/chat', icon: 'chat' },
   { id: 'members', label: 'Members', to: '/app/members', icon: 'members' },

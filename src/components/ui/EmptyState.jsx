@@ -1,9 +1,9 @@
 import { cx } from '../../lib/utils';
 import { Button } from './Button';
 
-export function EmptyState({ icon: Icon, title, description, actionLabel, onAction, className, compact = false }) {
-  return (
-    <div className={cx('flex flex-col items-center justify-center text-center', compact ? 'px-4 py-8' : 'px-6 py-16', className)}>
+export function EmptyState({ icon: Icon, title, description, actionLabel, onAction, className, compact = false, tile = false }) {
+  const body = (
+    <>
       {Icon && (
         <span className={cx('grid place-items-center rounded-2xl fill-teal-soft text-teal', compact ? 'mb-3 h-10 w-10' : 'mb-4 h-14 w-14')}>
           <Icon size={compact ? 18 : 24} strokeWidth={1.8} />
@@ -16,6 +16,15 @@ export function EmptyState({ icon: Icon, title, description, actionLabel, onActi
           {actionLabel}
         </Button>
       )}
+    </>
+  );
+
+  const inner = (
+    <div className={cx('flex flex-col items-center justify-center text-center', compact ? 'px-4 py-8' : 'px-6 py-16')}>
+      {body}
     </div>
   );
+
+  if (!tile) return <div className={className}>{inner}</div>;
+  return <div className={cx('card-surface rounded-2xl', className)}>{inner}</div>;
 }

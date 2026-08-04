@@ -105,14 +105,15 @@ export function AuthPage({ mode = 'login' }) {
             <span className="font-display text-lg font-bold text-ink">DevFlow</span>
           </Link>
 
-          <h1 className="mt-8 font-display text-2xl font-bold text-ink">
-            {isLogin ? 'Welcome back' : 'Start your pipeline'}
-          </h1>
-          <p className="mt-1 text-sm text-muted">
-            {isLogin ? 'Sign in to your workspaces.' : 'Create an account — workspaces and projects come next.'}
-          </p>
+          <div className="card-surface mt-7 rounded-2xl p-6 shadow-pop sm:p-7">
+            <h1 className="font-display text-2xl font-bold text-ink">
+              {isLogin ? 'Welcome back' : 'Start your pipeline'}
+            </h1>
+            <p className="mt-1 text-sm text-muted">
+              {isLogin ? 'Sign in to your workspaces.' : 'Create an account — workspaces and projects come next.'}
+            </p>
 
-          <form onSubmit={submit} className="mt-7 space-y-4">
+            <form onSubmit={submit} className="mt-6 space-y-4">
             {!isLogin && (
               <Field label="Full name">
                 <Input autoFocus value={name} onChange={(e) => setName(e.target.value)} placeholder="Ada Lovelace" />
@@ -157,11 +158,12 @@ export function AuthPage({ mode = 'login' }) {
             <span className="h-px flex-1 bg-line" /> or continue with <span className="h-px flex-1 bg-line" />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <Button variant="secondary" icon={Github} onClick={() => sso('GitHub')}>GitHub</Button>
-            <Button variant="secondary" onClick={() => sso('Google')}>
-              <G /> Google
-            </Button>
+            <div className="grid grid-cols-2 gap-3">
+              <Button variant="secondary" icon={Github} onClick={() => sso('GitHub')}>GitHub</Button>
+              <Button variant="secondary" onClick={() => sso('Google')}>
+                <G /> Google
+              </Button>
+            </div>
           </div>
 
           <p className="mt-7 text-center text-sm text-muted">

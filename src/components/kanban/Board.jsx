@@ -180,8 +180,8 @@ function Column({ status, items, users, onNewIssue, onStatusChange, total }) {
     <div
       ref={setNodeRef}
       className={cx(
-        'relative flex w-[292px] shrink-0 snap-start flex-col rounded-xl border bg-card transition-colors duration-200',
-        isOver ? 'border-teal shadow-glow' : 'border-line'
+        'relative flex w-[292px] shrink-0 snap-start flex-col rounded-xl border border-line bg-card-60 backdrop-blur-xl transition-colors duration-200',
+        isOver ? 'border-teal shadow-glow' : ''
       )}
       style={isOver ? { background: 'color-mix(in srgb, var(--signal-teal) 5%, var(--surface-card))' } : undefined}
     >
@@ -335,6 +335,7 @@ export function Board() {
     return (
       <div className="mx-auto max-w-2xl px-4 py-20">
         <EmptyState
+          tile
           icon={Plus}
           title="This workspace has no projects yet"
           description="Create a project to give issues, chat, and analytics a home."
@@ -350,6 +351,7 @@ export function Board() {
     return (
       <div className="mx-auto max-w-2xl px-4 py-20">
         <EmptyState
+          tile
           icon={Inbox}
           title="Select a project"
           description="Pick a project from the sidebar — everything re-scopes to it."
@@ -444,13 +446,13 @@ function FilterBar({ filters, members }) {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Filter by key, title…"
-          className="focus-ring ph-muted h-8 w-52 rounded-lg border border-line bg-raised pl-8 pr-3 text-[13px] text-ink focus:border-teal"
+          className="focus-ring ph-muted glass-input h-8 w-52 rounded-lg pl-8 pr-3 text-[13px] text-ink focus:border-teal"
         />
       </div>
       <select
         value={priority}
         onChange={(e) => setPriority(e.target.value)}
-        className="focus-ring h-8 cursor-pointer rounded-lg border border-line bg-raised px-2.5 text-[13px] text-ink focus:border-teal"
+        className="focus-ring h-8 cursor-pointer rounded-lg glass-input px-2.5 text-[13px] text-ink focus:border-teal"
         aria-label="Filter by priority"
       >
         <option value="all">Any priority</option>
@@ -461,7 +463,7 @@ function FilterBar({ filters, members }) {
       <select
         value={assignee}
         onChange={(e) => setAssignee(e.target.value)}
-        className="focus-ring h-8 cursor-pointer rounded-lg border border-line bg-raised px-2.5 text-[13px] text-ink focus:border-teal"
+        className="focus-ring h-8 cursor-pointer rounded-lg glass-input px-2.5 text-[13px] text-ink focus:border-teal"
         aria-label="Filter by assignee"
       >
         <option value="all">Anyone</option>

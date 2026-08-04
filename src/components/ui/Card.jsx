@@ -4,8 +4,9 @@ export function Card({ elevated = false, glass = false, hover = false, className
   return (
     <div
       className={cx(
-        'rounded-xl border border-line bg-card',
-        elevated && 'shadow-soft',
+        'rounded-2xl border border-line',
+        !glass && 'bg-card-60 backdrop-blur-xl shadow-soft',
+        elevated && 'shadow-pop',
         glass && 'glass-popover border-0',
         hover && 'transition-all duration-200 hover:-translate-y-0.5 hover:shadow-pop',
         className

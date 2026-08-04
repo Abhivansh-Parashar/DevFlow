@@ -3,7 +3,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
   ChevronDown, Plus, Building2, LayoutDashboard, MessageSquare, Users,
-  BarChart3, Sparkles, Settings, X, LogOut,
+  BarChart3, Sparkles, Settings, X, LogOut, Gauge,
 } from 'lucide-react';
 import { useAppStore } from '../../store/useAppStore';
 import { Dropdown, Avatar, Modal, Field, Input, Button, Badge } from '../ui';
@@ -12,6 +12,7 @@ import { navItems } from '../../lib/constants';
 import { cx } from '../../lib/utils';
 
 const ICONS = {
+  dashboard: Gauge,
   board: LayoutDashboard,
   chat: MessageSquare,
   members: Users,

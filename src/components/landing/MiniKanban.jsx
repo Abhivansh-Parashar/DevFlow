@@ -34,7 +34,7 @@ export function MiniKanban() {
   const LIVE = { key: 'DEV-102', title: 'Build pipeline line' };
 
   return (
-    <div className="grid grid-cols-3 gap-2.5 rounded-2xl border border-line bg-card p-3 shadow-pop">
+    <div className="grid grid-cols-3 gap-2.5 rounded-2xl border border-line bg-card-60 p-3 shadow-pop backdrop-blur-xl">
       {COLS.map((col, i) => {
         const isLive = pos === i;
         return (

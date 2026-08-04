@@ -508,7 +508,7 @@ function Walkthrough() {
                 className="grid items-center gap-8 lg:grid-cols-2"
               >
                 <StageCopy s={s} index={i} />
-                <div className="rounded-2xl border border-line bg-card p-5 shadow-soft">{s.snippet}</div>
+                <div className="rounded-2xl border border-line bg-card-60 p-5 shadow-soft backdrop-blur-xl">{s.snippet}</div>
               </motion.div>
             ))}
           </div>
@@ -547,7 +547,7 @@ function Walkthrough() {
           <div
             key={s.id}
             data-stage-panel
-            className="grid w-[min(600px,84vw)] shrink-0 items-center gap-6 rounded-3xl border border-line bg-card p-6 shadow-soft sm:grid-cols-2 sm:p-8"
+            className="grid w-[min(600px,84vw)] shrink-0 items-center gap-6 rounded-3xl border border-line bg-card-60 p-6 shadow-soft backdrop-blur-xl sm:grid-cols-2 sm:p-8"
           >
             <div className="min-w-0">
               <div className="flex items-center gap-3">
@@ -692,7 +692,7 @@ function ChatShowcase() {
               aria-hidden="true"
               style={{ background: 'radial-gradient(50% 55% at 30% 30%, color-mix(in srgb, var(--signal-violet) 12%, transparent), transparent 70%)' }}
             />
-            <div className="relative overflow-hidden rounded-2xl border border-line bg-card shadow-pop">
+            <div className="relative overflow-hidden rounded-2xl border border-line bg-card-60 shadow-pop backdrop-blur-xl">
               {/* window header */}
               <div className="flex items-center gap-2.5 border-b border-line bg-card-60 px-4 py-3">
                 <span className="grid h-7 w-7 place-items-center rounded-lg fill-violet-soft text-violet">
@@ -818,7 +818,7 @@ function MetricsBand() {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: '-60px' }}
         transition={{ duration: 0.6, ease: EASE }}
-        className="mx-auto max-w-5xl rounded-2xl border border-line bg-card p-8 shadow-soft sm:p-10"
+        className="mx-auto max-w-5xl rounded-2xl border border-line bg-card-60 p-8 shadow-soft backdrop-blur-xl sm:p-10"
       >
         <div className="grid grid-cols-1 gap-8 text-center sm:grid-cols-3">
           <div ref={ref1}>

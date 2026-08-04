@@ -223,7 +223,7 @@ export function ChatPage() {
   }, [pickerFor]);
 
   if (!activeProject) {
-    return <div className="mx-auto max-w-xl px-4 py-20"><EmptyState icon={MessageSquare} title="Select a project" description="Chat is scoped to the active project." /></div>;
+    return <div className="mx-auto max-w-xl px-4 py-20"><EmptyState tile icon={MessageSquare} title="Select a project" description="Chat is scoped to the active project." /></div>;
   }
 
   const members = users.filter((u) => activeProject.memberIds.includes(u.id));
@@ -411,7 +411,7 @@ export function ChatPage() {
               }}
               rows={1}
               placeholder={`Message #${activeProject.name.toLowerCase().replace(/\s+/g, '-')}…  (Enter to send, Shift+Enter for newline)`}
-              className="focus-ring ph-muted max-h-32 min-h-[42px] w-full resize-none rounded-xl border border-line bg-raised px-4 py-2.5 text-sm text-ink"
+              className="focus-ring ph-muted glass-input max-h-32 min-h-[42px] w-full resize-none rounded-xl px-4 py-2.5 text-sm text-ink"
             />
             <button
               onClick={submit}
