@@ -48,7 +48,7 @@ export default function App() {
             </RequireAuth>
           }
         >
-          <Route index element={<Navigate to="board" replace />} />
+          <Route index element={<Navigate to="dashboard" replace />} />
           <Route path="dashboard" element={<DashboardPage />} />
           <Route path="board" element={<Board />} />
           <Route path="issue/:issueId" element={<IssueDetailPage />} />
@@ -58,7 +58,7 @@ export default function App() {
           <Route path="ai" element={<AIPage />} />
           <Route path="settings" element={<SettingsPage />} />
           <Route path="account" element={<AccountPage />} />
-          <Route path="*" element={<Navigate to="board" replace />} />
+          <Route path="*" element={<Navigate to="dashboard" replace />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />

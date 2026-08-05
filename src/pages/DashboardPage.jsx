@@ -178,17 +178,10 @@ export function DashboardPage() {
   const pctDone = total ? Math.round((stats.done.length / total) * 100) : 0;
   const maxLoad = Math.max(1, ...stats.teamLoad.map((t) => t.open));
 
-  // Week-over-week insight for the AI strip
+  // Week-over-week delta for the throughput header
   const weekRecent = stats.days.slice(0, 7).reduce((a, d) => a + d.completed, 0);
   const weekPrev = stats.days.slice(7).reduce((a, d) => a + d.completed, 0);
   const delta = weekRecent - weekPrev;
-  const busiest = stats.teamLoad[0]?.user?.name ?? '—';
-  const insight = delta > 0
-    ? `Throughput is up ${delta} vs the previous week — momentum looks good.`
-    : delta < 0
-      ? `Throughput dipped ${Math.abs(delta)} vs the previous week — worth a look at the backlog.`
-      : `Throughput is steady week-over-week.`;
-  const insightRest = stats.teamLoad.some((t) => t.open > 0) ? ` ${busiest} carries the most open issues.` : '';
 
   const hour = new Date().getHours();
   const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
@@ -458,21 +451,6 @@ export function DashboardPage() {
           </div>
         </Tile>
 
-        {/* ---- AI insight strip ---- */}
-        <Tile spotlight className="p-5 md:col-span-2 xl:col-span-12">
-          <div className="relative flex flex-wrap items-center gap-4">
-            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl fill-violet-soft text-violet">
-              <Sparkles size={18} />
-            </span>
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-semibold text-ink">AI insight</p>
-              <p className="mt-0.5 text-[13px] text-muted">{insight}{insightRest}</p>
-            </div>
-            <Link to="/app/ai" className="focus-ring flex items-center gap-1.5 rounded-xl px-3 py-2 text-[13px] font-semibold text-violet transition-colors hover:bg-raised">
-              Ask the AI <ArrowRight size={14} />
-            </Link>
-          </div>
-        </Tile>
       </div>
     </div>
   );

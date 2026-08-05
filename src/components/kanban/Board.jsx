@@ -13,7 +13,7 @@ import { useAppStore } from '../../store/useAppStore';
 import { Badge, PriorityBadge, Avatar, PipelineLine, EmptyState, Button } from '../ui';
 import { NewIssueSlideOver } from './NewIssueSlideOver';
 import { CreateProjectModal } from '../projects/CreateProjectModal';
-import { STATUSES, STATUS_COLORS, PRIORITIES, LABELS } from '../../lib/constants';
+import { STATUSES, STATUS_COLORS, PRIORITIES } from '../../lib/constants';
 import { cx } from '../../lib/utils';
 
 const containerId = (status) => `column:${status}`;
@@ -33,20 +33,19 @@ function useFilters(projectIssues) {
   const [search, setSearch] = useState('');
   const [priority, setPriority] = useState('all');
   const [assignee, setAssignee] = useState('all');
-  const [labels, setLabels] = useState([]);
 
   const filtered = useMemo(() => {
     const needle = search.trim().toLowerCase();
     return projectIssues.filter((i) => {
       if (priority !== 'all' && i.priority !== priority) return false;
       if (assignee !== 'all' && i.assigneeId !== assignee) return false;
-      if (labels.length && !labels.some((l) => i.labels.includes(l))) return false;
+      // Search also matches label text, so label filtering stays available via the box.
       if (needle && !`${i.key} ${i.title} ${i.labels.join(' ')}`.toLowerCase().includes(needle)) return false;
       return true;
     });
-  }, [projectIssues, search, priority, assignee, labels]);
+  }, [projectIssues, search, priority, assignee]);
 
-  return { search, setSearch, priority, setPriority, assignee, setAssignee, labels, setLabels, filtered };
+  return { search, setSearch, priority, setPriority, assignee, setAssignee, filtered };
 }
 
 function SortableCard({ issue, users, onStatusChange, openMenuId, setOpenMenuId }) {
@@ -570,8 +569,8 @@ export function Board() {
 }
 
 function FilterBar({ filters, members }) {
-  const { search, setSearch, priority, setPriority, assignee, setAssignee, labels, setLabels } = filters;
-  const active = search || priority !== 'all' || assignee !== 'all' || labels.length;
+  const { search, setSearch, priority, setPriority, assignee, setAssignee } = filters;
+  const active = search || priority !== 'all' || assignee !== 'all';
   return (
     <div className="flex flex-wrap items-center gap-2 px-5 pb-3">
       <div className="relative">
@@ -579,7 +578,7 @@ function FilterBar({ filters, members }) {
         <input
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Filter by key, title…"
+          placeholder="Filter by key, title, label…"
           className="focus-ring ph-muted glass-input h-8 w-52 rounded-lg pl-8 pr-3 text-[13px] text-ink focus:border-teal"
         />
       </div>
@@ -605,33 +604,15 @@ function FilterBar({ filters, members }) {
           <option key={m.id} value={m.id}>{m.name}</option>
         ))}
       </select>
-      <div className="flex flex-wrap items-center gap-1.5">
-        {LABELS.map((l) => {
-          const on = labels.includes(l);
-          return (
-            <button
-              key={l}
-              onClick={() => setLabels((prev) => (on ? prev.filter((x) => x !== l) : [...prev, l]))}
-              className={cx(
-                'focus-ring rounded-md px-2 py-1 font-mono text-[11px] font-medium transition-colors',
-                on ? 'fill-teal-soft text-teal' : 'bg-raised text-muted hover:text-ink'
-              )}
-            >
-              {l}
-            </button>
-          );
-        })}
-      </div>
       {active && (
         <button
-          onClick={() => { setSearch(''); setPriority('all'); setAssignee('all'); setLabels([]); }}
+          onClick={() => { setSearch(''); setPriority('all'); setAssignee('all'); }}
           className="focus-ring rounded-md px-2 py-1 text-xs font-medium text-coral hover:fill-coral-soft"
         >
           Clear filters
         </button>
       )}
       <div className="flex-1" />
-      <span className="hidden text-[11px] font-mono text-muted sm:block">drag cards · ⋯ menu moves by keyboard</span>
-    </div>
+      </div>
   );
 }
