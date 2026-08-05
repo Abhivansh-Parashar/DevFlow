@@ -11,3 +11,5 @@ export { EmptyState } from './EmptyState';
 export { PipelineLine } from './PipelineLine';
 export { Label, Field, Input, Textarea, Select, Toggle } from './form';
 export { RichText, splitCode, CodeBlock } from './RichText';
+export { CustomCursor } from './CustomCursor';
+

@@ -1,8 +1,9 @@
 import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useAppStore } from './store/useAppStore';
-import { Toaster } from './components/ui';
+import { Toaster, CustomCursor } from './components/ui';
 import { AppShell } from './components/layout/AppShell';
+
 import { Board } from './components/kanban/Board';
 import { IssueDetailPage } from './components/issue/IssueDetailPage';
 import { ChatPage } from './pages/ChatPage';
@@ -63,6 +64,8 @@ export default function App() {
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       <Toaster />
+      <CustomCursor />
     </BrowserRouter>
   );
 }
+
