@@ -218,7 +218,6 @@ export function DashboardPage() {
             <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-teal" />
             {fmt(new Date().toISOString(), 'EEEE, MMM d')}
           </span>
-          <Link to="/app/board"><Button size="sm" iconRight={ArrowRight}>Open board</Button></Link>
         </div>
       </div>
 

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Outlet, Navigate, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useAppStore } from '../../store/useAppStore';
@@ -17,8 +17,21 @@ export function AppShell() {
   const location = useLocation();
   // Brief skeleton while routes swap, so navigation always feels responsive.
   const [routeLoading, setRouteLoading] = useState(true);
+  const prevPathname = useRef(location.pathname);
 
   useEffect(() => {
+    const prev = prevPathname.current;
+    prevPathname.current = location.pathname;
+    // If we just navigated away from an overlay (issue detail), skip the skeleton
+    if (prev && prev.includes('/issue/') && !location.pathname.includes('/issue/')) {
+      setRouteLoading(false);
+      return;
+    }
+    // If we're entering an overlay, don't show the skeleton
+    if (location.pathname.includes('/issue/')) {
+      setRouteLoading(false);
+      return;
+    }
     setRouteLoading(true);
     const t = setTimeout(() => setRouteLoading(false), 180);
     return () => clearTimeout(t);

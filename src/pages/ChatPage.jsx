@@ -48,7 +48,7 @@ function Message({ msg, users, isMine, projectId, reactions, toggleReaction, cur
       className={cx('group relative flex items-start gap-2.5', isMine && 'flex-row-reverse')}
     >
       <Avatar user={author} size={30} showStatus />
-      <div className={cx('max-w-[78%]', isMine && 'text-right')}>
+      <div className={cx('max-w-[78%] min-w-0 flex flex-col', isMine ? 'items-end' : 'items-start')}>
         <div className={cx('mb-1 flex items-baseline gap-2', isMine && 'flex-row-reverse')}>
           <span className="text-[13px] font-semibold text-ink">{isMine ? 'You' : author?.name}</span>
           <span className="font-mono text-[11px] text-muted">{timeAgo(msg.createdAt)}</span>
@@ -61,11 +61,14 @@ function Message({ msg, users, isMine, projectId, reactions, toggleReaction, cur
         ) : (
           <div
             className={cx(
-              'rounded-2xl border px-3.5 py-2.5 text-[13.5px] leading-relaxed text-ink',
+              // inline-block + w-max so the bubble shrinks to fit small content,
+              // max-w-[80%] keeps long messages wrapping within the available column width
+              'inline-block w-max max-w-[80%] rounded-2xl border px-3.5 py-2.5 text-[13.5px] leading-relaxed text-ink',
               isMine
                 ? 'bubble-mine rounded-tr-sm border-teal bg-teal text-white dark:text-[#04120E]'
                 : 'rounded-tl-sm border-line bg-card'
             )}
+            style={{ wordBreak: 'break-word' }}
           >
             {parts.map((p, i) =>
               p.type === 'code' ? <CodeBlock key={i} code={p.value} lang={p.lang} /> : <RichText key={i} text={p.value} />
@@ -281,9 +284,7 @@ export function ChatPage() {
           </p>
         </div>
         <div className="flex-1" />
-        <span className="hidden items-center gap-1.5 rounded-full border border-line bg-raised px-2.5 py-1 text-[11px] font-medium text-muted sm:flex">
-          <AtSign size={12} className="text-teal" /> @ to mention
-        </span>
+        {/* helper removed: mentions are discoverable via @ in the input */}
         <AvatarStack members={members} limit={6} size={26} showStatus />
       </div>
 
@@ -411,7 +412,7 @@ export function ChatPage() {
                 }
               }}
               rows={1}
-              placeholder={`Message #${activeProject.name.toLowerCase().replace(/\s+/g, '-')}…  (Enter to send, Shift+Enter for newline)`}
+              placeholder={`Message… (Enter to send, Shift+Enter for newline)`}
               className="focus-ring ph-muted glass-input max-h-32 min-h-[42px] w-full resize-none rounded-xl px-4 py-2.5 text-sm text-ink"
             />
             <button

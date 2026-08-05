@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 import {
@@ -48,9 +49,10 @@ function useFilters(projectIssues) {
   return { search, setSearch, priority, setPriority, assignee, setAssignee, labels, setLabels, filtered };
 }
 
-function SortableCard({ issue, users, onStatusChange }) {
+function SortableCard({ issue, users, onStatusChange, openMenuId, setOpenMenuId }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: issue.id });
   const navigate = useNavigate();
+  const [opening, setOpening] = useState(false);
   const assignee = users.find((u) => u.id === issue.assigneeId);
   const statusOptions = STATUSES.filter((s) => s.id !== issue.status);
 
@@ -65,6 +67,11 @@ function SortableCard({ issue, users, onStatusChange }) {
     touchAction: 'manipulation',
   };
 
+  const openIssue = () => {
+    setOpening(true);
+    setTimeout(() => navigate(`/app/issue/${issue.id}`), 160);
+  };
+
   return (
     <div
       ref={setNodeRef}
@@ -73,24 +80,23 @@ function SortableCard({ issue, users, onStatusChange }) {
       {...attributes}
       {...listeners}
     >
-      <div
-        onClick={() => navigate(`/app/issue/${issue.id}`)}
+      <motion.div
+        onClick={openIssue}
         className="card-surface focus-ring relative cursor-pointer rounded-xl p-3 shadow-soft transition-all duration-150 hover:-translate-y-px hover:shadow-pop"
         style={{
-          // Aging/overdue treatment tints the non-left edges + adds a soft ring.
           ...(stale && staleColor
             ? {
                 borderColor: staleColor,
                 boxShadow: `0 0 0 1px color-mix(in srgb, ${staleColor} 30%, transparent), var(--shadow-soft)`,
               }
             : {}),
-          // Priority accent stripe — a 3px left border that follows the rounded corner.
-          // Set last so the stripe keeps its priority color even on aging cards.
           borderLeft: `3px solid ${PRIORITY_COLOR[issue.priority] ?? 'var(--signal-teal)'}`,
         }}
         role="button"
         tabIndex={0}
-        onKeyDown={(e) => e.key === 'Enter' && navigate(`/app/issue/${issue.id}`)}
+        onKeyDown={(e) => e.key === 'Enter' && openIssue()}
+        animate={opening ? { scale: 0.985, opacity: 0.97 } : { scale: 1, opacity: 1 }}
+        transition={{ duration: 0.12 }}
       >
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
@@ -98,7 +104,14 @@ function SortableCard({ issue, users, onStatusChange }) {
             <PriorityBadge priority={issue.priority} size="sm" />
           </div>
           <div onClick={(e) => e.stopPropagation()}>
-            <StatusMenu statusOptions={statusOptions} onSelect={onStatusChange} issueKey={issue.key} />
+            <StatusMenu
+              statusOptions={statusOptions}
+              onSelect={onStatusChange}
+              issueKey={issue.key}
+              issueId={issue.id}
+              openMenuId={openMenuId}
+              setOpenMenuId={setOpenMenuId}
+            />
           </div>
         </div>
 
@@ -136,15 +149,17 @@ function SortableCard({ issue, users, onStatusChange }) {
             {assignee && <Avatar user={assignee} size={20} />}
           </div>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }
 
-function StatusMenu({ statusOptions, onSelect, issueKey }) {
-  const [open, setOpen] = useState(false);
+function StatusMenu({ statusOptions, onSelect, issueKey, issueId, openMenuId, setOpenMenuId }) {
   const anchorRef = useRef(null);
-  const [pos, setPos] = useState({ top: 0, left: 0 });
+  const menuRef = useRef(null);
+  const buttonRef = useRef(null);
+  const [pos, setPos] = useState(null);
+  const open = openMenuId === issueId;
 
   const placeMenu = useCallback(() => {
     if (!anchorRef.current) return;
@@ -160,10 +175,10 @@ function StatusMenu({ statusOptions, onSelect, issueKey }) {
     if (!open) return;
     placeMenu();
     const onDown = (e) => {
-      if (anchorRef.current && anchorRef.current.contains(e.target)) return;
-      setOpen(false);
+      if (anchorRef.current && (anchorRef.current.contains(e.target) || (menuRef.current && menuRef.current.contains(e.target)))) return;
+      setOpenMenuId(null);
     };
-    const onEsc = (e) => e.key === 'Escape' && setOpen(false);
+    const onEsc = (e) => e.key === 'Escape' && setOpenMenuId(null);
     const onRelayout = () => placeMenu();
     document.addEventListener('mousedown', onDown);
     document.addEventListener('keydown', onEsc);
@@ -175,13 +190,29 @@ function StatusMenu({ statusOptions, onSelect, issueKey }) {
       window.removeEventListener('resize', onRelayout);
       window.removeEventListener('scroll', onRelayout, true);
     };
-  }, [open, placeMenu]);
+  }, [open, placeMenu, setOpenMenuId]);
 
   return (
     <div ref={anchorRef} className={cx('relative', open && 'z-[80]')} onMouseDown={(e) => e.stopPropagation()}>
       <button
+        ref={buttonRef}
+        onMouseDown={(e) => {
+          // Prevent the native focus on mousedown so the browser doesn't scroll.
+          // We'll focus programmatically with preventScroll on click.
+          e.preventDefault();
+        }}
         onClick={() => {
-          setOpen((o) => !o);
+          const next = !open;
+          // compute position first, then open so the portal renders in-place
+          placeMenu();
+          setOpenMenuId(next ? issueId : null);
+          // focus without scrolling to avoid jump-to-top behavior
+          try {
+            buttonRef.current?.focus?.({ preventScroll: true });
+          } catch (err) {
+            // ignore if browser doesn't support preventScroll
+            buttonRef.current?.focus?.();
+          }
           requestAnimationFrame(placeMenu);
         }}
         aria-label={`Move ${issueKey} to another column`}
@@ -189,25 +220,29 @@ function StatusMenu({ statusOptions, onSelect, issueKey }) {
       >
         <MoreHorizontal size={14} />
       </button>
-      {open && (
+      {open && pos && (
         createPortal(
-          <div
+          <motion.div
+            ref={menuRef}
             className="glass-popover fixed z-[120] w-44 rounded-xl p-1.5 shadow-pop"
             style={{ top: pos.top, left: pos.left }}
             onMouseDown={(e) => e.stopPropagation()}
+            initial={{ opacity: 0, scale: 0.98, y: -6 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ duration: 0.14, ease: [0.16, 1, 0.3, 1] }}
           >
             <p className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-muted">Move to</p>
             {statusOptions.map((s) => (
               <button
                 key={s.id}
-                onClick={() => { onSelect(s.id); setOpen(false); }}
+                onClick={() => { onSelect(s.id); setOpenMenuId(null); }}
                 className="focus-ring flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-[13px] font-medium text-ink hover:bg-raised"
               >
                 <span className="h-2 w-2 rounded-full" style={{ background: STATUS_COLORS[s.id] }} />
                 {s.label}
               </button>
             ))}
-          </div>,
+          </motion.div>,
           document.body
         )
       )}
@@ -215,7 +250,7 @@ function StatusMenu({ statusOptions, onSelect, issueKey }) {
   );
 }
 
-function Column({ status, items, users, onNewIssue, onStatusChange, total }) {
+function Column({ status, items, users, onNewIssue, onStatusChange, total, openMenuId, setOpenMenuId }) {
   const { setNodeRef, isOver } = useDroppable({ id: containerId(status.id) });
   const color = STATUS_COLORS[status.id];
   const limit = WIP_LIMITS[status.id];
@@ -262,7 +297,14 @@ function Column({ status, items, users, onNewIssue, onStatusChange, total }) {
       <div className="max-h-[calc(100vh-260px)] min-h-[60px] overflow-y-auto px-2.5 pb-3 pt-1">
         <SortableContext items={items.map((i) => i.id)} strategy={verticalListSortingStrategy}>
           {items.map((i) => (
-            <SortableCard key={i.id} issue={i} users={users} onStatusChange={(s) => onStatusChange(i.id, s)} />
+            <SortableCard
+              key={i.id}
+              issue={i}
+              users={users}
+              onStatusChange={(s) => onStatusChange(i.id, s)}
+              openMenuId={openMenuId}
+              setOpenMenuId={setOpenMenuId}
+            />
           ))}
         </SortableContext>
         {items.length === 0 && (
@@ -284,6 +326,7 @@ export function Board() {
   const moveIssue = useAppStore((s) => s.moveIssue);
   const toast = useAppStore((s) => s.toast);
   const [board, setBoard] = useState(null);
+  const [openMenuId, setOpenMenuId] = useState(null);
   const draggingRef = useRef(false);
   const [activeId, setActiveId] = useState(null);
   const [newIssueOpen, setNewIssueOpen] = useState(false);
@@ -492,6 +535,8 @@ export function Board() {
                   total={filters.filtered.length}
                   onNewIssue={(status) => { setNewIssueStatus(status); setNewIssueOpen(true); }}
                   onStatusChange={(id, status) => moveIssue(id, status)}
+                  openMenuId={openMenuId}
+                  setOpenMenuId={setOpenMenuId}
                 />
               ))}
               <DragOverlay>
