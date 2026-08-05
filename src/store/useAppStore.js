@@ -68,6 +68,8 @@ export const useAppStore = create(
           return { signedIn: true, currentUserId: match?.id ?? 'u1' };
         }),
       signOut: () => set({ signedIn: false, currentUserId: null }),
+      updateUser: (id, patch) =>
+        set((s) => ({ users: s.users.map((u) => (u.id === id ? { ...u, ...patch } : u)) })),
 
       setActiveWorkspace: (id) =>
         set((s) => {
@@ -90,7 +92,7 @@ export const useAppStore = create(
       dismissToast: (id) => set((s) => ({ toasts: s.toasts.filter((t) => t.id !== id) })),
 
       // ---- workspaces & projects ----
-      createWorkspace: ({ name, icon = '◆' }) => {
+      createWorkspace: ({ name, icon = 'hexagon' }) => {
         if (!name.trim()) {
           get().toast('error', 'Workspace needs a name');
           return;
@@ -382,6 +384,9 @@ export const useAppStore = create(
         set((s) => ({ notifications: s.notifications.map((n) => (n.id === id ? { ...n, read: true } : n)) })),
       markAllNotificationsRead: () =>
         set((s) => ({ notifications: s.notifications.map((n) => ({ ...n, read: true })) })),
+      removeNotification: (id) =>
+        set((s) => ({ notifications: s.notifications.filter((n) => n.id !== id) })),
+      clearAllNotifications: () => set((s) => ({ notifications: [] })),
 
       // ---- members ----
       addWorkspaceMember: (workspaceId, userId, role = 'Member') => {
@@ -420,6 +425,46 @@ export const useAppStore = create(
           ),
         }));
         get().toast('info', 'Member removed from workspace and its projects');
+      },
+
+      leaveWorkspace: (workspaceId) => {
+        const me = get().currentUserId;
+        const ws = get().workspaces.find((w) => w.id === workspaceId);
+        if (!ws || !me) return;
+        const wasOwner = ws.roles[me] === 'Owner';
+        const workspaces = get()
+          .workspaces.map((w) => {
+            if (w.id !== workspaceId) return w;
+            const memberIds = w.memberIds.filter((m) => m !== me);
+            const roles = { ...w.roles, [me]: undefined };
+            // If the owner leaves, promote the first remaining member so the
+            // workspace never ends up ownerless.
+            if (wasOwner && memberIds.length && !Object.values(roles).includes('Owner')) {
+              roles[memberIds[0]] = 'Owner';
+            }
+            return { ...w, memberIds, roles };
+          })
+          // A workspace with nobody left is empty — remove it entirely.
+          .filter((w) => w.id !== workspaceId || w.memberIds.length > 0);
+        const projects = get().projects.map((p) =>
+          p.workspaceId === workspaceId && p.memberIds.includes(me)
+            ? {
+                ...p,
+                memberIds: p.memberIds.filter((m) => m !== me),
+                roles: { ...p.roles, [me]: undefined },
+              }
+            : p
+        );
+        set({ workspaces, projects });
+        get().toast('info', `You left ${ws.name}`);
+        if (get().activeWorkspaceId === workspaceId) {
+          const remaining = workspaces.filter((w) => w.memberIds.includes(me));
+          if (remaining.length) get().setActiveWorkspace(remaining[0].id);
+          else set({ activeWorkspaceId: null, activeProjectId: null });
+        } else {
+          const active = get().projects.find((p) => p.id === get().activeProjectId);
+          if (active?.workspaceId === workspaceId) set({ activeProjectId: null });
+        }
       },
 
       setWorkspaceRole: (workspaceId, userId, role) =>

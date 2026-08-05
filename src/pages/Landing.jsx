@@ -291,7 +291,12 @@ function Walkthrough() {
 
     const ctx = gsap.context(() => {
       const panels = gsap.utils.toArray('[data-stage-panel]');
-      const distance = () => Math.max(0, track.scrollWidth - window.innerWidth);
+      const lastPanel = panels[panels.length - 1];
+      // Travel far enough that the final stage panel lands dead-center in the
+      // viewport — scrollWidth alone only aligns the track's right edge, which
+      // leaves the last card half off-screen and never centered.
+      const distance = () =>
+        Math.max(0, lastPanel.offsetLeft + lastPanel.offsetWidth / 2 - window.innerWidth / 2);
       const scrollDistance = () => Math.max(1, distance() * 1.45);
 
       const tween = gsap.to(track, {

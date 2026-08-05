@@ -3,10 +3,10 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
   ChevronDown, Plus, Building2, LayoutDashboard, MessageSquare, Users,
-  BarChart3, Sparkles, Settings, X, LogOut, Gauge,
+  BarChart3, Sparkles, User, Settings, X, LogOut, Gauge,
 } from 'lucide-react';
 import { useAppStore } from '../../store/useAppStore';
-import { Dropdown, Avatar, Modal, Field, Input, Button, Badge } from '../ui';
+import { Dropdown, Avatar, Modal, Field, Input, Button, Badge, WorkspaceLogo } from '../ui';
 import { CreateProjectModal } from '../projects/CreateProjectModal';
 import { navItems } from '../../lib/constants';
 import { cx } from '../../lib/utils';
@@ -53,10 +53,10 @@ function WorkspaceSwitcher() {
         trigger={
           <button className="focus-ring flex w-full items-center gap-2.5 rounded-xl px-2.5 py-2 text-left transition-colors hover:bg-raised">
             <span
-              className="grid h-8 w-8 shrink-0 place-items-center rounded-lg text-sm font-bold text-white"
+              className="grid h-8 w-8 shrink-0 place-items-center rounded-lg text-white"
               style={{ background: activeWorkspace?.accent ?? 'var(--signal-teal)' }}
             >
-              {activeWorkspace?.icon ?? '◆'}
+              <WorkspaceLogo id={activeWorkspace?.icon} size={17} fallback={activeWorkspace?.icon ?? '◆'} />
             </span>
             <span className="min-w-0 flex-1">
               <span className="block truncate text-sm font-semibold text-ink">{activeWorkspace?.name ?? 'No workspace'}</span>
@@ -212,7 +212,8 @@ function UserCard({ onNavigate }) {
   if (!currentUser) return null;
 
   const items = [
-    { label: 'Settings', icon: Settings, onClick: () => { onNavigate?.(); navigate('/app/settings'); } },
+    { label: 'Account settings', icon: User, onClick: () => { onNavigate?.(); navigate('/app/account'); } },
+    { label: 'Workspace settings', icon: Settings, onClick: () => { onNavigate?.(); navigate('/app/settings'); } },
     { divider: true },
     {
       label: 'Sign out',
@@ -230,6 +231,7 @@ function UserCard({ onNavigate }) {
     <Dropdown
       align="left"
       width="w-56"
+      offset="bottom-full mb-2"
       trigger={
         <button className="focus-ring flex w-full items-center gap-2.5 rounded-xl px-2.5 py-2 transition-colors hover:bg-raised">
           <Avatar user={currentUser} size={30} showStatus />

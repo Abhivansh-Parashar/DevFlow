@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { motion, useMotionValue, useTransform } from 'framer-motion';
 import { X, Check, Mail, Users } from 'lucide-react';
 import { useAppStore } from '../../store/useAppStore';
-import { Avatar, AvatarStack, Badge } from '../ui';
+import { Avatar, AvatarStack, Badge, WorkspaceLogo } from '../ui';
 import { timeAgo } from '../../lib/utils';
 
 /**
@@ -209,10 +209,10 @@ function InviteCard({ invite, index, users, projects, workspaces, dir, top, onAc
             <div className="flex items-center justify-between gap-2">
               <span className="flex min-w-0 items-center gap-2 rounded-full border border-line bg-raised px-2.5 py-1">
                 <span
-                  className="grid shrink-0 place-items-center rounded text-[9px] font-bold text-white"
+                  className="grid shrink-0 place-items-center rounded text-white"
                   style={{ background: workspace?.accent, height: 18, width: 18 }}
                 >
-                  {workspace?.icon ?? '◆'}
+                  <WorkspaceLogo id={workspace?.icon} size={12} fallback={workspace?.icon ?? '◆'} />
                 </span>
                 <span className="truncate text-[11px] font-semibold text-ink">{workspace?.name}</span>
               </span>
@@ -227,7 +227,7 @@ function InviteCard({ invite, index, users, projects, workspaces, dir, top, onAc
                 className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl text-xl font-bold text-white"
                 style={{ background: project?.color ?? workspace?.accent }}
               >
-                {project?.icon ?? workspace?.icon}
+                {project ? project.icon : <WorkspaceLogo id={workspace?.icon} size={26} fallback={workspace?.icon ?? '◆'} />}
               </span>
               <div className="min-w-0">
                 <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-teal">invited to</p>

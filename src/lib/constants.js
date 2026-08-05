@@ -41,6 +41,8 @@ export const AVATAR_COLORS = [
 
 export const PROJECT_ACCENTS = ['#009E88', '#7C6AE8', '#FFB454', '#FF6B6B', '#3B82F6', '#10B981', '#EC4899'];
 
+
+
 export const WORKSPACE_ROLES = ['Owner', 'Admin', 'Member'];
 export const PROJECT_ROLES = ['Owner', 'Member'];
 

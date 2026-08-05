@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Settings, Building2, Trash2, Save } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
-import { Card, Field, Input, Textarea, Button, Modal, Badge } from '../components/ui';
+import { Card, Field, Input, Textarea, Button, Modal, Badge, WorkspaceLogo, WORKSPACE_LOGOS } from '../components/ui';
 import { PROJECT_ACCENTS } from '../lib/constants';
 import { cx } from '../lib/utils';
 
@@ -43,7 +43,7 @@ export function SettingsPage() {
   if (!activeWorkspace) return null;
 
   const save = () => {
-    updateWorkspace(activeWorkspace.id, { name, description, icon: icon || '◆', accent });
+    updateWorkspace(activeWorkspace.id, { name, description, icon: icon || 'hexagon', accent });
     toast('success', 'Workspace settings saved');
   };
 
@@ -51,11 +51,11 @@ export function SettingsPage() {
 
   const saveProjectIntegration = () => {
     if (!activeProject) return;
-    updateProject(activeProject.id, {
-      repoUrl: repoUrl.trim(),
-      localRepoPath: localRepoPath.trim(),
-      ideUrl: ideUrl.trim(),
-    });
+    // The GitHub repo URL is owner-only; members may only manage the local
+    // clone path and IDE deep link, so never send the URL for non-owners.
+    const patch = { localRepoPath: localRepoPath.trim(), ideUrl: ideUrl.trim() };
+    if (isOwner) patch.repoUrl = repoUrl.trim();
+    updateProject(activeProject.id, patch);
     toast('success', `Project integration saved for ${activeProject.name}`);
   };
 
@@ -71,19 +71,36 @@ export function SettingsPage() {
 
       <Card className="mt-6 space-y-5 p-5">
         <div className="flex items-center gap-3">
-          <span className="grid h-11 w-11 place-items-center rounded-xl text-lg font-bold text-white" style={{ background: accent }}>
-            {icon || '◆'}
+          <span className="grid h-11 w-11 place-items-center rounded-xl text-white" style={{ background: accent }}>
+            <WorkspaceLogo id={icon} size={22} fallback={icon ?? '◆'} />
           </span>
-          <div>
-            <Field label="Workspace icon">
-              <Input value={icon} onChange={(e) => setIcon(e.target.value)} className="w-24 text-center" maxLength={2} />
-            </Field>
-          </div>
           <div className="ml-2">
             <span className="mono-label">Role</span>
             <div className="mt-1"><Badge variant={role === 'Owner' ? 'teal' : role === 'Admin' ? 'violet' : 'neutral'} dot>{role}</Badge></div>
           </div>
         </div>
+
+        <Field label="Workspace logo" hint="Pick a mark — it appears in the sidebar and the workspace switcher.">
+          <div className="flex flex-wrap gap-2">
+            {WORKSPACE_LOGOS.map((logo) => (
+              <button
+                key={logo.id}
+                onClick={() => setIcon(logo.id)}
+                aria-label={`Use ${logo.label} as workspace logo`}
+                title={logo.label}
+                className={cx(
+                  'focus-ring grid h-10 w-10 place-items-center rounded-xl border transition-all hover:-translate-y-0.5 hover:border-teal',
+                  icon === logo.id
+                    ? 'border-teal text-white ring-2 ring-teal/30'
+                    : 'border-line bg-card text-white opacity-70 hover:opacity-100'
+                )}
+                style={icon === logo.id ? { background: accent } : undefined}
+              >
+                <WorkspaceLogo id={logo.id} size={20} />
+              </button>
+            ))}
+          </div>
+        </Field>
 
         <Field label="Workspace name">
           <Input value={name} onChange={(e) => setName(e.target.value)} />
@@ -118,8 +135,16 @@ export function SettingsPage() {
             <h2 className="font-display text-base font-semibold text-ink">Active project integration</h2>
             <p className="text-xs text-muted">Connect repository links for quick open actions from the board.</p>
           </div>
-          <Field label="GitHub repository URL">
-            <Input value={repoUrl} onChange={(e) => setRepoUrl(e.target.value)} placeholder="https://github.com/org/repo" />
+          <Field
+            label="GitHub repository URL"
+            hint={isOwner ? 'The canonical remote — members clone from this URL.' : 'Only the workspace owner can change the repository URL.'}
+          >
+            <Input
+              value={repoUrl}
+              onChange={(e) => setRepoUrl(e.target.value)}
+              placeholder="https://github.com/org/repo"
+              disabled={!isOwner}
+            />
           </Field>
           <Field label="Local clone path" hint="Used to open your project folder in the local IDE.">
             <Input value={localRepoPath} onChange={(e) => setLocalRepoPath(e.target.value)} placeholder="C:/Users/you/dev/repo" />

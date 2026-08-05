@@ -24,18 +24,18 @@ export const seedUsers = [
 
 export const seedWorkspaces = [
   {
-    id: 'ws1', name: 'Acme Labs', slug: 'acme-labs', icon: '▲', accent: '#009E88',
+    id: 'ws1', name: 'Acme Labs', slug: 'acme-labs', icon: 'hexagon', accent: '#009E88',
     memberIds: ['u1', 'u2', 'u3', 'u4', 'u5', 'u6'],
     roles: { u1: 'Owner', u2: 'Admin', u3: 'Admin', u4: 'Member', u5: 'Member', u6: 'Member' },
   },
   {
-    id: 'ws2', name: 'Vertex Systems', slug: 'vertex', icon: '◈', accent: '#7C6AE8',
+    id: 'ws2', name: 'Vertex Systems', slug: 'vertex', icon: 'layers', accent: '#7C6AE8',
     memberIds: ['u1', 'u7', 'u8', 'u9'],
     roles: { u7: 'Owner', u8: 'Admin', u1: 'Member', u9: 'Member' },
   },
   {
     // The current user (u1) is NOT a member — it must never appear in the switcher.
-    id: 'ws3', name: 'Pelican Studio', slug: 'pelican', icon: '▽', accent: '#FFB454',
+    id: 'ws3', name: 'Pelican Studio', slug: 'pelican', icon: 'wave', accent: '#FFB454',
     memberIds: ['u2', 'u3'],
     roles: { u2: 'Owner', u3: 'Admin' },
   },

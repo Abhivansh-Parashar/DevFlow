@@ -11,6 +11,7 @@ import { AnalyticsPage } from './pages/AnalyticsPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { AIPage } from './pages/AIPage';
 import { SettingsPage } from './pages/SettingsPage';
+import { AccountPage } from './pages/AccountPage';
 import { AuthPage } from './pages/AuthPage';
 import { Landing } from './pages/Landing';
 
@@ -55,6 +56,7 @@ export default function App() {
           <Route path="analytics" element={<AnalyticsPage />} />
           <Route path="ai" element={<AIPage />} />
           <Route path="settings" element={<SettingsPage />} />
+          <Route path="account" element={<AccountPage />} />
           <Route path="*" element={<Navigate to="board" replace />} />
         </Route>
 

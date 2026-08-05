@@ -1,6 +1,7 @@
 export { Button, IconButton } from './Button';
 export { Badge, PriorityBadge } from './Badge';
 export { Avatar, AvatarStack } from './Avatar';
+export { WorkspaceLogo, WORKSPACE_LOGOS } from './WorkspaceLogo';
 export { Card, CardHeader } from './Card';
 export { Modal } from './Modal';
 export { SlideOverPanel } from './SlideOverPanel';

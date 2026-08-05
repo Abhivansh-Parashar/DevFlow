@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ChevronDown, Menu, Search, Moon, Settings, LogOut, Building2, FolderKanban, BrickWall } from 'lucide-react';
+import { ChevronDown, Menu, Search, Moon, LogOut, Building2, FolderKanban, BrickWall } from 'lucide-react';
 import { useAppStore } from '../../store/useAppStore';
 import { Dropdown, Avatar } from '../ui';
 import { NotificationsPanel } from '../notifications/NotificationsPanel';
@@ -131,7 +131,6 @@ function UserMenu() {
       items={[
         { label: currentUser.name, right: 'You', disabled: true },
         { divider: true },
-        { label: 'Settings', icon: Settings, onClick: () => navigate('/app/settings') },
         {
           label: 'Sign out',
           icon: LogOut,

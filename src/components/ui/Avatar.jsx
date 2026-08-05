@@ -7,14 +7,15 @@ export function Avatar({ user, name, src, size = 28, showStatus = false, ring = 
   const label = name ?? user?.name ?? '?';
   const color = user?.color ?? hueFor(label);
   const dims = { width: size, height: size };
+  const imgSrc = src ?? user?.avatar;
   return (
     <span
       className={cx('relative inline-flex shrink-0 items-center justify-center rounded-full font-semibold text-white', ring && 'ring-2 ring-card', className)}
       style={{ ...dims, background: color, fontSize: Math.round(size * 0.38) }}
       title={label}
     >
-      {src ? (
-        <img src={src} alt={label} className="h-full w-full rounded-full object-cover" />
+      {imgSrc ? (
+        <img src={imgSrc} alt={label} className="h-full w-full rounded-full object-cover" />
       ) : (
         initials(label)
       )}

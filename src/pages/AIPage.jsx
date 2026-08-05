@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Sparkles, Send, Users, FolderKanban, AlertTriangle, CheckCircle2 } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
@@ -69,6 +69,13 @@ export function AIPage() {
 
   const [question, setQuestion] = useState('');
   const [history, setHistory] = useState([]);
+  const scrollRef = useRef(null);
+
+  // Keep the newest exchange in view — the panel has a fixed height, so a long
+  // thread scrolls instead of overflowing the screen.
+  useEffect(() => {
+    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
+  }, [history.length]);
 
   const snapshot = useMemo(
     () => (activeProject ? buildSnapshot(activeProject, issues, users, chat) : null),
@@ -148,8 +155,8 @@ export function AIPage() {
           </div>
         </Card>
 
-        <Card className="flex min-h-[460px] flex-col p-5">
-          <div className="flex-1 space-y-3 overflow-y-auto">
+        <Card className="flex h-[calc(100vh-11rem)] min-h-[460px] flex-col p-5">
+          <div ref={scrollRef} className="flex-1 space-y-3 overflow-y-auto overscroll-contain">
             {history.length === 0 && (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="rounded-xl border border-violet-soft fill-violet-soft p-4 text-sm text-violet">
                 Ask your first question. I can summarize status, spot risk, and suggest immediate execution steps for this project.
@@ -175,6 +182,7 @@ export function AIPage() {
                 rows={2}
                 placeholder={`Ask about ${activeProject.name}…`}
                 className="bg-canvas"
+                style={{ resize: 'none', height: 62, minHeight: 62, maxHeight: 62 }}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault();
