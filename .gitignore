@@ -1,11 +1,120 @@
-node_modules
-dist
-dist-ssr
-*.local
+# ================================
+# DevFlow
+# ================================
+
+# IntelliJ IDEA
+.idea/
+**/.idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+
+# ================================
+# BACKEND - Java / Maven
+# ================================
+
+Backend/target/
+Backend/*.class
+
+# Maven wrapper generated files
+Backend/.mvn/wrapper/maven-wrapper.jar
+
+# Spring Boot logs
+Backend/*.log
+Backend/logs/
+
+
+# ================================
+# BACKEND - Local configuration
+# ================================
+
+# Environment / secrets
+Backend/.env
+Backend/.env.*
+!Backend/.env.example
+
+# Local Spring configuration
+Backend/src/main/resources/application-local.properties
+Backend/src/main/resources/application-local.yml
+Backend/src/main/resources/application-local.yaml
+
+# Local database files
+Backend/postgres-data/
+Backend/database-data/
+
+
+# ================================
+# BACKEND - User uploads
+# ================================
+
+Backend/uploads/
+Backend/src/main/resources/uploads/
+
+
+# ================================
+# FRONTEND - React / Vite
+# ================================
+
+Frontend/node_modules/
+Frontend/dist/
+Frontend/.vite/
+
+# Frontend environment variables
+Frontend/.env
+Frontend/.env.*
+!Frontend/.env.example
+
+# npm logs
+Frontend/npm-debug.log*
+Frontend/yarn-debug.log*
+Frontend/pnpm-debug.log*
+
+# Frontend coverage
+Frontend/coverage/
+
+
+# ================================
+# TEST / COVERAGE
+# ================================
+
+Backend/coverage/
+Backend/test-results/
+Backend/surefire-reports/
+Backend/failsafe-reports/
+Backend/jacoco.exec
+
+
+# ================================
+# DOCKER LOCAL DATA
+# ================================
+
+docker-data/
+docker-volumes/
+
+Backend/docker-data/
+Backend/docker-volumes/
+
+
+# ================================
+# TEMPORARY FILES
+# ================================
+
+*.tmp
+*.temp
+*.swp
+*~
+*.bak
+
+
+# ================================
+# OS
+# ================================
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+# macOS
 .DS_Store
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.vscode/*
-!.vscode/extensions.json
-.idea
