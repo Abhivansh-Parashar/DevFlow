@@ -1,5 +1,4 @@
 package org.devflow.entity;
-//project, user, role, joinedAt; composite key.
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
