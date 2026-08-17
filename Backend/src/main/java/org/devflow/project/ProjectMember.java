@@ -1,4 +1,4 @@
-package org.devflow.entity;
+package org.devflow.project;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.devflow.enums.Role;
+import org.devflow.user.User;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;

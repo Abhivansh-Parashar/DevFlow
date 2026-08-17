@@ -1,4 +1,4 @@
-package org.devflow.entity;
+package org.devflow.chat;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
@@ -7,6 +7,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.devflow.project.Project;
+import org.devflow.user.User;
 
 import java.time.LocalDateTime;
 
