@@ -1,4 +1,4 @@
-package org.devflow.entity;
+package org.devflow.project;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
