@@ -5,6 +5,8 @@ import jakarta.validation.constraints.NotEmpty;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import org.devflow.common.audit.AuditableEntry;
+import org.devflow.workspace.Workspace;
 import org.hibernate.validator.constraints.URL;
 import java.time.LocalDateTime;
 
@@ -12,7 +14,7 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 @Getter
 @Setter
-public class Project {
+public class Project extends AuditableEntry {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
@@ -25,18 +27,4 @@ public class Project {
     private String keyPrefix;
     @URL
     private String repoUrl;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
-
-
-    @PrePersist
-    private void setCreatedAt(){
-        createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
-    }
-
-    @PreUpdate
-    private void setUpdatedAt(){
-        updatedAt = LocalDateTime.now();
-    }
 }
