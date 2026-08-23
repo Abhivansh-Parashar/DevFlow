@@ -12,7 +12,10 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import java.time.Instant;
 
 @MappedSuperclass
+<<<<<<< HEAD
 @EntityListeners(AuditingEntityListener.class)
+=======
+>>>>>>> 53740f58669cd3714157b1cb8adad2850d8e3432
 @Getter
 @Setter
 public abstract class AuditableEntry {
