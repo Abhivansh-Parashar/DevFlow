@@ -1306,4 +1306,165 @@
   animation: dfCursorRipple 0.5s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
 }
 
+/* ============================================================
+   404 page — "DEV-404, the issue that fell off the board."
+   Glitch digits + status blinkers + broken-drag board scene.
+   ============================================================ */
+
+/* Glitch digit: base glyph + two chromatic-aberration copies that
+   occasionally jump up/down as horizontal slices. The copies sit at
+   z-index:-1 inside an isolated context, so they peek out from behind
+   the ink-colored base text like a corrupted render. */
+.nf-digit {
+  position: relative;
+  display: inline-block;
+  isolation: isolate;
+  user-select: none;
+}
+.nf-digit::before,
+.nf-digit::after {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0;
+  will-change: transform, clip-path, opacity;
+}
+.nf-digit::before {
+  color: var(--signal-coral);
+  animation: nf-slice-a 3.7s ease-in-out infinite;
+}
+.nf-digit::after {
+  color: var(--signal-teal);
+  animation: nf-slice-b 4.6s ease-in-out infinite;
+}
+@keyframes nf-slice-a {
+  0%, 78%, 100% { opacity: 0; transform: none; clip-path: inset(0 0 0 0); }
+  80% { opacity: 0.85; transform: translate(-3px, 2px); clip-path: inset(6% 0 62% 0); }
+  82% { opacity: 0.85; transform: translate(3px, -1px); clip-path: inset(52% 0 8% 0); }
+  84% { opacity: 0; transform: none; clip-path: inset(0 0 0 0); }
+  91% { opacity: 0.9; transform: translate(2px, 1px); clip-path: inset(30% 0 45% 0); }
+  93% { opacity: 0; transform: none; clip-path: inset(0 0 0 0); }
+}
+@keyframes nf-slice-b {
+  0%, 70%, 100% { opacity: 0; transform: none; clip-path: inset(0 0 0 0); }
+  73% { opacity: 0.8; transform: translate(3px, -2px); clip-path: inset(0 0 20% 0); }
+  75% { opacity: 0.8; transform: translate(-2px, 2px); clip-path: inset(74% 0 0 0); }
+  77% { opacity: 0; transform: none; clip-path: inset(0 0 0 0); }
+  95% { opacity: 0.9; transform: translate(-3px, 0); clip-path: inset(40% 0 30% 0); }
+  97% { opacity: 0; transform: none; clip-path: inset(0 0 0 0); }
+}
+
+/* Rare whole-digit brightness dropout */
+.nf-digit-flicker {
+  animation: nf-flicker 5.4s steps(1, end) infinite;
+}
+@keyframes nf-flicker {
+  0%, 89.9%, 91.5%, 96.7%, 100% { opacity: 1; }
+  90% { opacity: 0.3; }
+  96.3% { opacity: 0.55; }
+}
+
+/* Blinking status caret / dot */
+.nf-blink {
+  animation: nf-blink 1.15s steps(1) infinite;
+}
+@keyframes nf-blink {
+  0%, 60% { opacity: 1; }
+  61%, 100% { opacity: 0.25; }
+}
+
+/* ---------- broken-drag board scene ---------- */
+
+/* Breathing drop-slot — the destination column still waiting for a
+   card that fell out of the drag before it ever landed. */
+.nf-slot {
+  border: 1.5px dashed color-mix(in srgb, var(--signal-coral) 45%, transparent);
+  background: color-mix(in srgb, var(--signal-coral) 4%, transparent);
+  animation: nf-slot-breathe 2.8s ease-in-out infinite;
+}
+@keyframes nf-slot-breathe {
+  0%, 100% {
+    border-color: color-mix(in srgb, var(--signal-coral) 30%, transparent);
+    background: color-mix(in srgb, var(--signal-coral) 2%, transparent);
+  }
+  50% {
+    border-color: color-mix(in srgb, var(--signal-coral) 72%, transparent);
+    background: color-mix(in srgb, var(--signal-coral) 9%, transparent);
+    box-shadow: inset 0 0 18px color-mix(in srgb, var(--signal-coral) 10%, transparent);
+  }
+}
+
+/* Hollow gap left behind inside the column where DEV-404 used to sit */
+.nf-hole {
+  border: 1.5px dashed color-mix(in srgb, var(--text-muted) 40%, transparent);
+  background: color-mix(in srgb, var(--surface-raised) 38%, transparent);
+}
+
+/* The fallen card dangles off the board edge, swaying on an invisible
+   thread it's no longer attached to… */
+.nf-hang {
+  transform-origin: 50% 0;
+  animation: nf-hang 5s ease-in-out infinite;
+}
+@keyframes nf-hang {
+  0%, 100% { transform: rotate(3.2deg) translateY(0); }
+  50% { transform: rotate(1.6deg) translateY(3px); }
+}
+
+/* …and occasionally gets yanked by phantom drag events */
+.nf-jolt {
+  animation: nf-jolt 7s ease-in-out infinite;
+}
+@keyframes nf-jolt {
+  0%, 22%, 34%, 47%, 59%, 100% { transform: translate(0, 0); }
+  23% { transform: translate(-5px, 2px); }
+  25% { transform: translate(4px, -2px); }
+  27% { transform: translate(-3px, 2px); }
+  29% { transform: translate(2px, -1px); }
+  31% { transform: translate(-1px, 1px); }
+  33% { transform: translate(0, 0); }
+  48% { transform: translate(-4px, 1px); }
+  50% { transform: translate(3px, -2px); }
+  52% { transform: translate(-2px, 1px); }
+  54% { transform: translate(1px, -1px); }
+  56% { transform: translate(0, 0); }
+}
+
+/* Coral scanline sweep — the board is still trying to "read" the card */
+.nf-scan-wrap {
+  position: relative;
+  overflow: hidden;
+}
+.nf-scan {
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  height: 30%;
+  pointer-events: none;
+  background: linear-gradient(to bottom, transparent, color-mix(in srgb, var(--signal-coral) 20%, transparent), transparent);
+  animation: nf-scan 6.5s ease-in-out infinite;
+}
+@keyframes nf-scan {
+  0% { transform: translateY(-150%); opacity: 0; }
+  7% { opacity: 1; }
+  52% { transform: translateY(340%); opacity: 1; }
+  74%, 100% { transform: translateY(340%); opacity: 0; }
+}
+
+/* Tiny pixel shards trickling off the card as it falls */
+.nf-shard {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: var(--signal-coral);
+  pointer-events: none;
+  animation: nf-shard 5.5s linear infinite;
+}
+@keyframes nf-shard {
+  0% { transform: translate(0, 0) rotate(0deg); opacity: 0; }
+  12% { opacity: 0.9; }
+  100% { transform: translate(12px, 52px) rotate(200deg); opacity: 0; }
+}
 
