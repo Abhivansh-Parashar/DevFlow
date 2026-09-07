@@ -1,11 +1,12 @@
-package org.devflow.project;
+package org.devflow.project.member;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.devflow.enums.Role;
+import org.devflow.project.Project;
+import org.devflow.project.ProjectRole;
 import org.devflow.user.User;
 
 import java.io.Serializable;
@@ -31,7 +32,7 @@ public class ProjectMember {
     private User user;
 
     @Enumerated(EnumType.STRING)
-    private Role role;
+    private ProjectRole role;
 
     private LocalDateTime joinedAt;
 
