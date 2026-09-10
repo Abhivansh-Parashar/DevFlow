@@ -3,11 +3,8 @@ package org.devflow.user;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import org.devflow.enums.Role;
+import lombok.*;
+import org.devflow.workspace.WorkspaceRole;
 
 import java.time.LocalDateTime;
 
@@ -17,6 +14,7 @@ import java.time.LocalDateTime;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -34,7 +32,7 @@ public class User {
     private String passwordHash;
 
     @Enumerated(EnumType.STRING)
-    private Role role;
+    private WorkspaceRole role;
 
     private String avatar;
     private boolean online;
