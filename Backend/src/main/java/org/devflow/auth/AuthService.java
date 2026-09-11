@@ -89,4 +89,15 @@ public class AuthService {
         return null;
     }
 
+    public void revokeRefreshToken(RefreshTokenRequest request) {
+        String token = request.getToken();
+
+        RefreshToken storedToken = refreshTokenRepository
+                .findByTokenHash(token)
+                .orElseThrow(() -> new InvalidCredentialsException("No refresh token found."));
+
+        storedToken.setRevokedAt(LocalDateTime.now());
+        refreshTokenRepository.save(storedToken);
+    }
+
 }
