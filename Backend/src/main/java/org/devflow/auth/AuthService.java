@@ -84,8 +84,7 @@ public class AuthService {
         // Revoke old refresh token
         storedToken.setRevokedAt(LocalDateTime.now());
         refreshTokenRepository.save(storedToken);
-
-        // JWT + new refresh token LEFT
+//        JWT + new refresh token  to be added
         return null;
     }
 
