@@ -1,4 +1,4 @@
-package org.devflow.project;
+package org.devflow.project.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
