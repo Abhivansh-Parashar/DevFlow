@@ -1,12 +1,14 @@
-package org.devflow.project.member;
+package org.devflow.project.dto;
 
 import lombok.Getter;
 import lombok.Setter;
 import org.devflow.project.ProjectRole;
 
-@Getter @Setter
+@Getter
+@Setter
 public class ProjectMemberDto {
-    private Long id;
+
+    private Long projectId;
     private Long userId;
     private ProjectRole role;
 }
