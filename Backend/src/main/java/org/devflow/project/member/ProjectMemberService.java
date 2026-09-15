@@ -1,12 +1,9 @@
 package org.devflow.project.member;
 
-import ch.qos.logback.classic.spi.IThrowableProxy;
-import org.devflow.common.exception.InvalidCredentialsException;
 import org.devflow.common.exception.ResourceNotFoundException;
 import org.devflow.project.Project;
 import org.devflow.project.ProjectRepository;
 import org.devflow.project.ProjectRole;
-import org.devflow.project.dto.ProjectMemberDto;
 import org.devflow.user.User;
 import org.devflow.user.UserRepository;
 import org.devflow.user.UserService;
@@ -79,12 +76,11 @@ public class ProjectMemberService {
         ProjectMember savedMember =
                 projectMemberRepository.save(member);
 
-        ProjectMemberDto response = new ProjectMemberDto();
-        response.setProjectId(savedMember.getProject().getId());
-        response.setUserId(savedMember.getUser().getId());
-        response.setRole(savedMember.getRole());
-
-        return response;
+        return new ProjectMemberDto(
+                savedMember.getProject().getId(),
+                savedMember.getUser().getId(),
+                savedMember.getRole()
+        );
     }
 
     public void removeMember(Long projectId, Long userId) {

@@ -1,15 +1,16 @@
 package org.devflow.chat.dto;
 
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
 
-@Getter @Setter
+@Getter @Setter @Builder
 public class ChatMessageDto {
     private Long id;
     private Long senderId;
     private String content;
-    private Long clientId;
+    private String clientId;
     private LocalDateTime createdAt;
 }

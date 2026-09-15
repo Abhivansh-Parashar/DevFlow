@@ -5,7 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
 
-interface ProjectMemberRepository extends JpaRepository<ProjectMember, ProjectMember.ProjectMemberKey> {
+public interface ProjectMemberRepository extends JpaRepository<ProjectMember, ProjectMember.ProjectMemberKey> {
     Optional<ProjectMember> findByProjectIdAndUserId(Long projectId, Long id);
 
     boolean existsByProjectIdAndUserId(Long projectId, @NotNull Long userId);

@@ -3,10 +3,7 @@ package org.devflow.chat;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.devflow.project.Project;
 import org.devflow.user.User;
 
@@ -17,6 +14,7 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class ChatMessage {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
