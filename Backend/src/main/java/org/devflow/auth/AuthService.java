@@ -5,6 +5,7 @@ import org.devflow.auth.dto.LoginRequest;
 import org.devflow.auth.dto.RefreshTokenRequest;
 import org.devflow.auth.dto.RegisterRequest;
 import org.devflow.common.exception.InvalidCredentialsException;
+import org.devflow.common.exception.ResourceNotFoundException;
 import org.devflow.common.exception.UserAlreadyExistsException;
 import org.devflow.user.User;
 import org.devflow.user.UserRepository;
@@ -55,7 +56,8 @@ public class AuthService {
         if(!userRepository.existsByEmail(email)){
             throw new InvalidCredentialsException("Credentials are wrong.");
         }
-        User user = userRepository.findByEmail(email);
+        User user = userRepository.findByEmail(email).orElseThrow(
+                ()-> new ResourceNotFoundException("No user found."));
 
         if(!passwordEncoder.matches(password, user.getPasswordHash())){
             throw new InvalidCredentialsException("Credentials are wrong.");

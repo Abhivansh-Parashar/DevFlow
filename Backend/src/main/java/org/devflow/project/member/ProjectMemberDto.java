@@ -1,4 +1,4 @@
-package org.devflow.project.dto;
+package org.devflow.project.member;
 
 import lombok.Builder;
 import lombok.Getter;

@@ -10,5 +10,5 @@ public class SendMessageRequest {
     @NotBlank
     private String content;
     @NotNull
-    private Long clientId;
+    private String clientId;
 }
