@@ -10,4 +10,8 @@ public interface IssueRepository extends JpaRepository<Issue, UUID> {
 
 
     List<Issue> findByProjectId(UUID projectId);
+
+    long countByWorkspaceId(Long workspaceId);
+
+    long countByWorkspaceIdAndStatus(Long workspaceId, IssueStatus issueStatus);
 }
