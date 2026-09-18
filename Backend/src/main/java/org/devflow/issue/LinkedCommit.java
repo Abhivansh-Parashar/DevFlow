@@ -15,7 +15,7 @@ import java.util.UUID;
 public class LinkedCommit {
     @Id
     @GeneratedValue
-    private UUID id;
+    private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name="issue_id",nullable = false)
