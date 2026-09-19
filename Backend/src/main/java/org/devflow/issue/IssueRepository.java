@@ -6,10 +6,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 import java.util.UUID;
 
-public interface IssueRepository extends JpaRepository<Issue, UUID> {
+public interface IssueRepository extends JpaRepository<Issue, Long> {
 
 
-    List<Issue> findByProjectId(UUID projectId);
+    List<Issue> findByProjectId(Long projectId);
 
     long countByWorkspaceId(Long workspaceId);
 
