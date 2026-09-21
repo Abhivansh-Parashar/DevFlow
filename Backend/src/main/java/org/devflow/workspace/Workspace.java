@@ -8,8 +8,6 @@ import lombok.Setter;
 import org.devflow.common.audit.AuditableEntry;
 import org.devflow.user.User;
 
-import java.time.Instant;
-import java.util.UUID;
 
 @Getter
 @Setter
@@ -18,7 +16,7 @@ import java.util.UUID;
 public class Workspace extends AuditableEntry {
     @Id
     @GeneratedValue
-    private UUID id;
+    private Long id;
 
     @Column(nullable = false)
     private String name;

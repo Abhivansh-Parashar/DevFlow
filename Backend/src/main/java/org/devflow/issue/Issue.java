@@ -10,8 +10,6 @@ import org.devflow.project.Project;
 import org.devflow.user.User;
 import org.devflow.workspace.Workspace;
 
-import java.util.UUID;
-
 @Entity
 @Table(name="issue")
 @Getter
@@ -20,7 +18,7 @@ import java.util.UUID;
 public class Issue extends AuditableEntry {
     @Id
     @GeneratedValue
-    private UUID id;
+    private Long id;
     private String title;
     private String description;
 
