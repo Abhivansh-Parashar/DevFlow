@@ -1,3 +1,5 @@
 spring:
   application:
-    name: Backend
+    name: Devflow-Backend
+jwt:
+  secret: super-secret-key-for-spring-project-devflow-1029384756
