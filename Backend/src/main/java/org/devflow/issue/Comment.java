@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 import org.devflow.user.User;
 
 import java.time.Instant;
-import java.util.UUID;
 
 @Entity
 @Getter
@@ -17,7 +16,7 @@ public class Comment {
 
     @Id
     @GeneratedValue
-    private UUID id;
+    private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY , optional = false)
     @JoinColumn(name="issue_id", nullable = false)
