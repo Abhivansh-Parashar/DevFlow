@@ -8,10 +8,9 @@ import org.devflow.common.exception.ResourceNotFoundException;
 import org.devflow.project.Project;
 import org.devflow.project.ProjectRepository;
 import org.devflow.project.member.ProjectMemberRepository;
+import org.devflow.security.CurrentUser;
 import org.devflow.user.User;
 import org.devflow.user.UserRepository;
-import org.devflow.user.UserService;
-import org.devflow.user.dto.UserDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -27,7 +26,7 @@ public class ChatService {
 
     private final ChatMessageRepository chatMessageRepository;
     private final UserRepository userRepository;
-    private final UserService userService;
+    private final CurrentUser currentUser;
     private final ProjectRepository projectRepository;
     private final ProjectMemberRepository projectMemberRepository;
     private final ReactionRepository reactionRepository;
@@ -35,14 +34,14 @@ public class ChatService {
     public ChatService(
             ChatMessageRepository chatMessageRepository,
             UserRepository userRepository,
-            UserService userService,
+            CurrentUser currentUser,
             ProjectRepository projectRepository,
             ProjectMemberRepository projectMemberRepository,
             ReactionRepository reactionRepository
     ) {
         this.chatMessageRepository = chatMessageRepository;
         this.userRepository = userRepository;
-        this.userService = userService;
+        this.currentUser = currentUser;
         this.projectRepository = projectRepository;
         this.projectMemberRepository = projectMemberRepository;
         this.reactionRepository = reactionRepository;
@@ -50,7 +49,7 @@ public class ChatService {
 
     public ChatMessageDto sendMessage(Long projectId, SendMessageRequest request) {
 
-        UserDto currentUser = userService.getCurrentUser();
+        User currentUser = this.currentUser.get();
 
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() ->
@@ -109,7 +108,7 @@ public class ChatService {
     }
 
     public PageResponse<ChatMessageDto> getMessages(Long projectId, int page, int size){
-        UserDto currentUser = userService.getCurrentUser();
+        User currentUser = this.currentUser.get();
         Pageable pageable = PageRequest.of(page, size);
 
         Project project = projectRepository.findById(projectId)
@@ -155,7 +154,7 @@ public class ChatService {
 
     public void deleteMessage(Long projectId, Long messageId) {
 
-        UserDto currentUser = userService.getCurrentUser();
+        User currentUser = this.currentUser.get();
 
         projectRepository.findById(projectId)
                 .orElseThrow(() ->
@@ -190,7 +189,7 @@ public class ChatService {
 
     public ReactionDto addReaction(Long projectId, Long messageId, String emoji) {
 
-        UserDto currentUser = userService.getCurrentUser();
+        User currentUser = this.currentUser.get();
 
         projectRepository.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project not found."));
