@@ -3,8 +3,7 @@ package org.devflow.user;
 import org.devflow.user.dto.AvatarUploadResponse;
 import org.devflow.user.dto.UpdateUserRequest;
 import org.devflow.user.dto.UserDto;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.devflow.security.CurrentUser;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -13,35 +12,17 @@ import org.springframework.web.multipart.MultipartFile;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final CurrentUser currentUser;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, CurrentUser currentUser) {
         this.userRepository = userRepository;
-    }
-
-    public UserDto getCurrentUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (authentication == null ||
-                !authentication.isAuthenticated() ||
-                !(authentication.getPrincipal() instanceof User)) {
-            throw new UsernameNotFoundException("No current user exists.");
-        }
-
-        User currentUser = (User) authentication.getPrincipal();
-
-        UserDto userDto = new UserDto();
-        userDto.setId(currentUser.getId());
-        userDto.setName(currentUser.getName());
-        userDto.setEmail(currentUser.getEmail());
-        userDto.setAvatar(currentUser.getAvatar());
-
-        return userDto;
+        this.currentUser = currentUser;
     }
 
     public UserDto updateUser(UpdateUserRequest request) {
-        UserDto currentUser = getCurrentUser();
+        User authenticatedUser = currentUser.get();
 
-        User user = userRepository.findById(currentUser.getId())
+        User user = userRepository.findById(authenticatedUser.getId())
                 .orElseThrow(() -> new UsernameNotFoundException("No current user exists."));
 
         user.setName(request.getName());
@@ -59,7 +40,7 @@ public class UserService {
     }
 
     public AvatarUploadResponse updateAvatar(MultipartFile file) {
-        UserDto currentUser = getCurrentUser();
+        User authenticatedUser = currentUser.get();
 
         if (file == null || file.isEmpty()) {
             throw new IllegalArgumentException("Avatar file cannot be empty.");
@@ -71,7 +52,7 @@ public class UserService {
             throw new IllegalArgumentException("Only image files are allowed.");
         }
 
-        User user = userRepository.findById(currentUser.getId())
+        User user = userRepository.findById(authenticatedUser.getId())
                 .orElseThrow(() -> new UsernameNotFoundException("No current user exists."));
 
         String avatarUrl = "/uploads/avatars/" + file.getOriginalFilename();
@@ -85,9 +66,9 @@ public class UserService {
         return response;
     }
     public void updatePresence(boolean online) {
-        UserDto currentUser = getCurrentUser();
+        User authenticatedUser = currentUser.get();
 
-        User user = userRepository.findById(currentUser.getId())
+        User user = userRepository.findById(authenticatedUser.getId())
                 .orElseThrow(() -> new UsernameNotFoundException("No current user exists."));
 
         user.setOnline(online);

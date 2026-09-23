@@ -4,7 +4,7 @@
 //import org.devflow.project.dto.ProjectDto;
 //import org.devflow.user.User;
 //import org.devflow.user.UserRepository;
-//import org.devflow.user.UserService;
+//import org.devflow.security.CurrentUser;
 //import org.springframework.stereotype.Service;
 //
 //@Service
@@ -12,17 +12,17 @@
 //
 //    private ProjectRepository projectRepository;
 //    private UserRepository userRepository;
-//    private UserService userService;
+//    private CurrentUser currentUser;
 //
-//    public ProjectService(ProjectRepository projectRepository, UserRepository userRepository, UserService userService) {
+//    public ProjectService(ProjectRepository projectRepository, UserRepository userRepository, CurrentUser currentUser) {
 //        this.projectRepository = projectRepository;
 //        this.userRepository = userRepository;
-//        this.userService = userService;
+//        this.currentUser = currentUser;
 //    }
 //
 //    public ProjectDto createProject(CreateProjectRequest request){
 //
-//        User user = userRepository.findByEmail(userService.getCurrentUser().getEmail());
+//        User user = userRepository.findByEmail(currentUser.get().getEmail());
 ////        if(projectRepository.findByWorkspaceId(request.getName()));
 //    }
 //}
