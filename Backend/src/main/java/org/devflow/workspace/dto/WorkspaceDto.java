@@ -10,10 +10,10 @@ import java.util.UUID;
 @AllArgsConstructor
 public class WorkspaceDto {
 
-    private UUID id;
+    private Long id;
     private String name;
     private String slug;
-    private UUID ownerId;
+    private Long ownerId;
     private Instant createdAt;
     private Instant updatedAt;
 }
