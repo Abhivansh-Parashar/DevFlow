@@ -1,10 +1,12 @@
 package org.devflow.user.dto;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class UserDto {
     private Long id;
     private String name;
