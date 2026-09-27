@@ -75,4 +75,16 @@ public class UserService {
         userRepository.save(user);
     }
 
+    public UserDto getCurrentUser() {
+        User user = currentUser.get();
+
+        return UserDto.builder()
+                .id(user.getId())
+                .name(user.getName())
+                .email(user.getEmail())
+                .avatar(user.getAvatar())
+                .online(user.isOnline())
+                .build();
+    }
+
 }
