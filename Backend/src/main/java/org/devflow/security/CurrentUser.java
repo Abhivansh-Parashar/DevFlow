@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class CurrentUser {
 
-    public User get(){
+    public static User get(){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if(authentication == null || !authentication.isAuthenticated()){
