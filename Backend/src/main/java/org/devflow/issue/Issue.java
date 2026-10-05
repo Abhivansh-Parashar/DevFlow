@@ -19,6 +19,9 @@ public class Issue extends AuditableEntry {
     @Id
     @GeneratedValue
     private Long id;
+
+    @Version
+    private Long version;
     private String title;
     private String description;
 

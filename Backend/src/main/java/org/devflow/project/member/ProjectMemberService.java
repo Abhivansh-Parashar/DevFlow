@@ -4,10 +4,9 @@ import org.devflow.common.exception.ResourceNotFoundException;
 import org.devflow.project.Project;
 import org.devflow.project.ProjectRepository;
 import org.devflow.project.ProjectRole;
+import org.devflow.security.CurrentUser;
 import org.devflow.user.User;
 import org.devflow.user.UserRepository;
-import org.devflow.user.UserService;
-import org.devflow.user.dto.UserDto;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
@@ -19,23 +18,23 @@ public class ProjectMemberService {
     private final ProjectMemberRepository projectMemberRepository;
     private final ProjectRepository projectRepository;
     private final UserRepository userRepository;
-    private final UserService userService;
+    private final CurrentUser currentUser;
 
     public ProjectMemberService(
             ProjectMemberRepository projectMemberRepository,
             ProjectRepository projectRepository,
             UserRepository userRepository,
-            UserService userService
+            CurrentUser currentUser
     ) {
         this.projectMemberRepository = projectMemberRepository;
         this.projectRepository = projectRepository;
         this.userRepository = userRepository;
-        this.userService = userService;
+        this.currentUser = currentUser;
     }
 
     public ProjectMemberDto addMember(Long projectId, ProjectMemberRequest request) {
 
-        UserDto currentUser = userService.getCurrentUser();
+        User currentUser = this.currentUser.get();
 
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() ->
@@ -84,7 +83,7 @@ public class ProjectMemberService {
     }
 
     public void removeMember(Long projectId, Long userId) {
-        UserDto currentUser = userService.getCurrentUser();
+        User currentUser = this.currentUser.get();
 
         projectRepository.findById(projectId)
                 .orElseThrow(() ->
@@ -127,7 +126,7 @@ public class ProjectMemberService {
 
     public ProjectMemberDto changeRole(Long projectId, Long userId, ProjectRole role){
 
-        UserDto currentUser = userService.getCurrentUser();
+        User currentUser = this.currentUser.get();
 
         projectRepository.findById(projectId)
                 .orElseThrow(() ->

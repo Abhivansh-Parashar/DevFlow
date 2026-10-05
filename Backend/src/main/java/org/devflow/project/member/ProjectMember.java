@@ -1,10 +1,7 @@
 package org.devflow.project.member;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.devflow.project.Project;
 import org.devflow.project.ProjectRole;
 import org.devflow.user.User;
@@ -19,6 +16,7 @@ import java.util.Objects;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class ProjectMember {
 
     @Id

@@ -10,8 +10,8 @@ import org.devflow.issue.IssueStatus;
 import org.devflow.project.Project;
 import org.devflow.project.ProjectRepository;
 import org.devflow.project.member.ProjectMemberRepository;
-import org.devflow.user.UserService;
-import org.devflow.user.dto.UserDto;
+import org.devflow.security.CurrentUser;
+import org.devflow.user.User;
 import org.devflow.workspace.WorkspaceMemberRepository;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -20,26 +20,26 @@ import java.util.List;
 
 @Service
 public class AiAssistantService {
-    private final UserService userService;
+    private final CurrentUser currentUser;
     private final ProjectRepository projectRepository;
     private final ProjectMemberRepository projectMemberRepository;
     private final IssueRepository issueRepository;
 
 
     public AiAssistantService(
-            UserService userService,
+            CurrentUser currentUser,
             ProjectRepository projectRepository,
             ProjectMemberRepository projectMemberRepository,
             IssueRepository issueRepository)
     {
-        this.userService = userService;
+        this.currentUser = currentUser;
         this.projectRepository = projectRepository;
         this.projectMemberRepository = projectMemberRepository;
         this.issueRepository = issueRepository;
     }
 
     public AiAskResponse ask(Long projectId, AiAskRequest request) {
-        UserDto currentUser = userService.getCurrentUser();
+        User currentUser = this.currentUser.get();
 
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> {

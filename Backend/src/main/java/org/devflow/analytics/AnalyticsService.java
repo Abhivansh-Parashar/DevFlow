@@ -5,25 +5,25 @@ import org.devflow.common.exception.ResourceNotFoundException;
 import org.devflow.issue.IssueRepository;
 import org.devflow.issue.IssueStatus;
 import org.devflow.issue.LinkedCommitRepository;
-import org.devflow.user.UserService;
+import org.devflow.security.CurrentUser;
 import org.devflow.workspace.WorkspaceRepository;
 import org.springframework.stereotype.Service;
 
 @Service
 public class AnalyticsService {
 
-    private final UserService userService;
+    private final CurrentUser currentUser;
     private final WorkspaceRepository workspaceRepository;
     private final IssueRepository issueRepository;
     private final LinkedCommitRepository linkedCommitRepository;
 
     public AnalyticsService(
-            UserService userService,
+            CurrentUser currentUser,
             WorkspaceRepository workspaceRepository,
             IssueRepository issueRepository,
             LinkedCommitRepository linkedCommitRepository
     ) {
-        this.userService = userService;
+        this.currentUser = currentUser;
         this.workspaceRepository = workspaceRepository;
         this.issueRepository = issueRepository;
         this.linkedCommitRepository = linkedCommitRepository;
@@ -31,7 +31,7 @@ public class AnalyticsService {
 
     public AnalyticsDto getAnalytics(Long workspaceId) {
 
-        userService.getCurrentUser();
+        currentUser.get();
 
         workspaceRepository.findById(workspaceId)
                 .orElseThrow(() ->

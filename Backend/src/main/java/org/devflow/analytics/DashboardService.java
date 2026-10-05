@@ -5,7 +5,7 @@ import org.devflow.common.exception.ResourceNotFoundException;
 import org.devflow.issue.IssueRepository;
 import org.devflow.issue.IssueStatus;
 import org.devflow.project.ProjectRepository;
-import org.devflow.user.UserService;
+import org.devflow.security.CurrentUser;
 import org.devflow.workspace.WorkspaceMemberRepository;
 import org.devflow.workspace.WorkspaceRepository;
 import org.springframework.stereotype.Service;
@@ -13,20 +13,20 @@ import org.springframework.stereotype.Service;
 @Service
 public class DashboardService {
 
-    private final UserService userService;
+    private final CurrentUser currentUser;
     private final WorkspaceRepository workspaceRepository;
     private final ProjectRepository projectRepository;
     private final IssueRepository issueRepository;
     private final WorkspaceMemberRepository workspaceMemberRepository;
 
     public DashboardService(
-            UserService userService,
+            CurrentUser currentUser,
             WorkspaceRepository workspaceRepository,
             ProjectRepository projectRepository,
             IssueRepository issueRepository,
             WorkspaceMemberRepository workspaceMemberRepository
     ) {
-        this.userService = userService;
+        this.currentUser = currentUser;
         this.workspaceRepository = workspaceRepository;
         this.projectRepository = projectRepository;
         this.issueRepository = issueRepository;
@@ -35,7 +35,7 @@ public class DashboardService {
 
     public DashboardStatsDto getDashboardStats(Long workspaceId) {
 
-        userService.getCurrentUser();
+        currentUser.get();
 
         workspaceRepository.findById(workspaceId)
                 .orElseThrow(() ->
