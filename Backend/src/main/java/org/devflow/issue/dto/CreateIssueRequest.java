@@ -17,9 +17,9 @@ public class CreateIssueRequest {
 
     private String description;
 
-    private UUID projectId;
+    private Long projectId;
 
-    private UUID assigneeId;
+    private Long assigneeId;
 
     private IssueType type;
 
