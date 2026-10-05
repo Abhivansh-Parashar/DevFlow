@@ -50,4 +50,19 @@ public class Issue extends AuditableEntry {
     @JoinColumn(name="assignee_id")
     private User assignee;
 
+    @Column(nullable = false,unique = true)
+    private String issueKey;
+
+    public Issue(String title, String description, IssueType type, IssuePriority priority,
+                 Workspace workspace, Project project, User reporter,User assignee) {
+        this.status = IssueStatus.TODO;
+        this.title = title;
+        this.description = description;
+        this.type = type;
+        this.priority = priority;
+        this.workspace = workspace;
+        this.project = project;
+        this.reporter=reporter;
+        this.assignee = assignee;
+    }
 }

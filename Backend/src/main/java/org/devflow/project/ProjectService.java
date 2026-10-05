@@ -48,7 +48,7 @@ public class ProjectService {
                         new ResourceNotFoundException("Workspace not found."));
 
         workspaceMemberRepository
-                .findByWorkspaceIdAndUserId(workspaceId, user.getId())
+                .findByWorkspaceIdAndUserId((workspaceId, user.getId())
                 .orElseThrow(() ->
                         new AccessDeniedException(
                                 "You are not a member of this workspace."
