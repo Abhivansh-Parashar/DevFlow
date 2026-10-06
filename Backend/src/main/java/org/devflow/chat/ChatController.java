@@ -1,6 +1,7 @@
 package org.devflow.chat;
 
 
+import jakarta.validation.Valid;
 import org.devflow.chat.dto.ChatMessageDto;
 import org.devflow.chat.dto.SendMessageRequest;
 import org.devflow.common.PageResponse;
@@ -19,7 +20,7 @@ public class ChatController {
     }
 
     @PostMapping("/{projectId}/chat")
-    public ResponseEntity<ChatMessageDto> sendMessage(@PathVariable Long projectId, @RequestBody SendMessageRequest request){
+    public ResponseEntity<ChatMessageDto> sendMessage(@PathVariable Long projectId, @Valid @RequestBody SendMessageRequest request){
         return ResponseEntity.status(201).body(chatService.sendMessage(projectId, request));
     }
 
