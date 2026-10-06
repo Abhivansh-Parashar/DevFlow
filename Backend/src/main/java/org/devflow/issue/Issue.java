@@ -1,10 +1,7 @@
 package org.devflow.issue;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.devflow.common.audit.AuditableEntry;
 import org.devflow.project.Project;
 import org.devflow.user.User;
@@ -15,6 +12,8 @@ import org.devflow.workspace.Workspace;
 @Getter
 @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Builder
+@AllArgsConstructor
 public class Issue extends AuditableEntry {
     @Id
     @GeneratedValue
