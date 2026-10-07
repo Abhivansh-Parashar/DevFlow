@@ -1,10 +1,7 @@
 package org.devflow.issue;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.devflow.common.audit.AuditableEntry;
 import org.devflow.project.Project;
 import org.devflow.user.User;
@@ -15,10 +12,15 @@ import org.devflow.workspace.Workspace;
 @Getter
 @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Builder
+@AllArgsConstructor
 public class Issue extends AuditableEntry {
     @Id
     @GeneratedValue
     private Long id;
+
+    @Version
+    private Long version;
     private String title;
     private String description;
 
@@ -47,4 +49,19 @@ public class Issue extends AuditableEntry {
     @JoinColumn(name="assignee_id")
     private User assignee;
 
+    @Column(nullable = false,unique = true)
+    private String issueKey;
+
+    public Issue(String title, String description, IssueType type, IssuePriority priority,
+                 Workspace workspace, Project project, User reporter,User assignee) {
+        this.status = IssueStatus.TODO;
+        this.title = title;
+        this.description = description;
+        this.type = type;
+        this.priority = priority;
+        this.workspace = workspace;
+        this.project = project;
+        this.reporter=reporter;
+        this.assignee = assignee;
+    }
 }

@@ -34,6 +34,7 @@ public class WorkspaceMember {
     private Instant joinedAt;
 
     public WorkspaceMember(Workspace workspace, User user, WorkspaceRole role, Instant joinedAt) {
+        this.id = new WorkspaceMemberId(workspace.getId(), user.getId());
         this.workspace = workspace;
         this.user = user;
         this.role = role;
