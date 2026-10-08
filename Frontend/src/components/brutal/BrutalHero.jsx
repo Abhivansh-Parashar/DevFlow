@@ -56,7 +56,7 @@ export function BrutalHero({ className }) {
     <section
       id="top"
       className={cx(
-        'sb-hero sb-blueprint relative flex min-h-screen items-center overflow-hidden px-5 pt-16',
+        'sb-hero sb-blueprint relative flex min-h-[88vh] items-center overflow-hidden px-5 pt-16',
         className,
       )}
     >
@@ -69,7 +69,7 @@ export function BrutalHero({ className }) {
         <div className="absolute inset-y-0 right-[max(1.25rem,calc(50%-36rem))] w-px bg-ink/10 brutal:bg-ink" />
       </div>
 
-      <div className="relative z-10 mx-auto grid w-full max-w-6xl items-center gap-14 lg:grid-cols-2">
+      <div className="relative z-10 mx-auto grid w-full max-w-6xl items-center gap-12 lg:grid-cols-2">
         {/* Copy column */}
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}>
           {/* Metadata stamp */}
@@ -85,7 +85,7 @@ export function BrutalHero({ className }) {
           </motion.div>
 
           {/* Display heading — weight 900, tight tracking */}
-          <h1 className="mt-6 font-display text-[44px] font-black leading-[0.98] tracking-[-0.04em] text-ink sm:text-6xl">
+          <h1 className="mt-5 font-display text-[42px] font-black leading-[0.98] tracking-[-0.04em] text-ink sm:text-5xl">
             <RevealLine text="Every issue has a path." />
             <RevealLine text="Watch yours move." className="text-teal" delay={0.32} />
           </h1>
@@ -93,8 +93,8 @@ export function BrutalHero({ className }) {
           <motion.p
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.65, delay: 0.55, ease: EASE }}
-            className="mt-5 max-w-xl rounded-xl border border-line bg-card-60 px-4 py-3 text-[17px] leading-relaxed text-ink shadow-soft"
+            transition={{ duration: 0.65, delay: 0.5, ease: EASE }}
+            className="mt-4 max-w-xl rounded-xl border border-line bg-card-60 px-4 py-3 text-[16px] leading-relaxed text-ink shadow-soft"
           >
             Workspaces keep companies apart, projects keep teams in sync. Every issue — from
             Backlog to Done — carries its commits, comments and context along a live pipeline.
@@ -104,8 +104,8 @@ export function BrutalHero({ className }) {
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.65, delay: 0.7, ease: EASE }}
-            className="mt-8 flex flex-wrap items-center gap-3"
+            transition={{ duration: 0.65, delay: 0.62, ease: EASE }}
+            className="mt-6 flex flex-wrap items-center gap-3"
           >
             <Link to="/register">
               <Button size="lg" iconRight={ArrowRight} className="sb-tilt rounded-none brutal:rounded-none">
@@ -127,8 +127,8 @@ export function BrutalHero({ className }) {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 0.7, delay: 0.9 }}
-            className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-2"
+            transition={{ duration: 0.7, delay: 0.8 }}
+            className="mt-5 flex flex-wrap items-center gap-x-6 gap-y-2"
           >
             {FEATURES.map((f) => (
               <span key={f} className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.16em] text-muted">
@@ -166,7 +166,7 @@ export function BrutalHero({ className }) {
       </div>
 
       {/* Scroll hint */}
-      <div className="absolute bottom-5 left-1/2 z-10 flex -translate-x-1/2 flex-col items-center gap-1.5 text-muted">
+      <div className="absolute bottom-4 left-1/2 z-10 flex -translate-x-1/2 flex-col items-center gap-1.5 text-muted">
         <span className="sb-index text-[10px]">scroll</span>
         <ChevronDown size={16} className="animate-[scroll-hint_1.6s_ease-in-out_infinite] text-teal" />
       </div>
