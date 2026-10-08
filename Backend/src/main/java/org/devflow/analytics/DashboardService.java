@@ -6,8 +6,10 @@ import org.devflow.issue.IssueRepository;
 import org.devflow.issue.IssueStatus;
 import org.devflow.project.ProjectRepository;
 import org.devflow.security.CurrentUser;
+import org.devflow.user.User;
 import org.devflow.workspace.WorkspaceMemberRepository;
 import org.devflow.workspace.WorkspaceRepository;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -35,7 +37,7 @@ public class DashboardService {
 
     public DashboardStatsDto getDashboardStats(Long workspaceId) {
 
-        currentUser.get();
+        User user = currentUser.get();
 
         workspaceRepository.findById(workspaceId)
                 .orElseThrow(() ->
@@ -43,6 +45,15 @@ public class DashboardService {
                                 "No workspace found for the given id."
                         )
                 );
+
+        if (!workspaceMemberRepository.existsByWorkspaceIdAndUserId(
+                workspaceId,
+                user.getId()
+        )) {
+            throw new AccessDeniedException(
+                    "User does not belong to the given workspace."
+            );
+        }
 
         long totalProjects =
                 projectRepository.findByWorkspaceId(workspaceId).size();
