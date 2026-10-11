@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>404 · Not Found</title>
+  <style>
+    :root {
+      --glitch-r: 255;
+      --glitch-g: 0;
+      --glitch-b: 80;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #0a0a0f;
+      font-family: "Courier New", monospace;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Scanline overlay */
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        rgba(0, 0, 0, 0.15) 0px,
+        rgba(0, 0, 0, 0.15) 1px,
+        transparent 1px,
+        transparent 3px
+      );
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    .glitch-wrap {
+      position: relative;
+      text-align: center;
+      isolation: isolate;
+    }
+
+    .glitch {
+      font-size: clamp(6rem, 22vw, 16rem);
+      font-weight: 900;
+      letter-spacing: 0.04em;
+      color: #fff;
+      position: relative;
+      text-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
+      animation: glitch-skew 3.2s infinite steps(2);
+      user-select: none;
+    }
+
+    .glitch::before,
+    .glitch::after {
+      content: "404";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    .glitch::before {
+      color: var(--glitch-r);
+      z-index: -1;
+      animation: glitch-channel-r 1.6s infinite;
+      clip-path: inset(0 0 60% 0);
+      transform: translate(-3px, -1px);
+    }
+
+    .glitch::after {
+      color: #00e5ff;
+      z-index: -2;
+      animation: glitch-channel-b 1.1s infinite;
+      clip-path: inset(60% 0 0 0);
+      transform: translate(3px, 1px);
+    }
+
+    @keyframes glitch-channel-r {
+      0%, 88%, 100% { transform: translate(-3px, -1px); opacity: 0; }
+      89% { opacity: 0.9; }
+      90% { transform: translate(4px, -2px); opacity: 0.7; }
+      91% { transform: translate(-1px, 2px); opacity: 0; }
+      93% { transform: translate(5px, 0); opacity: 0.5; }
+      94%, 100% { opacity: 0; }
+    }
+
+    @keyframes glitch-channel-b {
+      0%, 70%, 100% { transform: translate(3px, 1px); opacity: 0; }
+      71% { opacity: 0.8; }
+      73% { transform: translate(-4px, 2px); opacity: 0.6; }
+      75% { transform: translate(2px, -1px); opacity: 0; }
+      82% { transform: translate(-5px, 1px); opacity: 0.5; }
+      84%, 100% { opacity: 0; }
+    }
+
+    @keyframes glitch-skew {
+      0%, 72%, 100% { transform: skew(0deg); }
+      73% { transform: skew(2deg); }
+      74% { transform: skew(-1.5deg); }
+      76% { transform: skew(0.5deg); }
+      78% { transform: skew(-2deg); clip-path: inset(0 0 0 0); }
+      80% { transform: skew(0deg); }
+    }
+
+    .sub {
+      margin-top: 0.3em;
+      font-size: clamp(1rem, 2.4vw, 1.8rem);
+      color: #888;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      animation: flicker 2.4s infinite;
+      text-shadow: 0 0 6px rgba(255, 255, 255, 0.15);
+    }
+
+    @keyframes flicker {
+      0%, 92%, 100% { opacity: 1; }
+      93% { opacity: 0.1; }
+      94% { opacity: 1; }
+      95% { opacity: 0.4; }
+      96% { opacity: 1; }
+    }
+
+    .blink-bar {
+      margin-top: 2.2rem;
+      width: 180px;
+      height: 2px;
+      background: #222;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .blink-bar::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: #ff3c78;
+      animation: bar-drift 1.1s steps(2) infinite;
+      transform: translateX(-100%);
+    }
+
+    @keyframes bar-drift {
+      0% { transform: translateX(-100%); }
+      40% { transform: translateX(20%); }
+      42% { transform: translateX(-20%); }
+      44% { transform: translateX(0%); }
+      100% { transform: translateX(-100%); }
+    }
+
+    .neon-ring {
+      margin-top: 3rem;
+      width: 110px;
+      height: 110px;
+      border: 2px solid #00e5ff;
+      border-radius: 50%;
+      position: relative;
+      animation: pulse-ring 1.8s infinite alternate;
+      box-shadow: 0 0 14px rgba(0, 229, 255, 0.3), inset 0 0 14px rgba(0, 229, 255, 0.05);
+    }
+
+    .neon-ring::before {
+      content: "";
+      position: absolute;
+      inset: 8px;
+      border: 1px solid rgba(0, 229, 255, 0.35);
+      border-radius: 50%;
+      animation: pulse-ring 2.4s infinite alternate-reverse;
+    }
+
+    @keyframes pulse-ring {
+      0% { opacity: 0.55; transform: scale(1); }
+      100% { opacity: 1; transform: scale(1.06); }
+    }
+
+    .hint {
+      position: absolute;
+      bottom: 0.8rem;
+      font-size: 0.72rem;
+      color: #444;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      animation: glitch-skew 4s infinite;
+    }
+
+    .static-noise {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 11;
+      opacity: 0.04;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+      background-size: 200px 200px;
+      animation: noise-drift 0.7s steps(2) infinite;
+    }
+
+    @keyframes noise-drift {
+      0%, 100% { transform: translate(0, 0); }
+      50% { transform: translate(4px, -2px); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .glitch, .glitch::before, .glitch::after,
+      .sub, .blink-bar::after, .neon-ring, .neon-ring::before,
+      .static-noise, .hint {
+        animation: none !important;
+        transform: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="static-noise" aria-hidden="true"></div>
+  <div class="glitch-wrap">
+    <div class="glitch" aria-label="404">404</div>
+    <div class="sub">Page disappeared into the static</div>
+    <div class="blink-bar" aria-hidden="true"></div>
+    <div class="neon-ring" aria-hidden="true"></div>
+    <div class="hint">signal lost · 404</div>
+  </div>
+</body>
+</html>

@@ -1,5 +1,7 @@
 package org.devflow.project;
 
+import jakarta.transaction.Transactional;
+import org.devflow.analytics.event.WorkspaceDashboardChangedEvent;
 import org.devflow.common.exception.ResourceNotFoundException;
 import org.devflow.project.dto.CreateProjectRequest;
 import org.devflow.project.dto.ProjectDto;
@@ -11,6 +13,7 @@ import org.devflow.user.User;
 import org.devflow.workspace.Workspace;
 import org.devflow.workspace.WorkspaceMemberRepository;
 import org.devflow.workspace.WorkspaceRepository;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
@@ -24,21 +27,25 @@ public class ProjectService {
     private final WorkspaceMemberRepository workspaceMemberRepository;
     private final CurrentUser currentUser;
     private final ProjectMemberRepository projectMemberRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     public ProjectService(
             CurrentUser currentUser,
             ProjectMemberRepository projectMemberRepository,
             WorkspaceRepository workspaceRepository,
             WorkspaceMemberRepository workspaceMemberRepository,
-            ProjectRepository projectRepository
+            ProjectRepository projectRepository,
+            ApplicationEventPublisher eventPublisher
     ) {
         this.currentUser = currentUser;
         this.projectMemberRepository = projectMemberRepository;
         this.workspaceRepository = workspaceRepository;
         this.workspaceMemberRepository = workspaceMemberRepository;
         this.projectRepository = projectRepository;
+        this.eventPublisher = eventPublisher;
     }
 
+    @Transactional
     public ProjectDto createProject(Long workspaceId, CreateProjectRequest request) {
 
         User user = currentUser.get();
@@ -48,7 +55,7 @@ public class ProjectService {
                         new ResourceNotFoundException("Workspace not found."));
 
         workspaceMemberRepository
-                .findByWorkspaceIdAndUserId((workspaceId, user.getId())
+                .findByWorkspaceIdAndUserId(workspaceId, user.getId())
                 .orElseThrow(() ->
                         new AccessDeniedException(
                                 "You are not a member of this workspace."
@@ -64,11 +71,17 @@ public class ProjectService {
                 .build();
 
         projectRepository.save(project);
+        eventPublisher.publishEvent(
+                new WorkspaceDashboardChangedEvent(workspaceId)
+        );
 
         ProjectMember projectMember = ProjectMember.builder()
                 .project(project)
                 .user(user)
                 .build();
+        eventPublisher.publishEvent(
+                new WorkspaceDashboardChangedEvent(workspaceId)
+        );
 
         projectMemberRepository.save(projectMember);
 
@@ -126,6 +139,7 @@ public class ProjectService {
         return toDto(project);
     }
 
+    @Transactional
     public void deleteProject(Long projectId) {
 
         User user = currentUser.get();
@@ -150,6 +164,11 @@ public class ProjectService {
         }
 
         projectRepository.delete(project);
+        eventPublisher.publishEvent(
+                new WorkspaceDashboardChangedEvent(
+                        project.getWorkspace().getId()
+                )
+        );
     }
 
     public List<ProjectDto> getProjectsByWorkspace(Long workspaceId) {

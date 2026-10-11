@@ -1,9 +1,12 @@
 package org.devflow.workspace;
 
+import jakarta.transaction.Transactional;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.devflow.analytics.event.WorkspaceDashboardChangedEvent;
 import org.devflow.user.User;
 import org.devflow.user.UserRepository;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -15,7 +18,10 @@ public class WorkspaceMemberService {
     private final WorkspaceMemberRepository memberRepository;
     private final WorkspaceRepository workspaceRepository;
     private final UserRepository userRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
+
+    @Transactional
     public void addMember(Long workspaceId , Long userId){
         Workspace workspace = workspaceRepository.findById(workspaceId)
                 .orElseThrow();
@@ -33,14 +39,21 @@ public class WorkspaceMemberService {
                         Instant.now()
                 );
         memberRepository.save(member);
+        eventPublisher.publishEvent(
+                new WorkspaceDashboardChangedEvent(workspaceId)
+        );
 
     }
 
+    @Transactional
     public void deleteMember(Long workspaceId , Long userId){
         WorkspaceMemberId memberId = new WorkspaceMemberId(workspaceId,userId);
         WorkspaceMember member = memberRepository.findById(memberId)
                 .orElseThrow();
         memberRepository.delete(member);
+        eventPublisher.publishEvent(
+                new WorkspaceDashboardChangedEvent(workspaceId)
+        );
     }
 
     public void changeRole(Long workspaceId , Long userId, WorkspaceRole newRole){
