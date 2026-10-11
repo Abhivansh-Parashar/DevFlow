@@ -1,10 +1,8 @@
+
 package org.devflow.analytics;
 
 import org.devflow.analytics.dto.DashboardStatsDto;
 import org.devflow.common.exception.ResourceNotFoundException;
-import org.devflow.issue.IssueRepository;
-import org.devflow.issue.IssueStatus;
-import org.devflow.project.ProjectRepository;
 import org.devflow.security.CurrentUser;
 import org.devflow.user.User;
 import org.devflow.workspace.WorkspaceMemberRepository;
@@ -17,22 +15,19 @@ public class DashboardService {
 
     private final CurrentUser currentUser;
     private final WorkspaceRepository workspaceRepository;
-    private final ProjectRepository projectRepository;
-    private final IssueRepository issueRepository;
     private final WorkspaceMemberRepository workspaceMemberRepository;
+    private final DashboardStatsCacheService dashboardStatsCacheService;
 
     public DashboardService(
             CurrentUser currentUser,
             WorkspaceRepository workspaceRepository,
-            ProjectRepository projectRepository,
-            IssueRepository issueRepository,
-            WorkspaceMemberRepository workspaceMemberRepository
+            WorkspaceMemberRepository workspaceMemberRepository,
+            DashboardStatsCacheService dashboardStatsCacheService
     ) {
         this.currentUser = currentUser;
         this.workspaceRepository = workspaceRepository;
-        this.projectRepository = projectRepository;
-        this.issueRepository = issueRepository;
         this.workspaceMemberRepository = workspaceMemberRepository;
+        this.dashboardStatsCacheService = dashboardStatsCacheService;
     }
 
     public DashboardStatsDto getDashboardStats(Long workspaceId) {
@@ -55,40 +50,6 @@ public class DashboardService {
             );
         }
 
-        long totalProjects =
-                projectRepository.findByWorkspaceId(workspaceId).size();
-
-        long totalIssues =
-                issueRepository.countByWorkspaceId(workspaceId);
-
-        long openIssues =
-                issueRepository.countByWorkspaceIdAndStatus(
-                        workspaceId,
-                        IssueStatus.TODO
-                )
-                        +
-                        issueRepository.countByWorkspaceIdAndStatus(
-                                workspaceId,
-                                IssueStatus.IN_PROGRESS
-                        );
-
-        long completedIssues =
-                issueRepository.countByWorkspaceIdAndStatus(
-                        workspaceId,
-                        IssueStatus.DONE
-                );
-
-        long totalMembers =
-                workspaceMemberRepository.countByWorkspaceId(workspaceId);
-
-        DashboardStatsDto dto = new DashboardStatsDto();
-
-        dto.setTotalProjects(totalProjects);
-        dto.setTotalIssues(totalIssues);
-        dto.setOpenIssues(openIssues);
-        dto.setCompletedIssues(completedIssues);
-        dto.setTotalMembers(totalMembers);
-
-        return dto;
+        return dashboardStatsCacheService.getDashboardStats(workspaceId);
     }
 }

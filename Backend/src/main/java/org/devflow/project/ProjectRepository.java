@@ -14,4 +14,6 @@ public interface ProjectRepository extends JpaRepository<Project , Long> {
     boolean existsByWorkspaceIdAndKeyPrefix(Long workspaceId, String prefix);
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     Optional<Project> findByIdWithLock(Long id);
+
+    long countByWorkspaceId(Long workspaceId);
 }
