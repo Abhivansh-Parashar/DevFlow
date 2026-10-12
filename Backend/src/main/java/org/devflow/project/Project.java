@@ -2,10 +2,7 @@ package org.devflow.project;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.devflow.common.audit.AuditableEntry;
 import org.devflow.workspace.Workspace;
 import org.hibernate.validator.constraints.URL;
@@ -16,6 +13,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @Builder
+@AllArgsConstructor
 public class Project extends AuditableEntry {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

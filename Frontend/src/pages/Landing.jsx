@@ -124,7 +124,7 @@ const STAGES = [
         <div className="flex items-center gap-2.5 rounded-xl border border-violet-soft fill-violet-soft p-3">
           <Sparkles size={14} className="text-violet" />
           <div>
-            <p className="text-[12px] font-semibold text-violet">“Summarize blockers for DEV-105 and suggest next steps.”</p>
+            <p className="text-[12px] font-semibold text-violet">"Summarize blockers for DEV-105 and suggest next steps."</p>
             <p className="text-[11px] text-muted">AI assistant · project-aware context</p>
           </div>
         </div>
@@ -344,10 +344,10 @@ function Walkthrough() {
   // Mobile / reduced-motion fallback: natural scroll with staged reveals.
   if (reduced || !isDesktop) {
     return (
-      <section id="pipeline" className="relative px-5 py-20">
+      <section id="pipeline" className="relative px-5 py-14">
         <div className="mx-auto max-w-5xl">
           <SectionHeading eyebrow="the pipeline" title="Five stages. One trace." sub="Every ticket moves through the same honest pipeline." />
-          <div className="mt-12 space-y-10">
+          <div className="mt-10 space-y-8">
             {STAGES.map((s, i) => (
               <motion.div
                 key={s.id}
@@ -368,7 +368,7 @@ function Walkthrough() {
   }
 
   return (
-    <section id="pipeline" ref={sectionRef} className="relative h-screen overflow-hidden">
+    <section id="pipeline" ref={sectionRef} className="relative h-[88vh] overflow-hidden">
       {/* Header row */}
       <div className="pointer-events-none absolute inset-x-0 top-16 z-20 flex items-center justify-between px-6 sm:px-10">
         <p className="mono-label">The pipeline</p>
@@ -445,12 +445,12 @@ const FEATURES = [
 
 function Features() {
   return (
-    <section id="features" className="relative px-5 py-24">
+    <section id="features" className="relative px-5 py-16">
       <div className="mx-auto max-w-6xl">
         <div className="text-center">
           <SectionHeading eyebrow="features" title="Built like developer tooling" sub="Terminal-honest surfaces, git-graph signal colors, and a pipeline that never lies." />
         </div>
-        <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {FEATURES.map((f, i) => (
             <motion.div
               key={f.title}
@@ -477,9 +477,9 @@ function Features() {
 /* ------------------------------ Chat showcase ------------------------------ */
 function ChatShowcase() {
   return (
-    <section id="chat" className="relative px-5 py-24">
+    <section id="chat" className="relative px-5 py-16">
       <div className="mx-auto max-w-6xl">
-        <div className="grid items-center gap-12 lg:grid-cols-2">
+        <div className="grid items-center gap-10 lg:grid-cols-2">
           <motion.div
             initial={{ opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -491,11 +491,11 @@ function ChatShowcase() {
               title="Talk like a group chat."
               sub="Mentions that ping the right person, stickers for the wins, reactions for the small moments that keep a team moving."
             />
-            <ul className="mt-7 space-y-3">
+            <ul className="mt-6 space-y-3">
               {[
                 ['@mentions', 'Type @ and pick a teammate — their name turns into a teal chip and they get pinged.'],
                 ['Sticker pack', 'Ship it, party it, coffee-break it. Stickers render on vibrant tiles — no image uploads needed.'],
-                ['Reactions', 'Hover any message and react with one tap. A low-friction “+1” for the board.'],
+                ['Reactions', 'Hover any message and react with one tap. A low-friction "+1" for the board.'],
               ].map(([t, d]) => (
                 <li key={t} className="flex items-start gap-3 rounded-xl border border-line bg-card p-4 shadow-soft transition-transform duration-300 hover:-translate-y-0.5">
                   <span className="mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-lg fill-teal-soft text-teal">
@@ -642,7 +642,7 @@ function MetricsBand() {
   const [ref2, commits] = useCountUp(142, 0);
   const [ref3, uptime] = useCountUp(99.99, 2);
   return (
-    <section id="metrics" className="relative px-5 py-20">
+    <section id="metrics" className="relative px-5 py-14">
       <motion.div
         initial={{ opacity: 0, y: 24 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -672,7 +672,7 @@ function MetricsBand() {
 /* ---------------------------------- Final CTA ---------------------------------- */
 function FinalCTA() {
   return (
-    <section id="cta" className="relative overflow-hidden px-5 py-28">
+    <section id="cta" className="relative overflow-hidden px-5 py-20">
       <div className="pointer-events-none absolute inset-0" aria-hidden="true">
         <div className="absolute left-1/4 top-1/2 -translate-x-1/2 -translate-y-1/2">
           <div className="orb orb-b h-96 w-96 rounded-full" style={{ background: 'radial-gradient(circle, color-mix(in srgb, var(--signal-teal) 10%, transparent), transparent 70%)' }} />
@@ -745,7 +745,7 @@ function Footer() {
     { h: 'Resources', links: ['Docs', 'Changelog', 'Status', 'Contact'] },
   ];
   return (
-    <footer className="border-t border-line px-5 py-12">
+    <footer className="border-t border-line px-5 py-9">
       <div className="mx-auto grid max-w-6xl gap-10 md:grid-cols-[1.5fr_1fr_1fr_1fr_1fr]">
         <div>
           <div className="flex items-center gap-2">

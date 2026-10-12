@@ -16,7 +16,7 @@ import java.util.UUID;
 public class StatusHistory {
     @Id
     @GeneratedValue
-    private UUID id;
+    private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY , optional = false)
     @JoinColumn(name="issue_id",nullable = false)
@@ -32,5 +32,18 @@ public class StatusHistory {
     @JoinColumn(name="changed_by" ,nullable = false)
     private User changedBy;
 
-    private Instant changedAT;
+    private Instant changedAt;
+    public StatusHistory(
+            Issue issue,
+            IssueStatus previousStatus,
+            IssueStatus newStatus,
+            User changedBy,
+            Instant changedAt
+    ) {
+        this.issue = issue;
+        this.previousStatus = previousStatus;
+        this.newStatus = newStatus;
+        this.changedBy = changedBy;
+        this.changedAt = changedAt;
+    }
 }

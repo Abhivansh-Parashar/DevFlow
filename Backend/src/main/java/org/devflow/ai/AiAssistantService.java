@@ -1,4 +1,4 @@
-package org.devflow.analytics;
+package org.devflow.ai;
 
 import org.devflow.ai.dto.AiAskRequest;
 import org.devflow.ai.dto.AiAskResponse;
@@ -12,7 +12,6 @@ import org.devflow.project.ProjectRepository;
 import org.devflow.project.member.ProjectMemberRepository;
 import org.devflow.security.CurrentUser;
 import org.devflow.user.User;
-import org.devflow.workspace.WorkspaceMemberRepository;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
