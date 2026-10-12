@@ -15,7 +15,7 @@ public class UpdateIssueRequest {
 
     private String description;
 
-    private UUID assigneeId;
+    private Long assigneeId;
 
     private IssueType type;
 

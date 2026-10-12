@@ -11,9 +11,8 @@ import java.util.Optional;
 @Repository
 public interface ProjectRepository extends JpaRepository<Project , Long> {
     List<Project> findByWorkspaceId(Long workspaceId);
-    boolean existsByWorkspaceIdAndKeyPrefix(Long workspaceId, String prefix);
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     Optional<Project> findByIdWithLock(Long id);
-
-    long countByWorkspaceId(Long workspaceId);
+    boolean existsByWorkspaceIdAndKeyPrefix(Long workspaceId, String prefix);
+    Optional<Project> findById(Long id);
 }

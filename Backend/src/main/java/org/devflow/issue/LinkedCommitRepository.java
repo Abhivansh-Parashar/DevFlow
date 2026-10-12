@@ -6,4 +6,5 @@ import java.util.UUID;
 
 public interface LinkedCommitRepository extends JpaRepository<LinkedCommit, Long> {
     long countByIssueWorkspaceId(Long workspaceId);
+    void deleteByIssueId(Long issueId);
 }
