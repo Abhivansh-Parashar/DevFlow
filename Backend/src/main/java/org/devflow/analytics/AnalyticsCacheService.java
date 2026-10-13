@@ -46,11 +46,15 @@ public class AnalyticsCacheService {
         long totalCommits =
                 linkedCommitRepository.countByIssueWorkspaceId(workspaceId);
 
+        long totalContributors =
+                issueRepository.countDistinctContributorsByWorkspaceId(workspaceId);
+
         return AnalyticsDto.builder()
                 .totalIssues(totalIssues)
                 .openIssues(openIssues)
                 .completedIssues(completedIssues)
                 .totalCommits(totalCommits)
+                .totalContributors(totalContributors)
                 .build();
     }
 }
