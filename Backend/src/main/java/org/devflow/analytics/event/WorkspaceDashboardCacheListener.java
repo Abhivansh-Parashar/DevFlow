@@ -2,7 +2,6 @@ package org.devflow.analytics.event;
 
 import org.devflow.analytics.AnalyticsCacheInvalidator;
 import org.devflow.analytics.DashboardCacheInvalidator;
-import org.devflow.analytics.event.WorkspaceDashboardChangedEvent;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
