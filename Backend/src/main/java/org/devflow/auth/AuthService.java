@@ -1,5 +1,6 @@
 package org.devflow.auth;
 
+import jakarta.transaction.Transactional;
 import org.devflow.auth.dto.AuthResponse;
 import org.devflow.auth.dto.LoginRequest;
 import org.devflow.auth.dto.RefreshTokenRequest;
@@ -17,6 +18,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Service
 public class AuthService {
@@ -118,6 +120,50 @@ public class AuthService {
                 RefreshToken.builder()
                         .user(user)
                         .tokenHash(hashedRefreshToken)
+                        .expiresAt(LocalDateTime.now().plusDays(7))
+                        .build();
+
+        refreshTokenRepository.save(refreshTokenEntity);
+
+        return AuthResponse.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .build();
+    }
+
+    @Transactional
+    public AuthResponse loginWithGoogle(
+            String name,
+            String email,
+            String avatar
+    ) {
+        User user = userRepository.findByEmail(email)
+                .orElseGet(() -> {
+                    User newUser = User.builder()
+                            .name(name)
+                            .email(email)
+                            .passwordHash(
+                                    passwordEncoder.encode(
+                                            UUID.randomUUID().toString()
+                                    )
+                            )
+                            .role(WorkspaceRole.MEMBER)
+                            .avatar(avatar)
+                            .build();
+
+                    return userRepository.save(newUser);
+                });
+
+        String accessToken =
+                jwtService.generateAccessToken(user);
+
+        String refreshToken =
+                jwtService.generateRefreshToken();
+
+        RefreshToken refreshTokenEntity =
+                RefreshToken.builder()
+                        .user(user)
+                        .tokenHash(hashRefreshToken(refreshToken))
                         .expiresAt(LocalDateTime.now().plusDays(7))
                         .build();
 

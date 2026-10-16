@@ -6,6 +6,8 @@ spring:
   application:
     name: Devflow-Backend
 
+app:
+  frontend-url: http://localhost:5173
   datasource:
     url: ${DB_URL}
     username: ${DB_USERNAME}
