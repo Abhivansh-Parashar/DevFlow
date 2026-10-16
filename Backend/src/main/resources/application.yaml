@@ -14,7 +14,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: none
+      ddl-auto: update
     open-in-view: false
     properties:
       hibernate:
@@ -36,7 +36,6 @@ spring:
             scope:
               - email
               - profile
-
 jwt:
   secret: ${JWT_SECRET}
 server:
