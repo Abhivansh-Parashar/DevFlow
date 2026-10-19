@@ -35,4 +35,17 @@ public class Invite {
 
     @Enumerated(EnumType.STRING)
     private InviteStatus status;
+
+    public Invite(Workspace workspace, String email, User invitedBy, String token, Instant expiresAt) {
+        this.workspace = workspace;
+        this.email = email;
+        this.invitedBy = invitedBy;
+        this.token = token;
+        this.expiresAt = expiresAt;
+        this.status = InviteStatus.PENDING;
+    }
+
+    public void setStatus(InviteStatus status) {
+        this.status = status;
+    }
 }
