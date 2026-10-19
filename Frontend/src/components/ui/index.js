@@ -13,3 +13,5 @@ export { Label, Field, Input, Textarea, Select, Toggle } from './form';
 export { RichText, splitCode, CodeBlock } from './RichText';
 export { CustomCursor } from './CustomCursor';
 
+
+export { UnderDevelopmentModal } from './UnderDevelopmentModal';

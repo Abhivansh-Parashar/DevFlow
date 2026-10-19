@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { Users, UserPlus, Building2, FolderKanban, ShieldCheck } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
-import { Avatar, Badge, Button, Dropdown, EmptyState, Modal } from '../components/ui';
+import { Avatar, Badge, Button, Dropdown, EmptyState, Modal, Field, Input } from '../components/ui';
 import { WORKSPACE_ROLES, PROJECT_ROLES } from '../lib/constants';
 import { cx, timeAgo } from '../lib/utils';
+import { memberService, workspaceService } from '../lib/api/services';
 
 export function MembersPage() {
   const activeWorkspace = useAppStore((s) => s.activeWorkspace());
@@ -100,7 +101,8 @@ export function MembersPage() {
                     className="text-coral hover:fill-coral-soft"
                     onClick={() => {
                       if (isWorkspace) useAppStore.getState().removeWorkspaceMember(activeWorkspace.id, uid);
-                      else useAppStore.getState().removeProjectMember(activeProject.id, uid);
+                      else if (!/^\d+$/.test(String(activeProject.id))) useAppStore.getState().removeProjectMember(activeProject.id, uid);
+                      else memberService.remove(activeProject.id, uid).then(() => useAppStore.getState().removeProjectMember(activeProject.id, uid)).catch((err) => useAppStore.getState().toast('error', err.message || 'Unable to remove member'));
                     }}
                   >
                     Remove
@@ -126,13 +128,22 @@ function RoleBadge({ role }) {
 
 function RoleDropdown({ scope, scopeId, userId, role, roles }) {
   const setRole = useAppStore((s) => (scope === 'workspace' ? s.setWorkspaceRole : s.setProjectRole));
+  const toast = useAppStore((s) => s.toast);
   return (
     <Dropdown
       width="w-36"
       items={roles.map((r) => ({
         label: r,
         checked: r === role,
-        onClick: () => setRole(scopeId, userId, r),
+        onClick: () => {
+          if (scope === 'workspace') {
+            toast('info', 'Workspace member roles are under development.');
+          } else if (!/^\d+$/.test(String(scopeId))) {
+            setRole(scopeId, userId, r);
+          } else {
+            memberService.role(scopeId, userId, r.toUpperCase()).then(() => setRole(scopeId, userId, r)).catch((err) => toast('error', err.message || 'Unable to update role'));
+          }
+        },
       }))}
       trigger={
         <button className="focus-ring flex w-32 items-center justify-between gap-1 rounded-lg border border-line bg-raised px-2.5 py-1.5 text-xs font-medium text-ink hover:border-teal">
@@ -150,6 +161,9 @@ function AddMemberModal({ isOpen, onClose, workspace }) {
   const users = useAppStore((s) => s.users);
   const addWorkspaceMember = useAppStore((s) => s.addWorkspaceMember);
   const addProjectMember = useAppStore((s) => s.addProjectMember);
+  const toast = useAppStore((s) => s.toast);
+  const [email, setEmail] = useState('');
+  const [sending, setSending] = useState(false);
 
   if (!isOpen) return null;
 
@@ -166,7 +180,33 @@ function AddMemberModal({ isOpen, onClose, workspace }) {
       title={workspace ? 'Add workspace member' : `Add member from ${activeWorkspace.name}`}
       subtitle={workspace ? 'They will see every project in the workspace.' : 'Only workspace members can be added — project access stays a strict subset.'}
     >
-      {candidates.length === 0 ? (
+      {workspace ? (
+        <form
+          className="space-y-4"
+          onSubmit={async (event) => {
+            event.preventDefault();
+            if (!email.trim() || sending) return;
+            setSending(true);
+            try {
+              await workspaceService.invite(activeWorkspace.id, email.trim());
+              toast('success', `Invitation sent to ${email.trim()}.`);
+              setEmail('');
+              onClose();
+            } catch (error) {
+              toast('error', error.message || 'Unable to send invitation.');
+            } finally {
+              setSending(false);
+            }
+          }}
+        >
+          <Field label="Email address" hint="The person will see the invitation after signing in.">
+            <Input autoFocus type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="teammate@company.dev" />
+          </Field>
+          <div className="flex justify-end">
+            <Button type="submit" disabled={!email.trim() || sending}>{sending ? 'Sending…' : 'Send invitation'}</Button>
+          </div>
+        </form>
+      ) : candidates.length === 0 ? (
         <EmptyState compact icon={UserPlus} title="No candidates" description={workspace ? 'All users are already members.' : 'Every workspace member is already on this project.'} />
       ) : (
         <div className="max-h-[360px] space-y-1 overflow-y-auto">
@@ -183,8 +223,13 @@ function AddMemberModal({ isOpen, onClose, workspace }) {
                 onClick={() => {
                   if (workspace) {
                     if (addWorkspaceMember(activeWorkspace.id, u.id)) onClose();
-                  } else if (addProjectMember(activeProject.id, u.id)) {
-                    onClose();
+                  } else {
+                    if (!/^\d+$/.test(String(activeProject.id))) {
+                      addProjectMember(activeProject.id, u.id);
+                      onClose();
+                    } else {
+                      memberService.add(activeProject.id, { userId: u.id, role: 'MEMBER' }).then(() => { addProjectMember(activeProject.id, u.id); onClose(); }).catch((err) => useAppStore.getState().toast('error', err.message || 'Unable to add member'));
+                    }
                   }
                 }}
               >

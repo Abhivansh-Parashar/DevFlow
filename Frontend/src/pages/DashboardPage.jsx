@@ -13,6 +13,7 @@ import { useAppStore } from '../store/useAppStore';
 import { Avatar, AvatarStack, Badge, EmptyState, Button } from '../components/ui';
 import { STATUSES, STATUS_COLORS, STATUS_MAP } from '../lib/constants';
 import { cx, fmt, timeAgo } from '../lib/utils';
+import { dashboardService } from '../lib/api/services';
 
 const EASE = [0.16, 1, 0.3, 1];
 
@@ -99,6 +100,19 @@ export function DashboardPage() {
   const issues = useAppStore((s) => s.issues);
   const users = useAppStore((s) => s.users);
   const currentUserId = useAppStore((s) => s.currentUserId);
+  const [backendStats, setBackendStats] = useState(null);
+  const [backendLoading, setBackendLoading] = useState(false);
+  const [backendError, setBackendError] = useState('');
+
+  useEffect(() => {
+    if (!activeWorkspace?.id || !/^\d+$/.test(String(activeWorkspace.id))) return;
+    setBackendLoading(true);
+    setBackendError('');
+    dashboardService.get(activeWorkspace.id)
+      .then(setBackendStats)
+      .catch((err) => setBackendError(err.message || 'Unable to load dashboard data.'))
+      .finally(() => setBackendLoading(false));
+  }, [activeWorkspace?.id]);
 
   const stats = useMemo(() => {
     if (!activeProject) return null;
@@ -213,6 +227,10 @@ export function DashboardPage() {
           </span>
         </div>
       </div>
+
+      {backendError && <p className="mt-4 rounded-lg border border-coral-soft px-3 py-2 text-xs text-coral">{backendError}</p>}
+      {backendLoading && <p className="mt-4 text-xs text-muted">Refreshing dashboard data?</p>}
+      {backendStats && <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-5">{[['Projects',backendStats.totalProjects],['Issues',backendStats.totalIssues],['Open',backendStats.openIssues],['Completed',backendStats.completedIssues],['Members',backendStats.totalMembers]].map(([label,value])=><div key={label} className="card-surface rounded-xl p-3"><p className="text-xs text-muted">{label}</p><p className="mt-1 font-mono text-xl font-bold text-ink">{value ?? '?'}</p></div>)}</div>}
 
       {/* =============================== Bento grid =============================== */}
       <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-12">

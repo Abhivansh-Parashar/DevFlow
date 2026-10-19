@@ -5,6 +5,8 @@ import { useAppStore } from '../store/useAppStore';
 import { Avatar, AvatarStack, EmptyState, RichText, CodeBlock, splitCode } from '../components/ui';
 import { timeAgo, cx } from '../lib/utils';
 import { STICKER_MAP, STICKER_CATEGORIES, QUICK_REACTIONS } from '../lib/stickers';
+import { chatService } from '../lib/api/services';
+import { UnderDevelopmentModal } from '../components/ui';
 
 /* ------------------------------ Sticker bubble ------------------------------ */
 function StickerBubble({ msg }) {
@@ -189,6 +191,10 @@ export function ChatPage() {
   const toggleReaction = useAppStore((s) => s.toggleReaction);
   const currentUserId = useAppStore((s) => s.currentUserId);
   const [draft, setDraft] = useState('');
+  const [messages, setMessages] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [unsupportedOpen, setUnsupportedOpen] = useState(false);
   const [stickerOpen, setStickerOpen] = useState(false);
   const [pickerFor, setPickerFor] = useState(null);
   const [mentionIdx, setMentionIdx] = useState(0);
@@ -197,7 +203,20 @@ export function ChatPage() {
   const inputRef = useRef(null);
   const pickerRef = useRef(null);
 
-  const messages = activeProject ? (chat[activeProject.id] ?? []) : [];
+  useEffect(() => {
+    if (!activeProject) return;
+    setLoading(true); setError('');
+    if (!/^\d+$/.test(String(activeProject.id))) {
+      const rows = chat[activeProject.id] ?? [];
+      setMessages(rows);
+      setLoading(false);
+      return;
+    }
+    chatService.list(activeProject.id).then((data) => {
+      const rows = data?.content || data || [];
+      setMessages(rows.map((m) => ({ id: String(m.id), projectId: activeProject.id, authorId: String(m.senderId), body: m.content, createdAt: m.createdAt })));
+    }).catch((err) => setError(err.message || 'Unable to load chat.')).finally(() => setLoading(false));
+  }, [activeProject?.id]);
   const typers = activeProject
     ? (typing[activeProject.id] ?? []).map((id) => users.find((u) => u.id === id)).filter(Boolean)
     : [];
@@ -259,19 +278,35 @@ export function ChatPage() {
 
   const submit = () => {
     if (!draft.trim()) return;
-    sendChat(activeProject.id, draft);
-    setDraft('');
+    setLoading(true); setError('');
+    if (!/^\d+$/.test(String(activeProject.id))) {
+      const message = {
+        id: `local-${Date.now()}`,
+        projectId: activeProject.id,
+        authorId: currentUserId,
+        body: draft.trim(),
+        createdAt: new Date().toISOString(),
+      };
+      sendChat(activeProject.id, draft);
+      setMessages((rows) => [...rows, message]);
+      setDraft('');
+      setLoading(false);
+      inputRef.current?.focus();
+      return;
+    }
+    chatService.send(activeProject.id, { content: draft, clientId: `web-${Date.now()}` }).then((m) => { setMessages((rows) => [...rows, { id: String(m.id), projectId: activeProject.id, authorId: String(m.senderId), body: m.content, createdAt: m.createdAt }]); setDraft(''); }).catch((err) => setError(err.message || 'Unable to send message.')).finally(() => setLoading(false));
     inputRef.current?.focus();
   };
 
   const sendSticker = (id) => {
-    sendChat(activeProject.id, '', { sticker: id });
+    setUnsupportedOpen(true);
     setStickerOpen(false);
     inputRef.current?.focus();
   };
 
   return (
     <div className="flex h-[calc(100vh-56px)] flex-col">
+      <UnderDevelopmentModal isOpen={unsupportedOpen} onClose={() => setUnsupportedOpen(false)} feature="Chat stickers and realtime reactions" />
       {/* Header */}
       <div className="flex flex-wrap items-center gap-3 border-b border-line px-5 py-3.5">
         <span className="grid h-8 w-8 place-items-center rounded-lg fill-teal-soft text-teal">
@@ -289,9 +324,11 @@ export function ChatPage() {
       </div>
 
       {/* Messages */}
+      {error && <p className="border-b border-coral-soft px-5 py-2 text-xs text-coral">{error}</p>}
+      {loading && <p className="px-5 py-2 text-xs text-muted">Loading messages?</p>}
       <div className="flex-1 space-y-4 overflow-y-auto px-5 py-5">
         {messages.length === 0 && (
-          <EmptyState compact icon={MessageSquare} title="No messages yet" description="Say hi to the project — replies are simulated by your teammates." />
+          <EmptyState compact icon={MessageSquare} title="No messages yet" description="Start the conversation with your project team." />
         )}
         {messages.map((m) => (
           <Message
@@ -301,7 +338,7 @@ export function ChatPage() {
             isMine={m.authorId === currentUserId}
             projectId={activeProject.id}
             reactions={reactions}
-            toggleReaction={toggleReaction}
+            toggleReaction={() => setUnsupportedOpen(true)}
             currentUserId={currentUserId}
             pickerFor={pickerFor}
             setPickerFor={setPickerFor}

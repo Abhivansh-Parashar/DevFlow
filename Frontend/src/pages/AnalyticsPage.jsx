@@ -8,6 +8,8 @@ import { useAppStore } from '../store/useAppStore';
 import { Card, EmptyState } from '../components/ui';
 import { STATUSES, STATUS_COLORS } from '../lib/constants';
 import { fmt } from '../lib/utils';
+import { analyticsService } from '../lib/api/services';
+import { useEffect, useState } from 'react';
 
 const tooltipStyle = {
   background: 'var(--surface-card)',
@@ -21,6 +23,19 @@ const tooltipStyle = {
 export function AnalyticsPage() {
   const activeProject = useAppStore((s) => s.activeProject());
   const issues = useAppStore((s) => s.issues);
+  const [backendStats, setBackendStats] = useState(null);
+  const [backendLoading, setBackendLoading] = useState(false);
+  const [backendError, setBackendError] = useState('');
+
+  useEffect(() => {
+    if (!activeProject?.workspaceId || !/^\d+$/.test(String(activeProject.workspaceId))) return;
+    setBackendLoading(true);
+    setBackendError('');
+    analyticsService.get(activeProject.workspaceId)
+      .then(setBackendStats)
+      .catch((err) => setBackendError(err.message || 'Unable to load analytics data.'))
+      .finally(() => setBackendLoading(false));
+  }, [activeProject?.workspaceId]);
 
   const stats = useMemo(() => {
     if (!activeProject) return null;
@@ -90,6 +105,9 @@ export function AnalyticsPage() {
 
   return (
     <div className="mx-auto max-w-6xl px-5 py-6">
+      {backendError && <p className="mb-3 rounded-lg border border-coral-soft px-3 py-2 text-xs text-coral">{backendError}</p>}
+      {backendLoading && <p className="mb-3 text-xs text-muted">Refreshing analytics data?</p>}
+      {backendStats && <p className="mb-3 text-xs text-muted">Backend totals: {backendStats.totalIssues ?? 0} issues ? {backendStats.totalCommits ?? 0} commits ? {backendStats.totalContributors ?? 0} contributors.</p>}
       <div className="flex items-center gap-3">
         <span className="grid h-9 w-9 place-items-center rounded-xl fill-teal-soft text-teal"><BarChart3 size={18} /></span>
         <div>

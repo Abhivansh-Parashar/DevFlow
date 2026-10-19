@@ -53,10 +53,10 @@ export function AppShell() {
   useEffect(() => {
     if (!signedIn || !currentUserId) return;
     const st = useAppStore.getState();
-    if (st.activeWorkspaceId) return;
     const assigned = st.workspaces.filter((w) => w.memberIds.includes(currentUserId));
+    if (assigned.length && st.activeWorkspaceId && assigned.some((w) => w.id === st.activeWorkspaceId)) return;
     if (assigned.length) st.setActiveWorkspace(assigned[0].id);
-    else st.createWorkspace({ name: 'My Workspace' });
+    else useAppStore.setState({ activeWorkspaceId: null, activeProjectId: null });
   }, [signedIn, currentUserId, activeWorkspaceId]);
 
   if (!signedIn || !currentUserId) return <Navigate to="/login" replace />;

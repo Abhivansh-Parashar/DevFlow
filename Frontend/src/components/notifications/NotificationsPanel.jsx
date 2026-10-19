@@ -71,7 +71,7 @@ export function NotificationsPanel() {
               <div className="flex shrink-0 items-center gap-1">
                 {unread > 0 && (
                   <button
-                    onClick={markAll}
+                    onClick={() => markAll()}
                     className="focus-ring flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium text-teal hover:bg-raised"
                   >
                     <CheckCheck size={13} /> Mark all read
@@ -79,7 +79,7 @@ export function NotificationsPanel() {
                 )}
                 {notifications.length > 0 && (
                   <button
-                    onClick={clearAll}
+                    onClick={() => clearAll()}
                     aria-label="Clear all notifications"
                     title="Clear all"
                     className="focus-ring grid h-7 w-7 place-items-center rounded-md text-muted transition-colors hover:bg-raised hover:text-coral"

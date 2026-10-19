@@ -2,10 +2,15 @@ import { useState } from 'react';
 import { Modal, Field, Input, Textarea, Button } from '../ui';
 import { useAppStore } from '../../store/useAppStore';
 import { PROJECT_ACCENTS } from '../../lib/constants';
+import { projectService } from '../../lib/api/services';
 import { cx } from '../../lib/utils';
 
 export function CreateProjectModal({ isOpen, onClose }) {
+  const activeWorkspace = useAppStore((s) => s.activeWorkspace());
+  const toast = useAppStore((s) => s.toast);
   const createProject = useAppStore((s) => s.createProject);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [color, setColor] = useState(PROJECT_ACCENTS[0]);
@@ -13,11 +18,21 @@ export function CreateProjectModal({ isOpen, onClose }) {
   const [localRepoPath, setLocalRepoPath] = useState('');
   const [ideUrl, setIdeUrl] = useState('');
 
-  const submit = (e) => {
+  const submit = async (e) => {
     e.preventDefault();
     if (!name.trim()) return;
-    createProject({ name, description, color, repoUrl, localRepoPath, ideUrl });
-    onClose();
+    if (!activeWorkspace || saving) return;
+    setSaving(true); setError('');
+    try {
+      if (!/^\d+$/.test(String(activeWorkspace.id))) {
+        createProject({ name, description, color, repoUrl, localRepoPath, ideUrl });
+        onClose();
+        return;
+      }
+      const project = await projectService.create(activeWorkspace.id, { name, repoUrl: repoUrl || undefined });
+      useAppStore.setState((state) => ({ projects: [...state.projects, { ...project, color, icon: '#', memberIds: [state.currentUserId], roles: { [state.currentUserId]: 'Owner' } }], activeProjectId: project.id }));
+      toast('success', 'Project created'); onClose();
+    } catch (err) { setError(err.message || 'Unable to create project.'); } finally { setSaving(false); }
     setName('');
     setDescription('');
     setRepoUrl('');
@@ -34,11 +49,12 @@ export function CreateProjectModal({ isOpen, onClose }) {
       footer={
         <>
           <Button variant="ghost" onClick={onClose}>Cancel</Button>
-          <Button onClick={submit} disabled={!name.trim()}>Create project</Button>
+          <Button onClick={submit} disabled={!name.trim() || saving}>{saving ? 'Creating?' : 'Create project'}</Button>
         </>
       }
     >
       <form onSubmit={submit} className="space-y-4">
+        {error && <p className="rounded-lg border border-coral-soft px-3 py-2 text-xs text-coral">{error}</p>}
         <Field label="Project name" hint="Visible to workspace members only.">
           <Input autoFocus value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Design System" />
         </Field>

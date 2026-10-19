@@ -4,6 +4,7 @@ import { useAppStore } from '../store/useAppStore';
 import { Card, Field, Input, Button, Toggle, Avatar, Badge, Modal, WorkspaceLogo } from '../components/ui';
 import { AVATAR_COLORS } from '../lib/constants';
 import { cx } from '../lib/utils';
+import { userService } from '../lib/api/services';
 
 const MAX_PHOTO_BYTES = 2 * 1024 * 1024;
 
@@ -26,6 +27,8 @@ export function AccountPage() {
   const [avatar, setAvatar] = useState(currentUser?.avatar ?? '');
   const [photoUrl, setPhotoUrl] = useState('');
   const [leaveTarget, setLeaveTarget] = useState(null);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
   const fileRef = useRef(null);
 
   useEffect(() => {
@@ -47,14 +50,11 @@ export function AccountPage() {
       toast('error', 'Name cannot be empty');
       return;
     }
-    updateUser(currentUser.id, {
-      name: name.trim(),
-      email: email.trim() || currentUser.email,
-      color,
-      online,
-      avatar,
-    });
-    toast('success', 'Account settings saved');
+    setSaving(true); setError('');
+    userService.update({ name: name.trim(), email: email.trim() || currentUser.email, avatar })
+      .then((updated) => { useAppStore.setState((state) => ({ users: state.users.map((u) => (u.id === currentUser.id ? { ...u, ...updated, color, online } : u)) })); toast('success', 'Account settings saved'); })
+      .catch((err) => setError(err.message || 'Unable to save account.'))
+      .finally(() => setSaving(false));
   };
 
   const onPickFile = (e) => {
@@ -71,7 +71,7 @@ export function AccountPage() {
     }
     const reader = new FileReader();
     reader.onload = () => {
-      setAvatar(reader.result);
+      userService.avatar(file).then((result) => setAvatar(result.avatarUrl || result.url || reader.result)).catch((err) => setError(err.message || 'Unable to upload photo.'));
       setPhotoUrl('');
     };
     reader.readAsDataURL(file);
@@ -106,6 +106,7 @@ export function AccountPage() {
       </div>
 
       <Card className="mt-6 space-y-5 p-5">
+        {error && <p className="rounded-lg border border-coral-soft px-3 py-2 text-xs text-coral">{error}</p>}
         <div className="flex items-center gap-4">
           <Avatar user={previewUser} size={56} showStatus />
           <div className="min-w-0">
@@ -179,7 +180,7 @@ export function AccountPage() {
         </div>
 
         <div className="flex justify-end border-t border-line pt-4">
-          <Button icon={Save} onClick={save}>Save changes</Button>
+          <Button icon={Save} onClick={save} disabled={saving}>{saving ? 'Saving?' : 'Save changes'}</Button>
         </div>
       </Card>
 

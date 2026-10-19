@@ -3,6 +3,7 @@ import { useAppStore } from '../../store/useAppStore';
 import { SlideOverPanel, Field, Input, Textarea, Select, Button, Avatar } from '../ui';
 import { STATUSES, PRIORITIES, LABELS } from '../../lib/constants';
 import { cx } from '../../lib/utils';
+import { UnderDevelopmentModal } from '../ui';
 
 export function NewIssueSlideOver({ isOpen, onClose, initialStatus = 'backlog', project, members }) {
   const createIssue = useAppStore((s) => s.createIssue);
@@ -14,6 +15,7 @@ export function NewIssueSlideOver({ isOpen, onClose, initialStatus = 'backlog', 
   const [labels, setLabels] = useState([]);
   const [assigneeId, setAssigneeId] = useState(currentUserId);
   const [status, setStatus] = useState(initialStatus);
+  const [unsupportedOpen, setUnsupportedOpen] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
@@ -26,7 +28,7 @@ export function NewIssueSlideOver({ isOpen, onClose, initialStatus = 'backlog', 
     }
   }, [isOpen, initialStatus, currentUserId]);
 
-  const submit = () => {
+  const submit = () => { setUnsupportedOpen(true); return;
     const id = createIssue({
       projectId: project.id,
       title,
@@ -40,6 +42,8 @@ export function NewIssueSlideOver({ isOpen, onClose, initialStatus = 'backlog', 
   };
 
   return (
+    <>
+    <UnderDevelopmentModal isOpen={unsupportedOpen} onClose={() => setUnsupportedOpen(false)} feature="Issue creation" />
     <SlideOverPanel
       isOpen={isOpen}
       onClose={onClose}
@@ -124,5 +128,6 @@ export function NewIssueSlideOver({ isOpen, onClose, initialStatus = 'backlog', 
         </div>
       </div>
     </SlideOverPanel>
+    </>
   );
 }

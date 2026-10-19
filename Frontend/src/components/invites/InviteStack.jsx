@@ -4,6 +4,7 @@ import { X, Check, Mail, Users } from 'lucide-react';
 import { useAppStore } from '../../store/useAppStore';
 import { Avatar, AvatarStack, Badge, WorkspaceLogo } from '../ui';
 import { timeAgo } from '../../lib/utils';
+import { inviteService } from '../../lib/api/services';
 
 /**
  * InviteStack — the "first screen after login" experience when there are
@@ -14,10 +15,8 @@ import { timeAgo } from '../../lib/utils';
 export function InviteStack() {
   const invites = useAppStore((s) => s.invites);
   const users = useAppStore((s) => s.users);
-  const projects = useAppStore((s) => s.projects);
   const workspaces = useAppStore((s) => s.workspaces);
-  const acceptInvite = useAppStore((s) => s.acceptInvite);
-  const declineInvite = useAppStore((s) => s.declineInvite);
+  const toast = useAppStore((s) => s.toast);
   // id → 'accept' | 'decline' — drives the fly-out animation.
   const [fly, setFly] = useState({});
 
@@ -38,11 +37,37 @@ export function InviteStack() {
 
   const finish = (id) => {
     const dir = fly[id];
-    if (dir === 'accept') acceptInvite(id);
-    else if (dir === 'decline') declineInvite(id);
+    if (dir === 'accept') {
+      inviteService.accept(id).then((workspace) => {
+        const normalized = {
+          ...workspace,
+          id: String(workspace.id),
+          memberIds: (workspace.memberIds || []).map(String),
+          roles: Object.fromEntries(Object.entries(workspace.roles || {}).map(([key, value]) => [String(key), String(value).replace('_', ' ').replace(/\b\w/g, (letter) => letter.toUpperCase())])),
+        };
+        useAppStore.setState((state) => ({
+          invites: state.invites.filter((invite) => invite.id !== id),
+          workspaces: [...state.workspaces.filter((item) => item.id !== normalized.id), normalized],
+          activeWorkspaceId: normalized.id,
+          activeProjectId: null,
+        }));
+        toast('success', `You joined ${normalized.name}.`);
+      }).catch((error) => toast('error', error.message || 'Unable to accept invitation.'));
+    }
+    if (dir === 'decline') {
+      inviteService.decline(id)
+        .then(() => useAppStore.setState((state) => ({ invites: state.invites.filter((invite) => invite.id !== id) })))
+        .catch((error) => toast('error', error.message || 'Unable to decline invitation.'));
+    }
+    setFly((current) => {
+      const next = { ...current };
+      delete next[id];
+      return next;
+    });
   };
 
   return (
+    <>
     <div className="fixed inset-0 z-[70] flex items-center justify-center overflow-hidden">
       {/* Backdrop */}
       <motion.div
@@ -84,7 +109,6 @@ export function InviteStack() {
                 invite={inv}
                 index={i}
                 users={users}
-                projects={projects}
                 workspaces={workspaces}
                 dir={dir}
                 top={i === 0}
@@ -108,15 +132,14 @@ export function InviteStack() {
         </motion.p>
       </div>
     </div>
+    </>
   );
 }
 
-function InviteCard({ invite, index, users, projects, workspaces, dir, top, onAccept, onDecline, onDone }) {
-  const from = users.find((u) => u.id === invite.fromUserId);
-  const isProject = invite.type === 'project';
-  const project = isProject ? projects.find((p) => p.id === invite.projectId) : null;
+function InviteCard({ invite, index, users, workspaces, dir, top, onAccept, onDecline, onDone }) {
+  const isProject = false;
   const workspace = workspaces.find((w) => w.id === invite.workspaceId);
-  const memberIds = isProject ? project?.memberIds ?? [] : workspace?.memberIds ?? [];
+  const memberIds = workspace?.memberIds ?? [];
   const members = users.filter((u) => memberIds.includes(u.id));
 
   // Drag mechanics: x drives the swipe tilt + a directional glow. Only the top
@@ -227,7 +250,7 @@ function InviteCard({ invite, index, users, projects, workspaces, dir, top, onAc
                 className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl text-xl font-bold text-white"
                 style={{ background: project?.color ?? workspace?.accent }}
               >
-                {project ? project.icon : <WorkspaceLogo id={workspace?.icon} size={26} fallback={workspace?.icon ?? '◆'} />}
+                <WorkspaceLogo id={workspace?.icon} size={26} fallback={workspace?.icon ?? '◆'} />
               </span>
               <div className="min-w-0">
                 <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-teal">invited to</p>
@@ -244,9 +267,9 @@ function InviteCard({ invite, index, users, projects, workspaces, dir, top, onAc
             <div className="mt-5 flex items-center gap-3">
               <Avatar user={from} size={36} showStatus />
               <div className="min-w-0">
-                <p className="truncate text-[13px] font-semibold text-ink">{from?.name}</p>
+                <p className="truncate text-[13px] font-semibold text-ink">{invite.workspaceName || workspace?.name || 'Workspace invitation'}</p>
                 <p className="text-[11.5px] text-muted">
-                  {isProject ? 'asked you to join this project' : 'invited you to this workspace'} · {timeAgo(invite.createdAt)}
+                  invited you to this workspace · {timeAgo(invite.expiresAt)}
                 </p>
               </div>
             </div>
@@ -256,7 +279,7 @@ function InviteCard({ invite, index, users, projects, workspaces, dir, top, onAc
               <div className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted">
                 <Mail size={11} /> invitation
               </div>
-              <p className="mt-1.5 text-[13px] italic leading-relaxed text-ink">“{invite.message}”</p>
+              <p className="mt-1.5 text-[13px] italic leading-relaxed text-ink">“Join the team and start shipping together.”</p>
             </div>
 
             <div className="flex-1" />

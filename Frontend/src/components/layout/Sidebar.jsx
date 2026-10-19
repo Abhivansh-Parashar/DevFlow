@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
@@ -6,10 +6,13 @@ import {
   BarChart3, Sparkles, User, Settings, X, LogOut, Gauge,
 } from 'lucide-react';
 import { useAppStore } from '../../store/useAppStore';
-import { Dropdown, Avatar, Modal, Field, Input, Button, Badge, WorkspaceLogo } from '../ui';
+import { Dropdown, Avatar, Badge, WorkspaceLogo } from '../ui';
 import { CreateProjectModal } from '../projects/CreateProjectModal';
+import { CreateWorkspaceModal } from '../workspaces/CreateWorkspaceModal';
 import { navItems } from '../../lib/constants';
 import { cx } from '../../lib/utils';
+import { projectService, authService } from '../../lib/api/services';
+import { tokenStore } from '../../lib/api/client';
 
 const ICONS = {
   dashboard: Gauge,
@@ -26,9 +29,7 @@ function WorkspaceSwitcher() {
   const setActiveWorkspace = useAppStore((s) => s.setActiveWorkspace);
   const currentUserId = useAppStore((s) => s.currentUserId);
   const role = useAppStore((s) => (s.activeWorkspace() ? s.workspaceRole(s.activeWorkspace().id) : ''));
-  const createWorkspace = useAppStore((s) => s.createWorkspace);
   const [createOpen, setCreateOpen] = useState(false);
-  const [name, setName] = useState('');
 
   const assigned = workspaces.filter((w) => w.memberIds.includes(currentUserId));
 
@@ -40,7 +41,7 @@ function WorkspaceSwitcher() {
       checked: w.id === activeWorkspace?.id,
       onClick: () => setActiveWorkspace(w.id),
     })),
-    { divider: true },
+    ...(assigned.length ? [{ divider: true }] : []),
     { label: 'Create workspace', icon: Plus, onClick: () => setCreateOpen(true) },
   ];
 
@@ -67,32 +68,7 @@ function WorkspaceSwitcher() {
         }
         items={items}
       />
-
-      <Modal
-        isOpen={createOpen}
-        onClose={() => setCreateOpen(false)}
-        title="Create workspace"
-        subtitle="The top-level container — you'll be its Owner."
-        footer={
-          <>
-            <Button variant="ghost" onClick={() => setCreateOpen(false)}>Cancel</Button>
-            <Button
-              disabled={!name.trim()}
-              onClick={() => {
-                createWorkspace({ name });
-                setCreateOpen(false);
-                setName('');
-              }}
-            >
-              Create workspace
-            </Button>
-          </>
-        }
-      >
-        <Field label="Workspace name">
-          <Input autoFocus value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Orbital Systems" />
-        </Field>
-      </Modal>
+      <CreateWorkspaceModal isOpen={createOpen} onClose={() => setCreateOpen(false)} />
     </>
   );
 }
@@ -107,6 +83,26 @@ function ProjectList() {
   const users = useAppStore((s) => s.users);
   const navigate = useNavigate();
   const [createOpen, setCreateOpen] = useState(false);
+  const [loadError, setLoadError] = useState('');
+
+  useEffect(() => {
+    if (!activeWorkspace?.id || !/^\d+$/.test(String(activeWorkspace.id))) return;
+    projectService.list(activeWorkspace.id)
+      .then((rows) => useAppStore.setState((state) => {
+        const loaded = (Array.isArray(rows) ? rows : []).map((project) => ({
+          ...project,
+          id: String(project.id),
+          workspaceId: String(project.workspaceId ?? activeWorkspace.id),
+          memberIds: (project.memberIds || [state.currentUserId]).map(String),
+          roles: project.roles || { [state.currentUserId]: 'Owner' },
+        }));
+        const current = state.activeProjectId && loaded.some((project) => project.id === state.activeProjectId)
+          ? state.activeProjectId
+          : loaded[0]?.id ?? null;
+        return { projects: [...state.projects.filter((project) => project.workspaceId !== String(activeWorkspace.id)), ...loaded], activeProjectId: current };
+      }))
+      .catch((err) => setLoadError(err.message || 'Unable to load projects.'));
+  }, [activeWorkspace?.id]);
 
   if (!activeWorkspace) return null;
   const scoped = projects.filter((p) => p.workspaceId === activeWorkspace.id && p.memberIds.includes(currentUserId));
@@ -220,9 +216,14 @@ function UserCard({ onNavigate }) {
       icon: LogOut,
       danger: true,
       onClick: () => {
-        signOut();
-        toast('info', 'Signed out — see you soon.');
-        navigate('/login');
+        authService.logout(tokenStore.refresh)
+          .catch(() => toast('error', 'Server logout failed; local session was cleared.'))
+          .finally(() => {
+            tokenStore.clear();
+            signOut();
+            toast('info', 'Signed out — see you soon.');
+            navigate('/login');
+          });
       },
     },
   ];

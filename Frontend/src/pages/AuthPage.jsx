@@ -3,7 +3,9 @@ import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Github, ArrowRight, Eye, EyeOff } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
-import { Button, Field, Input } from '../components/ui';
+import { Button, Field, Input, UnderDevelopmentModal } from '../components/ui';
+import { authService, userService } from '../lib/api/services';
+import { tokenStore } from '../lib/api/client';
 
 function PipelineCanvas() {
   return (
@@ -62,10 +64,11 @@ export function AuthPage({ mode = 'login' }) {
   const [name, setName] = useState('');
   const [showPw, setShowPw] = useState(false);
   const [error, setError] = useState('');
+  const [ssoOpen, setSsoOpen] = useState(false);
 
   const isLogin = mode === 'login';
 
-  const submit = (e) => {
+  const submit = async (e) => {
     e.preventDefault();
     if (!/^\S+@\S+\.\S+$/.test(email)) {
       setError('Enter a valid email address.');
@@ -80,19 +83,41 @@ export function AuthPage({ mode = 'login' }) {
       return;
     }
     setError('');
-    signIn(email);
-    toast('success', isLogin ? `Welcome back — signed in.` : `Workspace created for ${name.trim().split(' ')[0]} — welcome to DevFlow.`);
-    navigate('/app', { replace: true });
+    try {
+      const response = isLogin
+        ? await authService.login({ email: email.trim(), password })
+        : await authService.register({ name: name.trim(), email: email.trim(), password });
+      tokenStore.set(response);
+      const user = response.user || await userService.me();
+      if (user) {
+        useAppStore.setState((state) => ({
+          users: state.users.some((item) => String(item.id) === String(user.id))
+            ? state.users.map((item) => String(item.id) === String(user.id) ? { ...item, ...user, id: String(user.id) } : item)
+            : [...state.users, { ...user, id: String(user.id) }],
+          signedIn: true,
+          currentUserId: String(user.id),
+        }));
+      } else {
+        signIn(email);
+      }
+      toast('success', isLogin ? 'Welcome back — signed in.' : `Account created for ${name.trim().split(' ')[0]} — welcome to DevFlow.`);
+      navigate('/app', { replace: true });
+    } catch (err) {
+      setError(err.message || 'Unable to authenticate. Check the backend connection and try again.');
+    }
   };
 
   const sso = (provider) => {
-    signIn(email || 'ada@acmelabs.dev');
-    toast('success', `Signed in with ${provider}`);
-    navigate('/app', { replace: true });
+    if (provider === 'Google') {
+      window.location.assign(`${(import.meta.env.VITE_API_BASE_URL || 'http://localhost:8081').replace(/\/$/, '')}/oauth2/authorization/google`);
+      return;
+    }
+    setSsoOpen(true);
   };
 
   return (
     <div className="flex min-h-screen">
+      <UnderDevelopmentModal isOpen={ssoOpen} onClose={() => setSsoOpen(false)} feature="GitHub sign-in" />
       {/* Left: form */}
       <div className="flex w-full flex-col justify-center px-6 py-10 sm:px-14 lg:w-[46%]">
         <div className="mx-auto w-full max-w-sm">
@@ -173,7 +198,6 @@ export function AuthPage({ mode = 'login' }) {
               <>Already have an account? <Link to="/login" className="font-medium text-teal hover:underline">Sign in</Link></>
             )}
           </p>
-          <p className="mt-2 text-center font-mono text-[10px] text-muted">demo: any email/password works · signs in as Ada</p>
         </div>
       </div>
 

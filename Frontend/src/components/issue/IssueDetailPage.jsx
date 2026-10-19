@@ -110,12 +110,12 @@ function CommentBody({ comment, users, issueId }) {
   );
 }
 
-function CommentThread({ issue, users, addReply }) {
+function CommentThread({ issue, users, addReply, onUnsupported }) {
   const [body, setBody] = useState('');
   const [replyingTo, setReplyingTo] = useState(null);
   const [replyBody, setReplyBody] = useState('');
   const submit = () => {
-    addReply(issue.id, replyingTo, replyBody);
+    onUnsupported();
     setReplyBody('');
     setReplyingTo(null);
   };
@@ -156,7 +156,7 @@ function CommentThread({ issue, users, addReply }) {
           className="focus-ring ph-muted min-h-[84px] w-full resize-y rounded-xl border border-line bg-raised px-3.5 py-2.5 text-sm text-ink"
         />
         <div className="mt-2 flex justify-end">
-          <Button size="sm" icon={MessageSquare} onClick={() => { useAppStore.getState().addComment(issue.id, body); setBody(''); }} disabled={!body.trim()}>
+          <Button size="sm" icon={MessageSquare} onClick={onUnsupported} disabled={!body.trim()}>
             Comment
           </Button>
         </div>
@@ -165,7 +165,7 @@ function CommentThread({ issue, users, addReply }) {
   );
 }
 
-function CommitPanel({ issue, users }) {
+function CommitPanel({ issue, users, onUnsupported }) {
   const linkCommit = useAppStore((s) => s.linkCommit);
   const [linking, setLinking] = useState(false);
   const [sha, setSha] = useState('');
@@ -181,7 +181,7 @@ function CommitPanel({ issue, users }) {
           <span className="font-mono text-[11px] text-muted">{issue.commits.length}</span>
         </div>
         <button
-          onClick={() => { setLinking((v) => !v); setSha(randomSha()); setMessage(''); setBranch('main'); }}
+          onClick={onUnsupported}
           className="focus-ring flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium text-teal hover:bg-raised"
         >
           <Link2 size={13} /> Link commit
@@ -198,7 +198,7 @@ function CommitPanel({ issue, users }) {
             <Button
               size="sm"
               disabled={!message.trim()}
-              onClick={() => { linkCommit(issue.id, { sha, message, branch }); setLinking(false); }}
+              onClick={onUnsupported}
             >
               Link
             </Button>
@@ -248,6 +248,7 @@ export function IssueDetailPage() {
 
   const [title, setTitle] = useState(issue?.title ?? '');
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [unsupportedOpen, setUnsupportedOpen] = useState(false);
   const didInit = useRef(false);
 
   useEffect(() => {
@@ -259,7 +260,7 @@ export function IssueDetailPage() {
 
   useEffect(() => {
     if (issue && didInit.current && title !== issue.title) {
-      const t = setTimeout(() => updateIssue(issue.id, { title }), 500);
+      const t = setTimeout(() => setUnsupportedOpen(true), 500);
       return () => clearTimeout(t);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -285,6 +286,7 @@ export function IssueDetailPage() {
 
   return (
     <>
+      <UnderDevelopmentModal isOpen={unsupportedOpen} onClose={() => setUnsupportedOpen(false)} feature="Issue creation, editing, movement, comments, replies, commits, duplication, and deletion" />
       {/* Board stays mounted underneath so the context survives the slide-over */}
       <div className="pointer-events-none" aria-hidden="true">
         <Board />
@@ -317,7 +319,7 @@ export function IssueDetailPage() {
                 align="right"
                 width="w-44"
                 items={[
-                  { label: 'Duplicate', icon: Copy, onClick: () => duplicateIssue(issue.id) },
+                  { label: 'Duplicate', icon: Copy, onClick: () => setUnsupportedOpen(true) },
                   { label: 'Delete issue', icon: Trash2, danger: true, onClick: () => setConfirmDelete(true) },
                 ]}
                 trigger={
@@ -357,19 +359,19 @@ export function IssueDetailPage() {
             <div className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-3">
               <div>
                 <label className="mono-label mb-1.5 block">Status</label>
-                <Select value={issue.status} onChange={(e) => updateIssue(issue.id, { status: e.target.value })}>
+                <Select value={issue.status} onChange={() => setUnsupportedOpen(true)}>
                   {STATUSES.map((s) => <option key={s.id} value={s.id}>{s.label}</option>)}
                 </Select>
               </div>
               <div>
                 <label className="mono-label mb-1.5 block">Priority</label>
-                <Select value={issue.priority} onChange={(e) => updateIssue(issue.id, { priority: e.target.value })}>
+                <Select value={issue.priority} onChange={() => setUnsupportedOpen(true)}>
                   {PRIORITIES.map((p) => <option key={p.id} value={p.id}>{p.label}</option>)}
                 </Select>
               </div>
               <div className="col-span-2 sm:col-span-1">
                 <label className="mono-label mb-1.5 block">Assignee</label>
-                <Select value={issue.assigneeId ?? ''} onChange={(e) => updateIssue(issue.id, { assigneeId: e.target.value || null })}>
+                <Select value={issue.assigneeId ?? ''} onChange={() => setUnsupportedOpen(true)}>
                   <option value="">Unassigned</option>
                   {members.map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}
                 </Select>
@@ -384,7 +386,7 @@ export function IssueDetailPage() {
                   return (
                     <button
                       key={l}
-                      onClick={() => updateIssue(issue.id, { labels: on ? issue.labels.filter((x) => x !== l) : [...issue.labels, l] })}
+                      onClick={() => setUnsupportedOpen(true)}
                       className={cx(
                         'focus-ring rounded-md px-2.5 py-1 font-mono text-[11px] font-medium transition-colors',
                         on ? 'fill-teal-soft text-teal' : 'bg-raised text-muted hover:text-ink'
@@ -400,12 +402,12 @@ export function IssueDetailPage() {
             {/* Description */}
             <div className="mt-6">
               <label className="mono-label mb-1.5 block">Description</label>
-              <EditableDescription issue={issue} updateIssue={updateIssue} />
+              <EditableDescription issue={issue} updateIssue={updateIssue} onUnsupported={() => setUnsupportedOpen(true)} />
             </div>
 
             {/* Commits */}
             <div className="mt-7">
-              <CommitPanel issue={issue} users={users} />
+              <CommitPanel issue={issue} users={users} onUnsupported={() => setUnsupportedOpen(true)} />
             </div>
 
             {/* Timeline */}
@@ -424,7 +426,7 @@ export function IssueDetailPage() {
                 <h3 className="font-display text-sm font-semibold text-ink">Comments</h3>
                 <span className="font-mono text-[11px] text-muted">{issue.comments.length}</span>
               </div>
-              <CommentThread issue={issue} users={users} addReply={addReply} />
+              <CommentThread issue={issue} users={users} addReply={addReply} onUnsupported={() => setUnsupportedOpen(true)} />
             </div>
           </div>
         </motion.div>
@@ -441,7 +443,7 @@ export function IssueDetailPage() {
               <Button variant="ghost" onClick={() => setConfirmDelete(false)}>Cancel</Button>
               <Button
                 variant="destructive"
-                onClick={() => { deleteIssue(issue.id); setConfirmDelete(false); navigate('/app/board'); }}
+                onClick={() => { setConfirmDelete(false); setUnsupportedOpen(true); }}
               >
                 Delete issue
               </Button>
@@ -463,7 +465,7 @@ function MoreDots() {
   );
 }
 
-function EditableDescription({ issue, updateIssue }) {
+function EditableDescription({ issue, updateIssue, onUnsupported }) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(issue.description);
   const [mode, setMode] = useState('edit');
@@ -502,7 +504,7 @@ function EditableDescription({ issue, updateIssue }) {
         ))}
         <div className="flex-1" />
         <button
-          onClick={() => { updateIssue(issue.id, { description: draft }); setEditing(false); }}
+          onClick={() => { onUnsupported(); setEditing(false); }}
           className="focus-ring rounded-md px-2 py-1 text-xs font-medium text-teal hover:bg-raised"
         >
           Save

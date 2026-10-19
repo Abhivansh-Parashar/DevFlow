@@ -1,0 +1,2 @@
+import { Modal, Button } from './index';
+export function UnderDevelopmentModal({isOpen,onClose,feature='This feature'}){return <Modal isOpen={isOpen} onClose={onClose} title="Feature Under Development" subtitle={`${feature} is not available in this release.`} footer={<Button onClick={onClose}>Close</Button>}><p className="text-sm text-muted">This feature is currently under development and will be available in a future update.</p></Modal>}

@@ -15,6 +15,7 @@ import { NewIssueSlideOver } from './NewIssueSlideOver';
 import { CreateProjectModal } from '../projects/CreateProjectModal';
 import { STATUSES, STATUS_COLORS, PRIORITIES } from '../../lib/constants';
 import { cx } from '../../lib/utils';
+import { UnderDevelopmentModal } from '../ui';
 
 const containerId = (status) => `column:${status}`;
 
@@ -331,6 +332,7 @@ export function Board() {
   const [newIssueOpen, setNewIssueOpen] = useState(false);
   const [newIssueStatus, setNewIssueStatus] = useState('backlog');
   const [createProjectOpen, setCreateProjectOpen] = useState(false);
+  const [unsupportedOpen, setUnsupportedOpen] = useState(false);
 
   const getIdeTarget = (project) => {
     if (!project) return '';
@@ -340,7 +342,7 @@ export function Board() {
     return `vscode://file/${normalized}`;
   };
 
-  const openTarget = (target, label) => {
+  const openTarget = (target, label) => { setUnsupportedOpen(true); return;
     const value = String(target ?? '').trim();
     if (!value) {
       toast('info', `Add ${label.toLowerCase()} in Settings → Active project integration`);
@@ -429,7 +431,7 @@ export function Board() {
           setBoard((prev) => ({ ...prev, [from]: arrayMove(prev[from], oldIndex, newIndex) }));
         }
       } else if (from && to && from !== to) {
-        moveIssue(active.id, to);
+        setUnsupportedOpen(true);
       }
     }
     draggingRef.current = false;
@@ -477,6 +479,7 @@ export function Board() {
 
   return (
     <div className="flex h-[calc(100vh-56px)] min-h-[480px] flex-col">
+      <UnderDevelopmentModal isOpen={unsupportedOpen} onClose={() => setUnsupportedOpen(false)} feature="Issue changes and repository/IDE integration" />
       <div className="flex flex-wrap items-center gap-3 px-5 pb-3 pt-4">
         <div className="min-w-0">
           <div className="flex items-center gap-2.5">
@@ -533,7 +536,7 @@ export function Board() {
                   users={users}
                   total={filters.filtered.length}
                   onNewIssue={(status) => { setNewIssueStatus(status); setNewIssueOpen(true); }}
-                  onStatusChange={(id, status) => moveIssue(id, status)}
+                  onStatusChange={() => setUnsupportedOpen(true)}
                   openMenuId={openMenuId}
                   setOpenMenuId={setOpenMenuId}
                 />

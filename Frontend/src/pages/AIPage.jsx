@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Sparkles, Send, Users, FolderKanban, AlertTriangle, CheckCircle2 } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
 import { Button, Textarea, Card, Badge } from '../components/ui';
+import { aiService } from '../lib/api/services';
 
 const PROMPTS = [
   'What is the current project status?',
@@ -35,40 +36,16 @@ function buildSnapshot(project, issues, users, chat) {
   return { scoped, byStatus, open, high, stale, commits, messageCount, memberStats };
 }
 
-function answer(question, project, snapshot) {
-  const q = question.toLowerCase();
-  const topMember = snapshot.memberStats[0];
-  const lightMember = snapshot.memberStats[snapshot.memberStats.length - 1];
-  const blockers = snapshot.high.slice(0, 3).map((i) => i.key).join(', ');
-
-  if (q.includes('status') || q.includes('health') || q.includes('progress')) {
-    return `Project ${project.name} has ${snapshot.open.length} open and ${snapshot.byStatus.done} done issues. In progress: ${snapshot.byStatus.inProgress}, in review: ${snapshot.byStatus.review}, backlog: ${snapshot.byStatus.backlog}. Linked commits so far: ${snapshot.commits}.`;
-  }
-  if (q.includes('overload') || q.includes('capacity') || q.includes('team') || q.includes('member')) {
-    return `${topMember?.name ?? 'Team lead'} currently carries the highest load (${topMember?.assignedOpen ?? 0} open issues). ${lightMember?.name ?? 'Another member'} has the lightest load (${lightMember?.assignedOpen ?? 0} open issues), so they are the best handoff candidate.`;
-  }
-  if (q.includes('blocker') || q.includes('risk') || q.includes('urgent')) {
-    if (!snapshot.high.length && !snapshot.stale.length) {
-      return 'No critical blockers detected right now. Keep the review queue flowing and pull from backlog by priority.';
-    }
-    return `Top blockers: ${blockers || 'none'}. There are ${snapshot.stale.length} stale open issues older than 5 days. Recommend triaging high-priority items first and assigning a clear owner per blocker.`;
-  }
-  if (q.includes('next') || q.includes('plan') || q.includes('48')) {
-    return `Next 48h plan: 1) move ${snapshot.byStatus.review} review items to done, 2) pull 2 high-priority backlog items into todo, 3) resolve stale issues (${snapshot.stale.length}) with owner + deadline, 4) keep chat updates short and link commits to issue keys.`;
-  }
-  return `I can help with project status, team workload, blockers, and next-step planning for ${project.name}. Ask me something like "top blockers" or "who has capacity".`;
-}
-
 export function AIPage() {
   const activeProject = useAppStore((s) => s.activeProject());
   const issues = useAppStore((s) => s.issues);
   const users = useAppStore((s) => s.users);
   const chat = useAppStore((s) => s.chat);
-  const currentUser = useAppStore((s) => s.currentUser());
   const toast = useAppStore((s) => s.toast);
 
   const [question, setQuestion] = useState('');
   const [history, setHistory] = useState([]);
+  const [asking, setAsking] = useState(false);
   const scrollRef = useRef(null);
 
   // Keep the newest exchange in view — the panel has a fixed height, so a long
@@ -82,16 +59,25 @@ export function AIPage() {
     [activeProject, issues, users, chat]
   );
 
-  const ask = (input = question) => {
+  const ask = async (input = question) => {
     const text = input.trim();
     if (!text) {
       toast('info', 'Ask the assistant about status, blockers, team load, or next steps.');
       return;
     }
-    if (!activeProject || !snapshot) return;
-    const reply = answer(text, activeProject, snapshot);
-    setHistory((prev) => [...prev, { role: 'user', text }, { role: 'assistant', text: reply }]);
+    if (!activeProject || !snapshot || asking) return;
+    setAsking(true);
+    setHistory((prev) => [...prev, { role: 'user', text }]);
     setQuestion('');
+    try {
+      const response = await aiService.ask(activeProject.id, text);
+      setHistory((prev) => [...prev, { role: 'assistant', text: response?.answer || 'The assistant returned no answer.' }]);
+    } catch (error) {
+      setHistory((prev) => [...prev, { role: 'assistant', text: error.message || 'Unable to reach the project assistant.' }]);
+      toast('error', error.message || 'Unable to reach the project assistant.');
+    } finally {
+      setAsking(false);
+    }
   };
 
   if (!activeProject) {
@@ -190,7 +176,7 @@ export function AIPage() {
                   }
                 }}
               />
-              <Button icon={Send} onClick={() => ask()} disabled={!question.trim()}>Send</Button>
+              <Button icon={Send} onClick={() => ask()} disabled={!question.trim() || asking}>{asking ? 'Sending…' : 'Send'}</Button>
             </div>
             <div className="mt-2 flex items-center gap-2 text-[11px] text-muted">
               <CheckCircle2 size={13} className="text-teal" />

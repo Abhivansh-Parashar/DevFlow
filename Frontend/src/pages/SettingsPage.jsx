@@ -5,6 +5,8 @@ import { useAppStore } from '../store/useAppStore';
 import { Card, Field, Input, Textarea, Button, Modal, Badge, WorkspaceLogo, WORKSPACE_LOGOS } from '../components/ui';
 import { PROJECT_ACCENTS } from '../lib/constants';
 import { cx } from '../lib/utils';
+import { projectService } from '../lib/api/services';
+import { UnderDevelopmentModal } from '../components/ui';
 
 export function SettingsPage() {
   const activeWorkspace = useAppStore((s) => s.activeWorkspace());
@@ -24,6 +26,9 @@ export function SettingsPage() {
   const [localRepoPath, setLocalRepoPath] = useState('');
   const [ideUrl, setIdeUrl] = useState('');
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [underDevelopment, setUnderDevelopment] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     if (activeWorkspace) {
@@ -42,7 +47,7 @@ export function SettingsPage() {
 
   if (!activeWorkspace) return null;
 
-  const save = () => {
+  const save = () => { setUnderDevelopment(true); return;
     updateWorkspace(activeWorkspace.id, { name, description, icon: icon || 'hexagon', accent });
     toast('success', 'Workspace settings saved');
   };
@@ -55,12 +60,18 @@ export function SettingsPage() {
     // clone path and IDE deep link, so never send the URL for non-owners.
     const patch = { localRepoPath: localRepoPath.trim(), ideUrl: ideUrl.trim() };
     if (isOwner) patch.repoUrl = repoUrl.trim();
-    updateProject(activeProject.id, patch);
-    toast('success', `Project integration saved for ${activeProject.name}`);
+    if (localRepoPath.trim() || ideUrl.trim()) { setUnderDevelopment(true); return; }
+    setSaving(true); setError('');
+    projectService.update(activeProject.id, { name: activeProject.name, repoUrl: repoUrl.trim() || undefined })
+      .then((updated) => { useAppStore.setState((state) => ({ projects: state.projects.map((p) => p.id === activeProject.id ? { ...p, ...updated } : p) })); toast('success', `Project integration saved for ${activeProject.name}`); })
+      .catch((err) => setError(err.message || 'Unable to update project.'))
+      .finally(() => setSaving(false));
   };
 
   return (
     <div className="mx-auto max-w-2xl px-5 py-6">
+      <UnderDevelopmentModal isOpen={underDevelopment} onClose={() => setUnderDevelopment(false)} feature="Workspace settings and local IDE integration" />
+      {error && <p className="mb-3 rounded-lg border border-coral-soft px-3 py-2 text-xs text-coral">{error}</p>}
       <div className="flex items-center gap-3">
         <span className="grid h-9 w-9 place-items-center rounded-xl fill-teal-soft text-teal"><Settings size={18} /></span>
         <div>
@@ -153,7 +164,7 @@ export function SettingsPage() {
             <Input value={ideUrl} onChange={(e) => setIdeUrl(e.target.value)} placeholder="vscode://file/C:/Users/you/dev/repo" />
           </Field>
           <div className="flex justify-end border-t border-line pt-4">
-            <Button onClick={saveProjectIntegration}>Save project integration</Button>
+            <Button onClick={saveProjectIntegration} disabled={saving}>{saving ? 'Saving?' : 'Save project integration'}</Button>
           </div>
         </Card>
       )}
@@ -166,7 +177,7 @@ export function SettingsPage() {
               <h3 className="font-display text-sm font-semibold text-ink">Danger zone</h3>
               <p className="text-xs text-muted">Deletes the workspace, its projects, issues and chat. Members lose access immediately.</p>
             </div>
-            <Button variant="destructive" onClick={() => setConfirmOpen(true)}>Delete workspace</Button>
+            <Button variant="destructive" onClick={() => setUnderDevelopment(true)}>Delete workspace</Button>
           </div>
         </Card>
       )}

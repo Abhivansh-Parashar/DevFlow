@@ -4,6 +4,8 @@ import { ChevronDown, Menu, Search, Moon, LogOut, Building2, FolderKanban, Brick
 import { useAppStore } from '../../store/useAppStore';
 import { Dropdown, Avatar } from '../ui';
 import { NotificationsPanel } from '../notifications/NotificationsPanel';
+import { authService } from '../../lib/api/services';
+import { tokenStore } from '../../lib/api/client';
 
 const THEME_ICONS = { dark: Moon, brutal: BrickWall };
 const THEME_LABELS = { dark: 'brutal', brutal: 'dark' };
@@ -41,7 +43,6 @@ function WorkspaceBreadcrumb() {
   const activeWorkspace = useAppStore((s) => s.activeWorkspace());
   const setActiveWorkspace = useAppStore((s) => s.setActiveWorkspace);
   const currentUserId = useAppStore((s) => s.currentUserId);
-  const createWorkspace = useAppStore((s) => s.createWorkspace);
 
   if (!activeWorkspace) return null;
   const assigned = workspaces.filter((w) => w.memberIds.includes(currentUserId));
@@ -58,15 +59,6 @@ function WorkspaceBreadcrumb() {
           checked: w.id === activeWorkspace.id,
           onClick: () => setActiveWorkspace(w.id),
         })),
-        { divider: true },
-        {
-          label: 'Create workspace',
-          icon: PlusIcon,
-          onClick: () => {
-            const name = window.prompt('Workspace name');
-            if (name) createWorkspace({ name });
-          },
-        },
       ]}
       trigger={
         <button className="focus-ring flex max-w-[160px] items-center gap-1.5 rounded-lg px-2 py-1 text-[13px] font-semibold text-ink transition-colors hover:bg-raised sm:max-w-[220px]">
@@ -136,9 +128,14 @@ function UserMenu() {
           icon: LogOut,
           danger: true,
           onClick: () => {
-            signOut();
-            toast('info', 'Signed out — see you soon.');
-            navigate('/login');
+            authService.logout(tokenStore.refresh)
+              .catch(() => toast('error', 'Server logout failed; local session was cleared.'))
+              .finally(() => {
+                tokenStore.clear();
+                signOut();
+                toast('info', 'Signed out — see you soon.');
+                navigate('/login');
+              });
           },
         },
       ]}
