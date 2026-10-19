@@ -25,6 +25,9 @@ try {
 }
 
 applyTheme(useAppStore.getState().theme);
+// Invites are not exposed by the current backend, so never restore old demo
+// invitations from a previous local session.
+useAppStore.setState({ invites: [] });
 useAppStore.subscribe((state, prev) => {
   if (state.theme !== prev.theme) applyTheme(state.theme);
 });

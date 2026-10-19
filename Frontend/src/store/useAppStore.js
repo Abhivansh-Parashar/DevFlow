@@ -1,18 +1,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import {
-  seedUsers,
-  seedWorkspaces,
-  seedProjects,
-  seedIssues,
-  seedChat,
-  seedNotifications,
-  seedReactions,
-  seedInvites,
-} from '../data/seed';
 import { uid, randomSha } from '../lib/utils';
 import { PROJECT_ACCENTS } from '../lib/constants';
-import { simulateChat, maybeSimulateCommentReply, maybeSimulateCommit } from '../lib/realtime';
 
 const pickAccent = () => PROJECT_ACCENTS[Math.floor(Math.random() * PROJECT_ACCENTS.length)];
 
@@ -26,15 +15,15 @@ export const useAppStore = create(
       activeWorkspaceId: null,
       activeProjectId: null,
 
-      // ---- session data (re-seeded per load) ----
-      users: seedUsers,
-      workspaces: seedWorkspaces,
-      projects: seedProjects,
-      issues: seedIssues,
-      chat: seedChat,
-      notifications: seedNotifications,
-      reactions: seedReactions,
-      invites: seedInvites,
+      // ---- session data loaded from the backend ----
+      users: [],
+      workspaces: [],
+      projects: [],
+      issues: [],
+      chat: {},
+      notifications: [],
+      reactions: {},
+      invites: [],
       toasts: [],
       typing: {},
       searchOpen: false,
@@ -262,7 +251,6 @@ export const useAppStore = create(
             i.id === issueId ? { ...i, comments: [...i.comments, comment], updatedAt: new Date().toISOString() } : i
           ),
         }));
-        maybeSimulateCommentReply(get, set, issueId);
       },
       addReply: (issueId, commentId, body) => {
         if (!body.trim()) return;
@@ -325,8 +313,6 @@ export const useAppStore = create(
         };
         if (opts.sticker) msg.sticker = opts.sticker;
         set((s) => ({ chat: { ...s.chat, [projectId]: [...(s.chat[projectId] ?? []), msg] } }));
-        const project = get().projects.find((p) => p.id === projectId);
-        simulateChat(get, set, projectId, project?.name ?? 'project', msg);
       },
       setTyping: (projectId, members) => set((s) => ({ typing: { ...s.typing, [projectId]: members } })),
 
@@ -524,44 +510,7 @@ export const useAppStore = create(
         currentUserId: s.currentUserId,
         activeWorkspaceId: s.activeWorkspaceId,
         activeProjectId: s.activeProjectId,
-        // Invite decisions persist so pending invite cards only appear once
-        // per invite instead of re-seeding on every refresh.
-        invites: s.invites,
       }),
     }
   )
 );
-
-// Ambient activity: occasionally the assignee of an active project's issue links a
-// commit so the board and notifications feel alive. Wired once per page session.
-if (typeof window !== 'undefined') {
-  let seeded = false;
-  const ambientTimer = () => {
-    setTimeout(() => {
-      const s = useAppStore.getState();
-      if (s.signedIn && s.activeProjectId) {
-        const pool = s.issues.filter(
-          (i) =>
-            i.projectId === s.activeProjectId &&
-            i.status !== 'done' &&
-            i.assigneeId &&
-            i.assigneeId !== s.currentUserId
-        );
-        if (pool.length) {
-          maybeSimulateCommit(
-            () => useAppStore.getState(),
-            useAppStore.setState,
-            pool[Math.floor(Math.random() * pool.length)].id
-          );
-        }
-      }
-      ambientTimer();
-    }, 28000 + Math.random() * 22000);
-  };
-  useAppStore.subscribe((s) => {
-    if (!seeded && s.signedIn) {
-      seeded = true;
-      ambientTimer();
-    }
-  });
-}

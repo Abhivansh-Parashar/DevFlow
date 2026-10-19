@@ -1,5 +1,5 @@
 // DevFlow sticker pack — emoji "stickers" rendered on vibrant gradient tiles.
-// Used by the chat sticker picker, seeded chat messages and simulated replies.
+// Sticker definitions used by the chat picker and rendered message bubbles.
 
 export const STICKERS = [
   // ---- Dev ----
@@ -40,5 +40,5 @@ export const STICKER_CATEGORIES = [
 // Quick one-tap emoji reactions on a message (like WhatsApp / Slack).
 export const QUICK_REACTIONS = ['👍', '❤️', '😂', '🎉', '🚀', '👀'];
 
-// Sticker ids the simulated teammates occasionally send.
+// Sticker ids supported by the picker.
 export const BOT_STICKER_IDS = ['ship', 'party', 'approve', 'fire', 'heart', 'tada', 'coffee', 'rocket'];
