@@ -1,46 +1,52 @@
-
 package org.devflow.notification;
 
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.MediaType;
+import org.springframework.mail.MailException;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestClient;
-
-import java.util.Map;
 
 @Service
 public class EmailService {
 
-    private final RestClient restClient;
+    private final JavaMailSender mailSender;
     private final String fromEmail;
 
     public EmailService(
-            RestClient.Builder restClientBuilder,
-            @Value("${resend.api-key}") String apiKey,
-            @Value("${resend.from-email}") String fromEmail
+            JavaMailSender mailSender,
+            @Value("${mail.from}") String fromEmail
     ) {
-        this.restClient = restClientBuilder
-                .baseUrl("https://api.resend.com")
-                .defaultHeader("Authorization", "Bearer " + apiKey)
-                .defaultHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-                .build();
-
+        this.mailSender = mailSender;
         this.fromEmail = fromEmail;
     }
 
     public void sendEmail(String to, String subject, String html) {
-        Map<String, Object> payload = Map.of(
-                "from", fromEmail,
-                "to", new String[]{to},
-                "subject", subject,
-                "html", html
-        );
+        MimeMessage message = mailSender.createMimeMessage();
+        try {
+            MimeMessageHelper helper = new MimeMessageHelper(message, false, "UTF-8");
+            helper.setFrom(fromEmail);
+            helper.setTo(to);
+            helper.setSubject(subject);
+            helper.setText(html, true);
+            mailSender.send(message);
+        } catch (MessagingException | MailException exception) {
+            throw new EmailDeliveryException("Unable to send email.", exception);
+        }
+    }
 
-        restClient.post()
-                .uri("/emails")
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(payload)
-                .retrieve()
-                .toBodilessEntity();
+    public void sendTextEmail(String to, String subject, String text) {
+        MimeMessage message = mailSender.createMimeMessage();
+        try {
+            MimeMessageHelper helper = new MimeMessageHelper(message, false, "UTF-8");
+            helper.setFrom(fromEmail);
+            helper.setTo(to);
+            helper.setSubject(subject);
+            helper.setText(text, false);
+            mailSender.send(message);
+        } catch (MessagingException | MailException exception) {
+            throw new EmailDeliveryException("Unable to send email.", exception);
+        }
     }
 }
