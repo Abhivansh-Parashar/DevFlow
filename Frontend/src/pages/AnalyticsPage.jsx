@@ -107,7 +107,7 @@ export function AnalyticsPage() {
     <div className="mx-auto max-w-6xl px-5 py-6">
       {backendError && <p className="mb-3 rounded-lg border border-coral-soft px-3 py-2 text-xs text-coral">{backendError}</p>}
       {backendLoading && <p className="mb-3 text-xs text-muted">Refreshing analytics data?</p>}
-      {backendStats && <p className="mb-3 text-xs text-muted">Backend totals: {backendStats.totalIssues ?? 0} issues ? {backendStats.totalCommits ?? 0} commits ? {backendStats.totalContributors ?? 0} contributors.</p>}
+      {backendStats && <p className="mb-3 text-xs text-muted">Backend totals: {backendStats.totalIssues ?? 0} issues, {backendStats.totalCommits ?? 0} commits, {backendStats.totalContributors ?? 0} contributors.</p>}
       <div className="flex items-center gap-3">
         <span className="grid h-9 w-9 place-items-center rounded-xl fill-teal-soft text-teal"><BarChart3 size={18} /></span>
         <div>
@@ -119,9 +119,9 @@ export function AnalyticsPage() {
       {/* KPI callouts */}
       <div className="mt-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
         <Kpi icon={Timer} label="Avg cycle time" mono>{stats.avgCycle ? `${stats.avgCycle.toFixed(1)}d` : '—'}</Kpi>
-        <Kpi icon={TrendingUp} label="Closed last 14d" mono>{stats.distribution.find((d) => d.name === 'Done')?.value ?? 0}</Kpi>
-        <Kpi icon={CircleDot} label="Open issues" mono>{stats.openCount}</Kpi>
-        <Kpi icon={BarChart3} label="Total tracked" mono>{stats.total}</Kpi>
+        <Kpi icon={TrendingUp} label="Completed issues" mono>{backendStats?.completedIssues ?? stats.distribution.find((d) => d.name === 'Done')?.value ?? 0}</Kpi>
+        <Kpi icon={CircleDot} label="Open issues" mono>{backendStats?.openIssues ?? stats.openCount}</Kpi>
+        <Kpi icon={BarChart3} label="Total issues" mono>{backendStats?.totalIssues ?? stats.total}</Kpi>
       </div>
 
       <div className="mt-6 grid gap-4 lg:grid-cols-5">

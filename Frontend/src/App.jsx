@@ -85,9 +85,13 @@ export default function App() {
             : workspaces[0]?.id ?? null,
         }));
       })
-      .catch(() => {
-        tokenStore.clear();
-        useAppStore.getState().signOut();
+      .catch((err) => {
+        if (err?.status === 401) {
+          tokenStore.clear();
+          useAppStore.getState().signOut();
+        } else {
+          useAppStore.getState().toast('error', err?.message || 'Unable to restore your session.');
+        }
       });
   }, [signedIn, currentUserId]);
 

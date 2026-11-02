@@ -87,14 +87,21 @@ function ProjectList() {
 
   useEffect(() => {
     if (!activeWorkspace?.id || !/^\d+$/.test(String(activeWorkspace.id))) return;
+    useAppStore.setState((state) => ({
+      projects: state.projects.filter((project) => project.workspaceId !== String(activeWorkspace.id)),
+      activeProjectId: null,
+    }));
     projectService.list(activeWorkspace.id)
       .then((rows) => useAppStore.setState((state) => {
         const loaded = (Array.isArray(rows) ? rows : []).map((project) => ({
           ...project,
           id: String(project.id),
           workspaceId: String(project.workspaceId ?? activeWorkspace.id),
-          memberIds: (project.memberIds || [state.currentUserId]).map(String),
-          roles: project.roles || { [state.currentUserId]: 'Owner' },
+          memberIds: (project.memberIds || []).map(String),
+          roles: Object.fromEntries(Object.entries(project.roles || {}).map(([id, role]) => [
+            String(id),
+            String(role).replace('_', ' ').replace(/\b\w/g, (letter) => letter.toUpperCase()),
+          ])),
         }));
         const current = state.activeProjectId && loaded.some((project) => project.id === state.activeProjectId)
           ? state.activeProjectId

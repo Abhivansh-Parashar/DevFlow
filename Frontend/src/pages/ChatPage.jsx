@@ -206,12 +206,6 @@ export function ChatPage() {
   useEffect(() => {
     if (!activeProject) return;
     setLoading(true); setError('');
-    if (!/^\d+$/.test(String(activeProject.id))) {
-      const rows = chat[activeProject.id] ?? [];
-      setMessages(rows);
-      setLoading(false);
-      return;
-    }
     chatService.list(activeProject.id).then((data) => {
       const rows = data?.content || data || [];
       setMessages(rows.map((m) => ({ id: String(m.id), projectId: activeProject.id, authorId: String(m.senderId), body: m.content, createdAt: m.createdAt })));
@@ -279,21 +273,6 @@ export function ChatPage() {
   const submit = () => {
     if (!draft.trim()) return;
     setLoading(true); setError('');
-    if (!/^\d+$/.test(String(activeProject.id))) {
-      const message = {
-        id: `local-${Date.now()}`,
-        projectId: activeProject.id,
-        authorId: currentUserId,
-        body: draft.trim(),
-        createdAt: new Date().toISOString(),
-      };
-      sendChat(activeProject.id, draft);
-      setMessages((rows) => [...rows, message]);
-      setDraft('');
-      setLoading(false);
-      inputRef.current?.focus();
-      return;
-    }
     chatService.send(activeProject.id, { content: draft, clientId: `web-${Date.now()}` }).then((m) => { setMessages((rows) => [...rows, { id: String(m.id), projectId: activeProject.id, authorId: String(m.senderId), body: m.content, createdAt: m.createdAt }]); setDraft(''); }).catch((err) => setError(err.message || 'Unable to send message.')).finally(() => setLoading(false));
     inputRef.current?.focus();
   };

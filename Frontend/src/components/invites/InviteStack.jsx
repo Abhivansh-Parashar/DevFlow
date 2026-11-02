@@ -141,6 +141,11 @@ function InviteCard({ invite, index, users, workspaces, dir, top, onAccept, onDe
   const workspace = workspaces.find((w) => w.id === invite.workspaceId);
   const memberIds = workspace?.memberIds ?? [];
   const members = users.filter((u) => memberIds.includes(u.id));
+  const from = users.find((user) => String(user.id) === String(invite.invitedById)) ?? {
+    name: 'Workspace administrator',
+    email: '',
+    avatar: null,
+  };
 
   // Drag mechanics: x drives the swipe tilt + a directional glow. Only the top
   // card owns these motion values, so fly-out targets (x/y/boxShadow) animate
@@ -225,7 +230,7 @@ function InviteCard({ invite, index, users, workspaces, dir, top, onAccept, onDe
           {/* Top accent strip */}
           <div
             className="h-1.5 w-full shrink-0"
-            style={{ background: `linear-gradient(90deg, ${workspace?.accent ?? 'var(--signal-teal)'}, ${project?.color ?? 'var(--signal-violet)'})` }}
+            style={{ background: `linear-gradient(90deg, ${workspace?.accent ?? 'var(--signal-teal)'}, var(--signal-violet))` }}
           />
           <div className="flex min-h-0 flex-1 flex-col p-6 sm:p-7">
             {/* Header row: workspace + role */}
@@ -240,7 +245,7 @@ function InviteCard({ invite, index, users, workspaces, dir, top, onAccept, onDe
                 <span className="truncate text-[11px] font-semibold text-ink">{workspace?.name}</span>
               </span>
               <Badge variant={isProject ? 'violet' : 'azure'} size="sm">
-                {isProject ? `${invite.role} · project` : `${invite.role} · workspace`}
+                {isProject ? `${invite.role ?? 'Member'} · project` : 'Member · workspace'}
               </Badge>
             </div>
 
@@ -248,17 +253,17 @@ function InviteCard({ invite, index, users, workspaces, dir, top, onAccept, onDe
             <div className="mt-5 flex items-start gap-4">
               <span
                 className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl text-xl font-bold text-white"
-                style={{ background: project?.color ?? workspace?.accent }}
+                style={{ background: workspace?.accent ?? 'var(--signal-teal)' }}
               >
                 <WorkspaceLogo id={workspace?.icon} size={26} fallback={workspace?.icon ?? '◆'} />
               </span>
               <div className="min-w-0">
                 <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-teal">invited to</p>
                 <h3 className="mt-0.5 truncate font-display text-xl font-bold text-ink">
-                  {project?.name ?? workspace?.name}
+                  {workspace?.name ?? invite.workspaceName ?? 'Workspace invitation'}
                 </h3>
                 <p className="mt-1 line-clamp-2 text-[12.5px] leading-snug text-muted">
-                  {project?.description ?? 'A brand new workspace, ready for your boards.'}
+                  A brand new workspace, ready for your boards.
                 </p>
               </div>
             </div>

@@ -26,6 +26,7 @@ export const projectService = {
 };
 
 export const memberService = {
+	list: (projectId) => apiClient.get(`/api/projects/${projectId}/members`),
 	add: (projectId, body) => apiClient.post(`/api/projects/${projectId}/members`, body),
 	remove: (projectId, userId) => apiClient.delete(`/api/projects/${projectId}/members/${userId}`),
 	role: (projectId, userId, role) => apiClient.put(`/api/projects/${projectId}/members/${userId}/role`, role),
@@ -49,6 +50,8 @@ export const workspaceService = {
 	create: (body) => apiClient.post('/api/workspaces', body),
 	members: (workspaceId) => apiClient.get(`/api/workspaces/${workspaceId}/members`),
 	invite: (workspaceId, email) => apiClient.post(`/api/workspaces/${workspaceId}/invites`, { email }),
+	removeMember: (workspaceId, userId) => apiClient.delete(`/api/workspaces/${workspaceId}/members/${userId}`),
+	role: (workspaceId, userId, role) => apiClient.put(`/api/workspaces/${workspaceId}/members/${userId}/role`, role),
 };
 
 export const inviteService = {

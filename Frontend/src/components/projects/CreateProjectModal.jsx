@@ -8,7 +8,6 @@ import { cx } from '../../lib/utils';
 export function CreateProjectModal({ isOpen, onClose }) {
   const activeWorkspace = useAppStore((s) => s.activeWorkspace());
   const toast = useAppStore((s) => s.toast);
-  const createProject = useAppStore((s) => s.createProject);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [name, setName] = useState('');
@@ -24,13 +23,20 @@ export function CreateProjectModal({ isOpen, onClose }) {
     if (!activeWorkspace || saving) return;
     setSaving(true); setError('');
     try {
-      if (!/^\d+$/.test(String(activeWorkspace.id))) {
-        createProject({ name, description, color, repoUrl, localRepoPath, ideUrl });
-        onClose();
-        return;
-      }
       const project = await projectService.create(activeWorkspace.id, { name, repoUrl: repoUrl || undefined });
-      useAppStore.setState((state) => ({ projects: [...state.projects, { ...project, color, icon: '#', memberIds: [state.currentUserId], roles: { [state.currentUserId]: 'Owner' } }], activeProjectId: project.id }));
+      if (!project?.id) throw new Error('The backend returned an invalid project.');
+      useAppStore.setState((state) => ({
+        projects: [...state.projects, {
+          ...project,
+          id: String(project.id),
+          workspaceId: String(project.workspaceId ?? activeWorkspace.id),
+          color,
+          icon: '#',
+          memberIds: [String(state.currentUserId)],
+          roles: { [state.currentUserId]: 'Owner' },
+        }],
+        activeProjectId: String(project.id),
+      }));
       toast('success', 'Project created'); onClose();
     } catch (err) { setError(err.message || 'Unable to create project.'); } finally { setSaving(false); }
     setName('');

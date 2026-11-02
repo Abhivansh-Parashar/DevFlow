@@ -44,7 +44,7 @@ async function refreshAccessToken() {
     })
       .then(async (response) => {
         const data = await parseResponse(response);
-        if (!response.ok) throw new ApiError(data?.message || 'Session expired.', response.status, data);
+        if (!response.ok) throw new ApiError(data?.message || data?.error || 'Session expired.', response.status, data);
         tokenStore.set(data);
         return true;
       })
@@ -60,7 +60,7 @@ async function refreshAccessToken() {
 export async function api(path, options = {}, retry = false) {
   const headers = new Headers(options.headers || {});
   if (!(options.body instanceof FormData)) headers.set('Content-Type', 'application/json');
-  if (tokenStore.access) headers.set('Authorization', `Bearer ${tokenStore.access}`);
+  if (tokenStore.access) headers.set('Authorization', 'Bearer ' + tokenStore.access);
 
   const response = await fetch(`${API_BASE}${path}`, { ...options, headers, redirect: 'manual' });
   if (response.type === 'opaqueredirect') {
