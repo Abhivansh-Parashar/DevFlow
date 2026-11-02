@@ -34,6 +34,25 @@ public class WorkspaceController {
         return ResponseEntity.ok(workspaceService.listMembers(workspaceId));
     }
 
+    @DeleteMapping("/workspaces/{workspaceId}/members/{userId}")
+    public ResponseEntity<Void> removeMember(
+            @PathVariable Long workspaceId,
+            @PathVariable Long userId
+    ) {
+        workspaceService.removeMember(workspaceId, userId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/workspaces/{workspaceId}/members/{userId}/role")
+    public ResponseEntity<Void> changeMemberRole(
+            @PathVariable Long workspaceId,
+            @PathVariable Long userId,
+            @RequestBody WorkspaceRole role
+    ) {
+        workspaceService.changeMemberRole(workspaceId, userId, role);
+        return ResponseEntity.noContent().build();
+    }
+
     @PostMapping("/workspaces/{workspaceId}/invites")
     public ResponseEntity<InviteDto> invite(
             @PathVariable Long workspaceId,
