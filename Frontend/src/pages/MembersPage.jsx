@@ -15,20 +15,28 @@ export function MembersPage() {
   const [addOpen, setAddOpen] = useState(false);
 
   const isWorkspace = tab === 'workspace';
-  // Note: computed before the early return to keep hook order stable.
-  const canManage = useAppStore((s) =>
-    isWorkspace
-      ? s.canManageMembers('workspace', activeWorkspace?.id)
-      : s.canManageMembers('project', activeProject?.id)
-  );
+  const roleOf = isWorkspace
+    ? (activeWorkspace?.roles ?? {})
+    : (activeProject?.roles ?? {});
+  const currentRole = Object.entries(roleOf).find(
+    ([userId]) => String(userId) === String(currentUserId)
+  )?.[1];
+  const normalizedCurrentRole = String(currentRole ?? '')
+    .replace(/_/g, ' ')
+    .trim()
+    .toLowerCase();
+  const canManage = useAppStore((s) => {
+    if (isWorkspace) {
+      return normalizedCurrentRole === 'owner'
+        || normalizedCurrentRole === 'admin'
+        || String(activeWorkspace?.ownerId) === String(s.currentUserId);
+    }
+    return Boolean(activeProject?.id) && normalizedCurrentRole === 'owner';
+  });
 
   if (!activeWorkspace) return null;
 
   const memberIds = isWorkspace ? activeWorkspace.memberIds : (activeProject?.memberIds ?? []);
-  const roleOf = isWorkspace
-    ? activeWorkspace.roles
-    : (activeProject?.roles ?? {});
-
   return (
     <div className="mx-auto max-w-4xl px-5 py-6">
       <div className="flex flex-wrap items-center gap-3">
@@ -68,7 +76,7 @@ export function MembersPage() {
         </p>
       )}
 
-      <div className="card-surface mt-5 overflow-hidden rounded-xl">
+      <div className="card-surface mt-5 overflow-visible rounded-xl">
         <div className="divide-y divide-line">
           {memberIds.length === 0 && (
             <EmptyState compact icon={Users} title="No members" description="Add members to get the team moving." />
@@ -100,9 +108,17 @@ export function MembersPage() {
                     size="sm"
                     className="text-coral hover:fill-coral-soft"
                     onClick={() => {
-                      if (isWorkspace) useAppStore.getState().removeWorkspaceMember(activeWorkspace.id, uid);
-                      else if (!/^\d+$/.test(String(activeProject.id))) useAppStore.getState().removeProjectMember(activeProject.id, uid);
-                      else memberService.remove(activeProject.id, uid).then(() => useAppStore.getState().removeProjectMember(activeProject.id, uid)).catch((err) => useAppStore.getState().toast('error', err.message || 'Unable to remove member'));
+                      if (isWorkspace) {
+                        workspaceService.removeMember(activeWorkspace.id, uid)
+                          .then(() => useAppStore.getState().removeWorkspaceMember(activeWorkspace.id, uid))
+                          .catch((err) => useAppStore.getState().toast('error', err.message || 'Unable to remove member'));
+                      } else if (!/^\d+$/.test(String(activeProject.id))) {
+                        useAppStore.getState().toast('error', 'This project is not connected to the backend.');
+                      } else {
+                        memberService.remove(activeProject.id, uid)
+                          .then(() => useAppStore.getState().removeProjectMember(activeProject.id, uid))
+                          .catch((err) => useAppStore.getState().toast('error', err.message || 'Unable to remove member'));
+                      }
                     }}
                   >
                     Remove
@@ -137,7 +153,9 @@ function RoleDropdown({ scope, scopeId, userId, role, roles }) {
         checked: r === role,
         onClick: () => {
           if (scope === 'workspace') {
-            toast('info', 'Workspace member roles are under development.');
+            workspaceService.role(scopeId, userId, r.toUpperCase())
+              .then(() => setRole(scopeId, userId, r))
+              .catch((err) => toast('error', err.message || 'Unable to update role'));
           } else if (!/^\d+$/.test(String(scopeId))) {
             setRole(scopeId, userId, r);
           } else {
@@ -159,7 +177,6 @@ function AddMemberModal({ isOpen, onClose, workspace }) {
   const activeWorkspace = useAppStore((s) => s.activeWorkspace());
   const activeProject = useAppStore((s) => s.activeProject());
   const users = useAppStore((s) => s.users);
-  const addWorkspaceMember = useAppStore((s) => s.addWorkspaceMember);
   const addProjectMember = useAppStore((s) => s.addProjectMember);
   const toast = useAppStore((s) => s.toast);
   const [email, setEmail] = useState('');
@@ -193,7 +210,7 @@ function AddMemberModal({ isOpen, onClose, workspace }) {
               setEmail('');
               onClose();
             } catch (error) {
-              toast('error', error.message || 'Unable to send invitation.');
+              toast(error.status === 409 ? 'info' : 'error', error.message || 'Unable to send invitation.');
             } finally {
               setSending(false);
             }
@@ -222,14 +239,17 @@ function AddMemberModal({ isOpen, onClose, workspace }) {
                 variant="secondary"
                 onClick={() => {
                   if (workspace) {
-                    if (addWorkspaceMember(activeWorkspace.id, u.id)) onClose();
+                    setSending(true);
+                    workspaceService.invite(activeWorkspace.id, u.email)
+                      .then(() => { toast('success', `Invitation sent to ${u.email}`); onClose(); })
+                      .catch((err) => toast(err.status === 409 ? 'info' : 'error', err.message || 'Unable to send invitation'))
+                      .finally(() => setSending(false));
                   } else {
-                    if (!/^\d+$/.test(String(activeProject.id))) {
-                      addProjectMember(activeProject.id, u.id);
-                      onClose();
-                    } else {
-                      memberService.add(activeProject.id, { userId: u.id, role: 'MEMBER' }).then(() => { addProjectMember(activeProject.id, u.id); onClose(); }).catch((err) => useAppStore.getState().toast('error', err.message || 'Unable to add member'));
-                    }
+                    setSending(true);
+                    memberService.add(activeProject.id, { userId: u.id, role: 'MEMBER' })
+                      .then(() => { addProjectMember(activeProject.id, u.id); onClose(); })
+                      .catch((err) => useAppStore.getState().toast('error', err.message || 'Unable to add member'))
+                      .finally(() => setSending(false));
                   }
                 }}
               >

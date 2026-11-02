@@ -4,6 +4,9 @@ import { uid, randomSha } from '../lib/utils';
 import { PROJECT_ACCENTS } from '../lib/constants';
 
 const pickAccent = () => PROJECT_ACCENTS[Math.floor(Math.random() * PROJECT_ACCENTS.length)];
+const normalizeRole = (role) => String(role || 'Member')
+  .replace(/_/g, ' ')
+  .replace(/\b\w/g, (letter) => letter.toUpperCase());
 
 export const useAppStore = create(
   persist(
@@ -33,9 +36,9 @@ export const useAppStore = create(
       activeWorkspace: () => get().workspaces.find((w) => w.id === get().activeWorkspaceId) ?? null,
       activeProject: () => get().projects.find((p) => p.id === get().activeProjectId) ?? null,
       workspaceRole: (workspaceId) =>
-        (get().workspaces.find((w) => w.id === workspaceId)?.roles ?? {})[get().currentUserId] ?? 'Member',
+        normalizeRole((get().workspaces.find((w) => String(w.id) === String(workspaceId))?.roles ?? {})[get().currentUserId]),
       projectRole: (projectId) =>
-        (get().projects.find((p) => p.id === projectId)?.roles ?? {})[get().currentUserId] ?? 'Member',
+        normalizeRole((get().projects.find((p) => String(p.id) === String(projectId))?.roles ?? {})[get().currentUserId]),
       canManageMembers: (scope, id) => {
         const role = scope === 'workspace' ? get().workspaceRole(id) : get().projectRole(id);
         return role === 'Owner' || role === 'Admin';
@@ -56,7 +59,20 @@ export const useAppStore = create(
           );
           return { signedIn: true, currentUserId: match?.id ?? 'u1' };
         }),
-      signOut: () => set({ signedIn: false, currentUserId: null }),
+      signOut: () => set({
+        signedIn: false,
+        currentUserId: null,
+        activeWorkspaceId: null,
+        activeProjectId: null,
+        users: [],
+        workspaces: [],
+        projects: [],
+        issues: [],
+        chat: {},
+        notifications: [],
+        reactions: {},
+        invites: [],
+      }),
       updateUser: (id, patch) =>
         set((s) => ({ users: s.users.map((u) => (u.id === id ? { ...u, ...patch } : u)) })),
 

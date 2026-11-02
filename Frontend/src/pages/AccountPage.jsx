@@ -71,7 +71,15 @@ export function AccountPage() {
     }
     const reader = new FileReader();
     reader.onload = () => {
-      userService.avatar(file).then((result) => setAvatar(result.avatarUrl || result.url || reader.result)).catch((err) => setError(err.message || 'Unable to upload photo.'));
+      userService.avatar(file)
+        .then((result) => {
+          const nextAvatar = result.avatarUrl;
+          if (!nextAvatar) throw new Error('The backend did not return an avatar URL.');
+          setAvatar(nextAvatar);
+          updateUser(currentUser.id, { avatar: nextAvatar });
+          toast('success', 'Profile photo updated');
+        })
+        .catch((err) => setError(err.message || 'Unable to upload photo.'));
       setPhotoUrl('');
     };
     reader.readAsDataURL(file);

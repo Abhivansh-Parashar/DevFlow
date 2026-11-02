@@ -90,10 +90,17 @@ export function AuthPage({ mode = 'login' }) {
       tokenStore.set(response);
       const user = response.user || await userService.me();
       if (user) {
-        useAppStore.setState((state) => ({
-          users: state.users.some((item) => String(item.id) === String(user.id))
-            ? state.users.map((item) => String(item.id) === String(user.id) ? { ...item, ...user, id: String(user.id) } : item)
-            : [...state.users, { ...user, id: String(user.id) }],
+        useAppStore.setState(() => ({
+          users: [{ ...user, id: String(user.id) }],
+          workspaces: [],
+          projects: [],
+          issues: [],
+          chat: {},
+          notifications: [],
+          reactions: {},
+          invites: [],
+          activeWorkspaceId: null,
+          activeProjectId: null,
           signedIn: true,
           currentUserId: String(user.id),
         }));
