@@ -20,6 +20,11 @@ public class ProjectMemberController {
         return ResponseEntity.status(201).body(projectMemberService.addMember(projectId, request));
     }
 
+    @GetMapping("/{projectId}/members")
+    public ResponseEntity<java.util.List<ProjectMemberDto>> listMembers(@PathVariable Long projectId) {
+        return ResponseEntity.ok(projectMemberService.listMembers(projectId));
+    }
+
     @DeleteMapping("/{projectId}/members/{userId}")
     public ResponseEntity<Void> removeMember(
             @PathVariable(name = "projectId") Long projectId,

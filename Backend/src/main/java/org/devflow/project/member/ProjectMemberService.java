@@ -7,10 +7,13 @@ import org.devflow.project.ProjectRole;
 import org.devflow.security.CurrentUser;
 import org.devflow.user.User;
 import org.devflow.user.UserRepository;
+import org.devflow.workspace.WorkspaceMemberRepository;
+import org.devflow.workspace.WorkspaceRole;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
+import java.util.List;
 
 @Service
 public class ProjectMemberService {
@@ -19,17 +22,20 @@ public class ProjectMemberService {
     private final ProjectRepository projectRepository;
     private final UserRepository userRepository;
     private final CurrentUser currentUser;
+    private final WorkspaceMemberRepository workspaceMemberRepository;
 
     public ProjectMemberService(
             ProjectMemberRepository projectMemberRepository,
             ProjectRepository projectRepository,
             UserRepository userRepository,
-            CurrentUser currentUser
+            CurrentUser currentUser,
+            WorkspaceMemberRepository workspaceMemberRepository
     ) {
         this.projectMemberRepository = projectMemberRepository;
         this.projectRepository = projectRepository;
         this.userRepository = userRepository;
         this.currentUser = currentUser;
+        this.workspaceMemberRepository = workspaceMemberRepository;
     }
 
     public ProjectMemberDto addMember(Long projectId, ProjectMemberRequest request) {
@@ -47,6 +53,15 @@ public class ProjectMemberService {
                                 new AccessDeniedException(
                                         "You are not a member of this project."
                                 ));
+
+        if (currentMembership.getRole() == null
+                && workspaceMemberRepository.findByWorkspaceIdAndUserId(
+                project.getWorkspace().getId(), currentUser.getId())
+                .map(member -> member.getRole() == WorkspaceRole.OWNER)
+                .orElse(false)) {
+            currentMembership.setRole(ProjectRole.OWNER);
+            projectMemberRepository.save(currentMembership);
+        }
 
         if (currentMembership.getRole() != ProjectRole.OWNER) {
             throw new AccessDeniedException(
@@ -82,6 +97,28 @@ public class ProjectMemberService {
         );
     }
 
+    public List<ProjectMemberDto> listMembers(Long projectId) {
+        User user = currentUser.get();
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new ResourceNotFoundException("Project not found."));
+        ProjectMember currentMembership = projectMemberRepository.findByProjectIdAndUserId(projectId, user.getId())
+                .orElseThrow(() -> new AccessDeniedException("You are not a member of this project."));
+        if (currentMembership.getRole() == null
+                && workspaceMemberRepository.findByWorkspaceIdAndUserId(
+                project.getWorkspace().getId(), user.getId())
+                .map(member -> member.getRole() == WorkspaceRole.OWNER)
+                .orElse(false)) {
+            currentMembership.setRole(ProjectRole.OWNER);
+            projectMemberRepository.save(currentMembership);
+        }
+        return projectMemberRepository.findAllByProjectId(projectId).stream()
+                .map(member -> new ProjectMemberDto(
+                        member.getProject().getId(),
+                        member.getUser().getId(),
+                        member.getRole()))
+                .toList();
+    }
+
     public void removeMember(Long projectId, Long userId) {
         User currentUser = this.currentUser.get();
 
@@ -101,7 +138,7 @@ public class ProjectMemberService {
                                 )
                         );
 
-        if (!currentMembership.getRole().equals(ProjectRole.OWNER)) {
+        if (currentMembership.getRole() != ProjectRole.OWNER) {
             throw new AccessDeniedException(
                     "Only the project owner can remove members."
             );
@@ -144,7 +181,7 @@ public class ProjectMemberService {
                                 )
                         );
 
-        if (!currentMembership.getRole().equals(ProjectRole.OWNER)) {
+        if (currentMembership.getRole() != ProjectRole.OWNER) {
             throw new AccessDeniedException(
                     "Only the project owner can change member roles."
             );

@@ -4,9 +4,11 @@ import jakarta.validation.constraints.NotNull;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
+import java.util.List;
 
 public interface ProjectMemberRepository extends JpaRepository<ProjectMember, ProjectMember.ProjectMemberKey> {
     Optional<ProjectMember> findByProjectIdAndUserId(Long projectId, Long id);
+    List<ProjectMember> findAllByProjectId(Long projectId);
     boolean existsByProjectIdAndUserId(Long projectId, @NotNull Long userId);
     long countByProjectId(Long projectId);
 
