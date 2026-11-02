@@ -11,11 +11,15 @@ spring:
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
+    hikari:
+      connection-timeout: 10000
+      validation-timeout: 5000
 
   jpa:
     hibernate:
       ddl-auto: update
     open-in-view: false
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
     properties:
       hibernate:
         format_sql: true
@@ -25,6 +29,19 @@ spring:
       host: ${REDIS_HOST:localhost}
       port: ${REDIS_PORT:6379}
       timeout: 2s
+
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
 
   security:
     oauth2:
@@ -48,6 +65,5 @@ jwt:
 server:
   port: 8081
 
-resend:
-  api-key: ${RESEND_API_KEY}
-  from-email: ${RESEND_FROM_EMAIL}
+mail:
+  from: ${MAIL_FROM:${MAIL_USERNAME}}
