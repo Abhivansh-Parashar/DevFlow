@@ -16,7 +16,15 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class Project extends AuditableEntry {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @SequenceGenerator(
+            name = "project_id_generator",
+            sequenceName = "project_id_seq",
+            allocationSize = 1
+    )
+    @GeneratedValue(
+            strategy = GenerationType.SEQUENCE,
+            generator = "project_id_generator"
+    )
     private Long id;
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "workspace_id", nullable = false)

@@ -14,10 +14,12 @@ import org.devflow.workspace.Workspace;
 import org.devflow.workspace.WorkspaceMemberRepository;
 import org.devflow.workspace.WorkspaceRepository;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ProjectService {
@@ -28,6 +30,7 @@ public class ProjectService {
     private final CurrentUser currentUser;
     private final ProjectMemberRepository projectMemberRepository;
     private final ApplicationEventPublisher eventPublisher;
+    private final JdbcTemplate jdbcTemplate;
 
     public ProjectService(
             CurrentUser currentUser,
@@ -35,7 +38,8 @@ public class ProjectService {
             WorkspaceRepository workspaceRepository,
             WorkspaceMemberRepository workspaceMemberRepository,
             ProjectRepository projectRepository,
-            ApplicationEventPublisher eventPublisher
+            ApplicationEventPublisher eventPublisher,
+            JdbcTemplate jdbcTemplate
     ) {
         this.currentUser = currentUser;
         this.projectMemberRepository = projectMemberRepository;
@@ -43,6 +47,7 @@ public class ProjectService {
         this.workspaceMemberRepository = workspaceMemberRepository;
         this.projectRepository = projectRepository;
         this.eventPublisher = eventPublisher;
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     @Transactional
@@ -64,6 +69,7 @@ public class ProjectService {
         String keyPrefix = generateKeyPrefix(request.getName(), workspaceId);
 
         Project project = Project.builder()
+                .id(nextAvailableProjectId())
                 .workspace(workspace)
                 .name(request.getName())
                 .keyPrefix(keyPrefix)
@@ -78,6 +84,7 @@ public class ProjectService {
         ProjectMember projectMember = ProjectMember.builder()
                 .project(project)
                 .user(user)
+                .role(ProjectRole.OWNER)
                 .build();
         eventPublisher.publishEvent(
                 new WorkspaceDashboardChangedEvent(workspaceId)
@@ -86,6 +93,20 @@ public class ProjectService {
         projectMemberRepository.save(projectMember);
 
         return toDto(project);
+    }
+
+    private Long nextAvailableProjectId() {
+        jdbcTemplate.execute("CREATE SEQUENCE IF NOT EXISTS project_id_seq START WITH 1 INCREMENT BY 1");
+        for (int attempt = 0; attempt < 100; attempt++) {
+            Long candidate = jdbcTemplate.queryForObject(
+                    "SELECT nextval('project_id_seq')",
+                    Long.class
+            );
+            if (candidate != null && !projectRepository.existsById(candidate)) {
+                return candidate;
+            }
+        }
+        throw new IllegalStateException("Unable to allocate a unique project identifier.");
     }
 
     public ProjectDto getProject(Long projectId) {
@@ -171,6 +192,7 @@ public class ProjectService {
         );
     }
 
+    @Transactional
     public List<ProjectDto> getProjectsByWorkspace(Long workspaceId) {
 
         User user = currentUser.get();
@@ -188,6 +210,8 @@ public class ProjectService {
 
         return projectRepository.findByWorkspaceId(workspaceId)
                 .stream()
+                .filter(project -> projectMemberRepository.existsByProjectIdAndUserId(
+                        project.getId(), user.getId()))
                 .map(this::toDto)
                 .toList();
     }
@@ -218,12 +242,21 @@ public class ProjectService {
     }
 
     private ProjectDto toDto(Project project) {
+        List<ProjectMember> members = projectMemberRepository.findAllByProjectId(project.getId());
         return ProjectDto.builder()
                 .id(project.getId())
                 .name(project.getName())
                 .keyPrefix(project.getKeyPrefix())
                 .workspaceId(project.getWorkspace().getId())
                 .repoUrl(project.getRepoUrl())
+                .memberIds(members.stream()
+                        .map(member -> member.getUser().getId())
+                        .toList())
+                .roles(members.stream().collect(Collectors.toMap(
+                        member -> member.getUser().getId(),
+                        member -> member.getRole() == null ? ProjectRole.MEMBER.name() : member.getRole().name(),
+                        (first, ignored) -> first
+                )))
                 .build();
     }
 }
