@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 import org.devflow.user.User;
 
 import java.time.Instant;
-import java.util.UUID;
 
 @Entity
 @Getter
@@ -16,7 +15,7 @@ import java.util.UUID;
 public class Reply {
     @Id
     @GeneratedValue
-    private UUID id;
+    private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY,optional = false)
     @JoinColumn(name="comment_id",nullable = false)
@@ -29,4 +28,15 @@ public class Reply {
     private String body;
 
     private Instant createdAt;
+
+    public Reply(Comment comment, User author, String body) {
+        this.comment = comment;
+        this.author = author;
+        this.body = body;
+        this.createdAt = Instant.now();
+    }
+
+    public void updateBody(String body) {
+        this.body = body;
+    }
 }

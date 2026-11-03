@@ -1,13 +1,14 @@
-package org.devflow.workspace;
+package org.devflow.invite;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.devflow.user.User;
+import org.devflow.workspace.Workspace;
 
 import java.time.Instant;
-import java.util.UUID;
 
 @Entity
 @Getter
@@ -16,7 +17,7 @@ import java.util.UUID;
 public class Invite {
     @Id
     @GeneratedValue
-    private UUID id;
+    private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name="workspace_id",nullable = false)
@@ -33,6 +34,7 @@ public class Invite {
 
     private Instant expiresAt;
 
+    @Setter
     @Enumerated(EnumType.STRING)
     private InviteStatus status;
 
@@ -45,7 +47,4 @@ public class Invite {
         this.status = InviteStatus.PENDING;
     }
 
-    public void setStatus(InviteStatus status) {
-        this.status = status;
-    }
 }
