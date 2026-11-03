@@ -1,7 +1,6 @@
 package org.devflow.workspace.dto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import org.devflow.workspace.InviteStatus;
 
 import java.time.Instant;
 import java.util.UUID;

@@ -3,6 +3,9 @@ package org.devflow.workspace;
 
 import lombok.RequiredArgsConstructor;
 import org.devflow.common.exception.ResourceNotFoundException;
+import org.devflow.invite.Invite;
+import org.devflow.invite.InviteRepository;
+import org.devflow.invite.InviteStatus;
 import org.devflow.security.CurrentUser;
 import org.devflow.user.User;
 import org.devflow.user.UserRepository;

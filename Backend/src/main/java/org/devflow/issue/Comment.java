@@ -30,4 +30,14 @@ public class Comment {
 
     private Instant createdAt;
 
+    public Comment(Issue issue, User author, String body) {
+        this.issue = issue;
+        this.author = author;
+        this.body = body;
+        this.createdAt = Instant.now();
+    }
+    public void updateBody(String body) {
+        this.body = body;
+    }
+
 }
