@@ -1,5 +1,7 @@
 package org.devflow.workspace;
 
+import org.devflow.invite.Invite;
+import org.devflow.invite.InviteStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.UUID;

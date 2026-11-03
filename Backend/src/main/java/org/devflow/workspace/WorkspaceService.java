@@ -3,6 +3,8 @@ package org.devflow.workspace;
 
 import org.devflow.common.exception.ResourceNotFoundException;
 import org.devflow.common.exception.DuplicateInvitationException;
+import org.devflow.invite.Invite;
+import org.devflow.invite.InviteStatus;
 import org.devflow.notification.EmailService;
 import org.devflow.security.CurrentUser;
 import org.devflow.user.User;
