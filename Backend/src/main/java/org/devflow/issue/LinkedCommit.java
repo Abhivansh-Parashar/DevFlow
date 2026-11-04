@@ -28,4 +28,12 @@ public class LinkedCommit {
     private String commitMessage;
 
     private Instant committedAt;
+
+    public LinkedCommit(Issue issue, String repo, String commitHash, String commitMessage, Instant committedAt) {
+        this.issue = issue;
+        this.repo = repo;
+        this.commitHash = commitHash;
+        this.commitMessage = commitMessage;
+        this.committedAt = committedAt;
+    }
 }

@@ -1,9 +1,11 @@
 
 package org.devflow.workspace;
 
+import lombok.RequiredArgsConstructor;
 import org.devflow.common.exception.ResourceNotFoundException;
-import org.devflow.common.exception.DuplicateInvitationException;
-import org.devflow.notification.EmailService;
+import org.devflow.invite.Invite;
+import org.devflow.invite.InviteRepository;
+import org.devflow.invite.InviteStatus;
 import org.devflow.security.CurrentUser;
 import org.devflow.user.User;
 import org.devflow.user.UserRepository;
@@ -14,7 +16,6 @@ import org.devflow.workspace.dto.WorkspaceMemberDto;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.beans.factory.annotation.Value;
 
 import java.time.Instant;
 import java.util.List;
@@ -22,33 +23,13 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class WorkspaceService {
 
     private final WorkspaceRepository repo;
     private final UserRepository userRepository;
     private final WorkspaceMemberRepository memberRepository;
-    private final WorkspaceMemberService workspaceMemberService;
     private final InviteRepository inviteRepository;
-    private final EmailService emailService;
-    private final String frontendUrl;
-
-    public WorkspaceService(
-            WorkspaceRepository repo,
-            UserRepository userRepository,
-            WorkspaceMemberRepository memberRepository,
-            WorkspaceMemberService workspaceMemberService,
-            InviteRepository inviteRepository,
-            EmailService emailService,
-            @Value("${app.frontend-url:http://localhost:5173}") String frontendUrl
-    ) {
-        this.repo = repo;
-        this.userRepository = userRepository;
-        this.memberRepository = memberRepository;
-        this.workspaceMemberService = workspaceMemberService;
-        this.inviteRepository = inviteRepository;
-        this.emailService = emailService;
-        this.frontendUrl = frontendUrl;
-    }
 
     @Transactional
     public WorkspaceDto createWorkspace(CreateWorkspaceRequest request) {
@@ -107,16 +88,6 @@ public class WorkspaceService {
     }
 
     @Transactional
-    public void removeMember(Long workspaceId, Long userId) {
-        workspaceMemberService.deleteMember(workspaceId, userId);
-    }
-
-    @Transactional
-    public void changeMemberRole(Long workspaceId, Long userId, WorkspaceRole role) {
-        workspaceMemberService.changeRole(workspaceId, userId, role);
-    }
-
-    @Transactional
     public InviteDto createInvite(Long workspaceId, String email) {
         User inviter = CurrentUser.get();
         Workspace workspace = requireMember(workspaceId);
@@ -149,13 +120,10 @@ public class WorkspaceService {
             );
         }
 
-        Invite existingInvite = inviteRepository
-                .findByWorkspaceIdAndEmailIgnoreCaseAndStatus(
-                        workspaceId, normalizedEmail, InviteStatus.PENDING)
-                .orElse(null);
-        if (existingInvite != null) {
-            throw new DuplicateInvitationException(
-                    "A pending invitation already exists for " + normalizedEmail + "."
+        if (inviteRepository.existsByWorkspaceIdAndEmailIgnoreCaseAndStatus(
+                workspaceId, normalizedEmail, InviteStatus.PENDING)) {
+            throw new IllegalArgumentException(
+                    "A pending invitation already exists for this email."
             );
         }
 
@@ -169,23 +137,7 @@ public class WorkspaceService {
                 )
         );
 
-        emailService.sendTextEmail(
-                normalizedEmail,
-                "You have been invited to join " + workspace.getName() + " on DevFlow",
-                invitationText(workspace, inviter)
-        );
-
         return toInviteDto(invite);
-    }
-
-    private String invitationText(Workspace workspace, User inviter) {
-        return "Hello,\n\n"
-                + inviter.getName() + " invited you to join the "
-                + workspace.getName() + " workspace on DevFlow.\n\n"
-                + "Sign in or create an account using this email address, then open "
-                + frontendUrl + " to accept the invitation.\n\n"
-                + "This invitation expires in 7 days.\n\n"
-                + "DevFlow";
     }
 
     @Transactional(readOnly = true)

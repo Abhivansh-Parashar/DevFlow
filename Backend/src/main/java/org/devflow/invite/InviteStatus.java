@@ -1,4 +1,4 @@
-package org.devflow.workspace;
+package org.devflow.invite;
 
 public enum InviteStatus {
     PENDING,
