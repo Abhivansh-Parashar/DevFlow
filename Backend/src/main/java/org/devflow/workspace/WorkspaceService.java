@@ -10,7 +10,7 @@ import org.devflow.security.CurrentUser;
 import org.devflow.user.User;
 import org.devflow.user.UserRepository;
 import org.devflow.workspace.dto.CreateWorkspaceRequest;
-import org.devflow.workspace.dto.InviteDto;
+import org.devflow.invite.dto.InviteDto;
 import org.devflow.workspace.dto.WorkspaceDto;
 import org.devflow.workspace.dto.WorkspaceMemberDto;
 

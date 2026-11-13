@@ -1,3 +1,4 @@
+
 package org.devflow.invite;
 
 import jakarta.persistence.LockModeType;

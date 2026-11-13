@@ -1,13 +1,15 @@
-package org.devflow.workspace.dto;
+
+package org.devflow.invite.dto;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.time.Instant;
 
-
 @Getter
 @AllArgsConstructor
 public class InviteDto {
+
     private Long id;
     private Long workspaceId;
     private String workspaceName;

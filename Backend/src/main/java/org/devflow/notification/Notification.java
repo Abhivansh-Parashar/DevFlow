@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 import org.devflow.user.User;
 
 import java.time.Instant;
-import java.util.UUID;
+
 
 @Entity
 @Table(name = "notification")
@@ -17,7 +17,7 @@ public class Notification {
 
     @Id
     @GeneratedValue
-    private UUID id;
+    private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "recipient_id", nullable = false)
@@ -31,4 +31,10 @@ public class Notification {
     private Instant readAt;
 
     private Instant createdAt;
+
+    public void markAsRead(){
+        if(this.readAt == null){
+            this.readAt = Instant.now();
+        }
+    }
 }

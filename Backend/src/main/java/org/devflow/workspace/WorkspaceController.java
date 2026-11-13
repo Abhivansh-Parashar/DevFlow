@@ -4,7 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.devflow.workspace.dto.CreateInviteRequest;
 import org.devflow.workspace.dto.CreateWorkspaceRequest;
-import org.devflow.workspace.dto.InviteDto;
+import org.devflow.invite.dto.InviteDto;
 import org.devflow.workspace.dto.WorkspaceDto;
 import org.devflow.workspace.dto.WorkspaceMemberDto;
 import org.springframework.http.ResponseEntity;
