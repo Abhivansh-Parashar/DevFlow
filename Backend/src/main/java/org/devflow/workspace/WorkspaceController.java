@@ -4,7 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.devflow.workspace.dto.CreateInviteRequest;
 import org.devflow.workspace.dto.CreateWorkspaceRequest;
-import org.devflow.workspace.dto.InviteDto;
+import org.devflow.invite.dto.InviteDto;
 import org.devflow.workspace.dto.WorkspaceDto;
 import org.devflow.workspace.dto.WorkspaceMemberDto;
 import org.springframework.http.ResponseEntity;
@@ -67,12 +67,12 @@ public class WorkspaceController {
     }
 
     @PostMapping("/invites/{inviteId}/accept")
-    public ResponseEntity<WorkspaceDto> acceptInvite(@PathVariable UUID inviteId) {
+    public ResponseEntity<WorkspaceDto> acceptInvite(@PathVariable Long inviteId) {
         return ResponseEntity.ok(workspaceService.acceptInvite(inviteId));
     }
 
     @PostMapping("/invites/{inviteId}/decline")
-    public ResponseEntity<Void> declineInvite(@PathVariable UUID inviteId) {
+    public ResponseEntity<Void> declineInvite(@PathVariable Long inviteId) {
         workspaceService.declineInvite(inviteId);
         return ResponseEntity.noContent().build();
     }

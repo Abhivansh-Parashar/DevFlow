@@ -2,21 +2,22 @@
 package org.devflow.workspace;
 
 import org.devflow.common.exception.ResourceNotFoundException;
-import org.devflow.common.exception.DuplicateInvitationException;
 import org.devflow.invite.Invite;
+import org.devflow.invite.InviteRepository;
 import org.devflow.invite.InviteStatus;
 import org.devflow.notification.EmailService;
 import org.devflow.security.CurrentUser;
 import org.devflow.user.User;
 import org.devflow.user.UserRepository;
 import org.devflow.workspace.dto.CreateWorkspaceRequest;
-import org.devflow.workspace.dto.InviteDto;
+import org.devflow.invite.dto.InviteDto;
 import org.devflow.workspace.dto.WorkspaceDto;
 import org.devflow.workspace.dto.WorkspaceMemberDto;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.beans.factory.annotation.Value;
 
 import java.time.Instant;
 import java.util.List;
@@ -127,15 +128,15 @@ public class WorkspaceService {
                 .findByWorkspaceIdAndUserId(workspaceId, inviter.getId())
                 .orElseThrow();
 
-        if (membership.getRole() == WorkspaceRole.MEMBER) {
+        if (membership.getRole() != WorkspaceRole.ADMIN) {
             throw new AccessDeniedException(
-                    "Only workspace owners and admins can invite members."
+                    "Only admins can invite members."
             );
         }
 
         String normalizedEmail = email.trim().toLowerCase();
 
-        if (normalizedEmail.equals(inviter.getEmail().toLowerCase())) {
+        if (normalizedEmail.equalsIgnoreCase(inviter.getEmail())) {
             throw new IllegalArgumentException(
                     "You are already a member of this workspace."
             );
@@ -151,13 +152,10 @@ public class WorkspaceService {
             );
         }
 
-        Invite existingInvite = inviteRepository
-                .findByWorkspaceIdAndEmailIgnoreCaseAndStatus(
-                        workspaceId, normalizedEmail, InviteStatus.PENDING)
-                .orElse(null);
-        if (existingInvite != null) {
-            throw new DuplicateInvitationException(
-                    "A pending invitation already exists for " + normalizedEmail + "."
+        if (inviteRepository.existsByWorkspaceIdAndEmailIgnoreCaseAndStatus(
+                workspaceId, normalizedEmail, InviteStatus.PENDING)) {
+            throw new IllegalArgumentException(
+                    "A pending invitation already exists for this email."
             );
         }
 
@@ -207,7 +205,7 @@ public class WorkspaceService {
     }
 
     @Transactional
-    public WorkspaceDto acceptInvite(UUID inviteId) {
+    public WorkspaceDto acceptInvite(Long inviteId) {
         User currentUser = CurrentUser.get();
 
         Invite invite = inviteRepository.findById(inviteId)
@@ -221,7 +219,7 @@ public class WorkspaceService {
         }
 
         if (invite.getStatus() != InviteStatus.PENDING
-                || invite.getExpiresAt().isBefore(Instant.now())) {
+                || !invite.getExpiresAt().isAfter(Instant.now())) {
             throw new IllegalArgumentException(
                     "This invitation is no longer available."
             );
@@ -248,7 +246,7 @@ public class WorkspaceService {
     }
 
     @Transactional
-    public void declineInvite(UUID inviteId) {
+    public void declineInvite(Long inviteId) {
         User currentUser = CurrentUser.get();
 
         Invite invite = inviteRepository.findById(inviteId)
@@ -258,6 +256,13 @@ public class WorkspaceService {
         if (!invite.getEmail().equalsIgnoreCase(currentUser.getEmail())) {
             throw new AccessDeniedException(
                     "This invitation belongs to another account."
+            );
+        }
+
+        if (invite.getStatus() != InviteStatus.PENDING
+                || !invite.getExpiresAt().isAfter(Instant.now())) {
+            throw new IllegalArgumentException(
+                    "This invitation is no longer available."
             );
         }
 
