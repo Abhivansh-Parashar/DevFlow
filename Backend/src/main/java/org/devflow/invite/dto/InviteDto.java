@@ -1,14 +1,16 @@
-package org.devflow.workspace.dto;
+
+package org.devflow.invite.dto;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.time.Instant;
-import java.util.UUID;
 
 @Getter
 @AllArgsConstructor
 public class InviteDto {
-    private UUID id;
+
+    private Long id;
     private Long workspaceId;
     private String workspaceName;
     private String email;

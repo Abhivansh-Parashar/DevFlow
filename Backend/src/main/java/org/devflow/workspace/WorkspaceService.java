@@ -1,18 +1,20 @@
 
 package org.devflow.workspace;
 
-import lombok.RequiredArgsConstructor;
 import org.devflow.common.exception.ResourceNotFoundException;
 import org.devflow.invite.Invite;
 import org.devflow.invite.InviteRepository;
 import org.devflow.invite.InviteStatus;
+import org.devflow.notification.EmailService;
 import org.devflow.security.CurrentUser;
 import org.devflow.user.User;
 import org.devflow.user.UserRepository;
 import org.devflow.workspace.dto.CreateWorkspaceRequest;
-import org.devflow.workspace.dto.InviteDto;
+import org.devflow.invite.dto.InviteDto;
 import org.devflow.workspace.dto.WorkspaceDto;
 import org.devflow.workspace.dto.WorkspaceMemberDto;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,13 +25,33 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
 public class WorkspaceService {
 
     private final WorkspaceRepository repo;
     private final UserRepository userRepository;
     private final WorkspaceMemberRepository memberRepository;
+    private final WorkspaceMemberService workspaceMemberService;
     private final InviteRepository inviteRepository;
+    private final EmailService emailService;
+    private final String frontendUrl;
+
+    public WorkspaceService(
+            WorkspaceRepository repo,
+            UserRepository userRepository,
+            WorkspaceMemberRepository memberRepository,
+            WorkspaceMemberService workspaceMemberService,
+            InviteRepository inviteRepository,
+            EmailService emailService,
+            @Value("${app.frontend-url:http://localhost:5173}") String frontendUrl
+    ) {
+        this.repo = repo;
+        this.userRepository = userRepository;
+        this.memberRepository = memberRepository;
+        this.workspaceMemberService = workspaceMemberService;
+        this.inviteRepository = inviteRepository;
+        this.emailService = emailService;
+        this.frontendUrl = frontendUrl;
+    }
 
     @Transactional
     public WorkspaceDto createWorkspace(CreateWorkspaceRequest request) {
@@ -88,6 +110,16 @@ public class WorkspaceService {
     }
 
     @Transactional
+    public void removeMember(Long workspaceId, Long userId) {
+        workspaceMemberService.deleteMember(workspaceId, userId);
+    }
+
+    @Transactional
+    public void changeMemberRole(Long workspaceId, Long userId, WorkspaceRole role) {
+        workspaceMemberService.changeRole(workspaceId, userId, role);
+    }
+
+    @Transactional
     public InviteDto createInvite(Long workspaceId, String email) {
         User inviter = CurrentUser.get();
         Workspace workspace = requireMember(workspaceId);
@@ -96,15 +128,15 @@ public class WorkspaceService {
                 .findByWorkspaceIdAndUserId(workspaceId, inviter.getId())
                 .orElseThrow();
 
-        if (membership.getRole() == WorkspaceRole.MEMBER) {
+        if (membership.getRole() != WorkspaceRole.ADMIN) {
             throw new AccessDeniedException(
-                    "Only workspace owners and admins can invite members."
+                    "Only admins can invite members."
             );
         }
 
         String normalizedEmail = email.trim().toLowerCase();
 
-        if (normalizedEmail.equals(inviter.getEmail().toLowerCase())) {
+        if (normalizedEmail.equalsIgnoreCase(inviter.getEmail())) {
             throw new IllegalArgumentException(
                     "You are already a member of this workspace."
             );
@@ -137,7 +169,23 @@ public class WorkspaceService {
                 )
         );
 
+        emailService.sendTextEmail(
+                normalizedEmail,
+                "You have been invited to join " + workspace.getName() + " on DevFlow",
+                invitationText(workspace, inviter)
+        );
+
         return toInviteDto(invite);
+    }
+
+    private String invitationText(Workspace workspace, User inviter) {
+        return "Hello,\n\n"
+                + inviter.getName() + " invited you to join the "
+                + workspace.getName() + " workspace on DevFlow.\n\n"
+                + "Sign in or create an account using this email address, then open "
+                + frontendUrl + " to accept the invitation.\n\n"
+                + "This invitation expires in 7 days.\n\n"
+                + "DevFlow";
     }
 
     @Transactional(readOnly = true)
@@ -157,7 +205,7 @@ public class WorkspaceService {
     }
 
     @Transactional
-    public WorkspaceDto acceptInvite(UUID inviteId) {
+    public WorkspaceDto acceptInvite(Long inviteId) {
         User currentUser = CurrentUser.get();
 
         Invite invite = inviteRepository.findById(inviteId)
@@ -171,7 +219,7 @@ public class WorkspaceService {
         }
 
         if (invite.getStatus() != InviteStatus.PENDING
-                || invite.getExpiresAt().isBefore(Instant.now())) {
+                || !invite.getExpiresAt().isAfter(Instant.now())) {
             throw new IllegalArgumentException(
                     "This invitation is no longer available."
             );
@@ -198,7 +246,7 @@ public class WorkspaceService {
     }
 
     @Transactional
-    public void declineInvite(UUID inviteId) {
+    public void declineInvite(Long inviteId) {
         User currentUser = CurrentUser.get();
 
         Invite invite = inviteRepository.findById(inviteId)
@@ -208,6 +256,13 @@ public class WorkspaceService {
         if (!invite.getEmail().equalsIgnoreCase(currentUser.getEmail())) {
             throw new AccessDeniedException(
                     "This invitation belongs to another account."
+            );
+        }
+
+        if (invite.getStatus() != InviteStatus.PENDING
+                || !invite.getExpiresAt().isAfter(Instant.now())) {
+            throw new IllegalArgumentException(
+                    "This invitation is no longer available."
             );
         }
 
