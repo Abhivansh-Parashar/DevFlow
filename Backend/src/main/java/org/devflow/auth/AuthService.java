@@ -18,6 +18,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
+import java.util.Locale;
 import java.util.UUID;
 
 @Service
@@ -40,9 +41,10 @@ public class AuthService {
         this.jwtService = jwtService;
     }
 
+    @Transactional
     public AuthResponse register(RegisterRequest request) {
 
-        String email = request.getEmail();
+        String email = request.getEmail().trim().toLowerCase(Locale.ROOT);
 
         if (userRepository.existsByEmail(email)) {
             throw new UserAlreadyExistsException(
@@ -86,9 +88,10 @@ public class AuthService {
                 .build();
     }
 
+    @Transactional
     public AuthResponse login(LoginRequest request) {
 
-        String email = request.getEmail();
+        String email = request.getEmail().trim().toLowerCase(Locale.ROOT);
         String password = request.getPassword();
 
         User user = userRepository.findByEmail(email)
@@ -137,11 +140,13 @@ public class AuthService {
             String email,
             String avatar
     ) {
-        User user = userRepository.findByEmail(email)
+        String normalizedEmail = email.trim().toLowerCase(Locale.ROOT);
+
+        User user = userRepository.findByEmail(normalizedEmail)
                 .orElseGet(() -> {
                     User newUser = User.builder()
                             .name(name)
-                            .email(email)
+                            .email(normalizedEmail)
                             .passwordHash(
                                     passwordEncoder.encode(
                                             UUID.randomUUID().toString()
@@ -175,6 +180,7 @@ public class AuthService {
                 .build();
     }
 
+    @Transactional
     public AuthResponse refreshToken(RefreshTokenRequest request) {
 
         String rawRefreshToken = request.getToken();
@@ -184,12 +190,14 @@ public class AuthService {
 
         RefreshToken storedToken =
                 refreshTokenRepository
-                        .findByTokenHash(hashedRefreshToken)
+                        .findByTokenHashForUpdate(hashedRefreshToken)
                         .orElseThrow(() ->
                                 new InvalidCredentialsException(
                                         "Invalid refresh token."
                                 )
                         );
+
+        LocalDateTime now = LocalDateTime.now();
 
         if (storedToken.getRevokedAt() != null) {
             throw new InvalidCredentialsException(
@@ -197,8 +205,7 @@ public class AuthService {
             );
         }
 
-        if (storedToken.getExpiresAt()
-                .isBefore(LocalDateTime.now())) {
+        if (!storedToken.getExpiresAt().isAfter(now)) {
             throw new InvalidCredentialsException(
                     "Refresh token has expired."
             );
@@ -206,7 +213,7 @@ public class AuthService {
 
         User user = storedToken.getUser();
 
-        storedToken.setRevokedAt(LocalDateTime.now());
+        storedToken.setRevokedAt(now);
         refreshTokenRepository.save(storedToken);
 
         String newAccessToken =
@@ -222,7 +229,7 @@ public class AuthService {
                 RefreshToken.builder()
                         .user(user)
                         .tokenHash(newHashedRefreshToken)
-                        .expiresAt(LocalDateTime.now().plusDays(7))
+                        .expiresAt(now.plusDays(7))
                         .build();
 
         refreshTokenRepository.save(newRefreshTokenEntity);
@@ -233,9 +240,8 @@ public class AuthService {
                 .build();
     }
 
-    public void revokeRefreshToken(
-            RefreshTokenRequest request
-    ) {
+    @Transactional
+    public void revokeRefreshToken(RefreshTokenRequest request) {
 
         String rawRefreshToken = request.getToken();
 
@@ -244,15 +250,18 @@ public class AuthService {
 
         RefreshToken storedToken =
                 refreshTokenRepository
-                        .findByTokenHash(hashedRefreshToken)
+                        .findByTokenHashForUpdate(hashedRefreshToken)
                         .orElseThrow(() ->
                                 new InvalidCredentialsException(
                                         "No refresh token found."
                                 )
                         );
 
-        storedToken.setRevokedAt(LocalDateTime.now());
+        if (storedToken.getRevokedAt() != null) {
+            return;
+        }
 
+        storedToken.setRevokedAt(LocalDateTime.now());
         refreshTokenRepository.save(storedToken);
     }
 
