@@ -1,7 +1,6 @@
+
 package org.devflow.security;
 
-
-import io.jsonwebtoken.Jwt;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.devflow.user.User;
@@ -16,6 +15,10 @@ import java.util.Date;
 
 @Service
 public class JwtService {
+
+    private static final long ACCESS_TOKEN_EXPIRATION_MILLIS = 15 * 60 * 1000L;
+    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
+
     private final SecretKey secretKey;
 
     public JwtService(@Value("${jwt.secret}") String jwtSecret) {
@@ -24,9 +27,9 @@ public class JwtService {
         );
     }
 
-    public String generateAccessToken(User user){
+    public String generateAccessToken(User user) {
         Date now = new Date();
-        Date expiry = new Date(now.getTime() + 15 * 60 * 1000);
+        Date expiry = new Date(now.getTime() + ACCESS_TOKEN_EXPIRATION_MILLIS);
 
         return Jwts.builder()
                 .subject(user.getEmail())
@@ -36,7 +39,7 @@ public class JwtService {
                 .compact();
     }
 
-    public String extractUsername(String token){
+    public String extractUsername(String token) {
         return Jwts.parser()
                 .verifyWith(secretKey)
                 .build()
@@ -45,14 +48,12 @@ public class JwtService {
                 .getSubject();
     }
 
-    public String generateRefreshToken(){
+    public String generateRefreshToken() {
         byte[] bytes = new byte[32];
-        new SecureRandom().nextBytes(bytes);
+        SECURE_RANDOM.nextBytes(bytes);
 
         return Base64.getUrlEncoder()
                 .withoutPadding()
                 .encodeToString(bytes);
     }
-
-
 }
