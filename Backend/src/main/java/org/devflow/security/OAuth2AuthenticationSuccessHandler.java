@@ -1,4 +1,3 @@
-
 package org.devflow.security;
 
 import java.io.IOException;
@@ -6,10 +5,11 @@ import java.nio.charset.StandardCharsets;
 
 import org.devflow.auth.AuthService;
 import org.devflow.auth.dto.AuthResponse;
+import org.devflow.security.OAuthLoginCodeService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriUtils;
@@ -43,8 +43,7 @@ public class OAuth2AuthenticationSuccessHandler
             Authentication authentication
     ) throws IOException, ServletException {
 
-        if (!(authentication instanceof OAuth2AuthenticationToken oauthToken)
-                || !(authentication.getPrincipal() instanceof OAuth2User googleUser)) {
+        if (!(authentication instanceof OAuth2AuthenticationToken oauthToken)) {
             response.sendError(
                     HttpServletResponse.SC_UNAUTHORIZED,
                     "Unsupported OAuth authentication."
@@ -52,24 +51,55 @@ public class OAuth2AuthenticationSuccessHandler
             return;
         }
 
-        String email = googleUser.getAttribute("email");
-        Boolean emailVerified = googleUser.getAttribute("email_verified");
-        String name = googleUser.getAttribute("name");
-        String avatar = googleUser.getAttribute("picture");
+        String registrationId = oauthToken.getAuthorizedClientRegistrationId();
+        OAuth2User oauthUser = oauthToken.getPrincipal();
 
-        if (email == null || !Boolean.TRUE.equals(emailVerified)) {
-            response.sendError(
+        String name;
+        String email;
+        String avatar;
+
+        switch (registrationId) {
+            case "google" -> {
+                name = oauthUser.getAttribute("name");
+                email = oauthUser.getAttribute("email");
+                avatar = oauthUser.getAttribute("picture");
+
+                Boolean emailVerified = oauthUser.getAttribute("email_verified");
+
+                if (email == null || !Boolean.TRUE.equals(emailVerified)) {
+                    response.sendError(
+                            HttpServletResponse.SC_UNAUTHORIZED,
+                            "Google email is missing or not verified."
+                    );
+                    return;
+                }
+
+                AuthResponse authResponse =
+                        authService.loginWithGoogle(name, email, avatar);
+
+                redirectWithCode(response, authResponse);
+            }
+
+            case "github" -> {
+                response.sendError(
+                        HttpServletResponse.SC_NOT_IMPLEMENTED,
+                        "GitHub profile handling is not implemented yet."
+                );
+            }
+
+            default -> response.sendError(
                     HttpServletResponse.SC_UNAUTHORIZED,
-                    "Google email is missing or not verified."
+                    "Unsupported OAuth provider."
             );
-            return;
         }
+    }
 
-        AuthResponse authResponse =
-                authService.loginWithGoogle(name, email, avatar);
+    private void redirectWithCode(
+            HttpServletResponse response,
+            AuthResponse authResponse
+    ) throws IOException {
 
-        String oneTimeCode =
-                loginCodeService.createCode(authResponse);
+        String oneTimeCode = loginCodeService.createCode(authResponse);
 
         String redirectUrl = frontendUrl
                 + "/oauth/callback?code="
